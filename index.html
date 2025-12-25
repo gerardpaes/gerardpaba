@@ -430,7 +430,6 @@ h2{
 }
 
 /* MOBILE ADJUSTMENT */
-/* MOBILE ADJUSTMENT */
 @media(max-width:768px){
   /* HERO */
   .hero-container{
@@ -440,15 +439,15 @@ h2{
   }
   .hero-image{
     flex:1 1 auto;
-    margin-top:15px; /* menos espacio que antes */
+    margin-top:15px;
   }
   .hero-buttons{
     justify-content:center;
   }
   h1{
-    font-size:44px; /* más pequeño */
+    font-size:44px;
     text-align:center;
-    margin-top:10px; /* reducir margen superior */
+    margin-top:10px;
   }
   h2{
     font-size:42px;
@@ -474,7 +473,8 @@ h2{
     display:flex;
     flex-direction:column;
     align-items:center;
-    padding:8px 16px;
+    padding:10px 16px;
+    height:auto; /* ajusta automáticamente al contenido */
   }
   .nav{
     flex-direction:column;
@@ -493,10 +493,8 @@ h2{
     display:flex;
     flex-wrap:nowrap;
     justify-content:center;
-    gap:8px;
+    gap:12px;
     width:100%;
-    overflow-x:auto;
-    padding:4px 0;
   }
   .nav a{
     font-size:14px;
@@ -532,22 +530,12 @@ h2{
 
   /* HERO padding para no tapar contenido con header */
   .hero{
-    padding-top:120px; /* menos espacio arriba para que el h1 quede más cerca */
+    padding-top:150px; /* ajusta para que hero no quede tapado */
   }
 }
 
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#000;
-    --text:#f5f5f7;
-    --muted:#98989d;
-    --accent:#0071e3;
-  }
-  header{
-    background:rgba(0,0,0,.72);
-  }
-}
 
+  
 </style>
 </head>
 
