@@ -59,65 +59,78 @@ header{
 .nav a{
   color:var(--muted);
   font-weight:500;
-  position:relative;
-  padding-bottom:6px;
   font-size:18px;
   transition: color .25s ease;
 }
 
 /* MAIN SECTION */
 main {
-  padding-top: 120px;
-  max-width: 900px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-/* LOST MESSAGE */
-.lost-message {
+  padding-top:120px;
+  max-width:900px;
+  margin:0 auto;
+  text-align:center;
   display:flex;
   flex-direction:column;
-  gap:32px;
-  padding:40px 20px;
+  gap:40px;
 }
 
-.lost-message h1 {
-  font-size:64px;
+/* CARDS */
+.card {
+  background:#ffffff;
+  border-radius:24px;
+  padding:32px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s, transform 0.6s;
+  opacity:0;
+  transform: translateY(20px);
+}
+
+.card.visible {
+  opacity:1;
+  transform: translateY(0);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow:0 18px 60px rgba(0,0,0,0.12);
+}
+
+.card h2 {
+  font-size:32px;
   font-weight:700;
   margin-bottom:16px;
 }
 
-.lost-message p {
-  font-size:18px;
+.card p {
+  font-size:16px;
   line-height:1.6;
   color:#555;
 }
 
 /* CONTACT TABLE */
 .contact-table {
-  background: #e8f1fc; /* azul clarito */
-  padding: 32px;
-  border-radius: 24px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.06);
-  margin-top: 40px;
-  text-align: left;
+  background: #e8f1fc;
+  padding:32px;
+  border-radius:24px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.06);
+  text-align:left;
 }
 
 .contact-table h2 {
-  font-size:32px;
+  font-size:28px;
   font-weight:600;
   margin-bottom:24px;
-  text-align: center;
+  text-align:center;
 }
 
 .contact-table table {
-  width: 100%;
+  width:100%;
   border-collapse: collapse;
 }
 
 .contact-table td {
-  padding: 12px 16px;
-  font-size: 16px;
+  padding:12px 16px;
+  font-size:16px;
   color: var(--text);
   transition: background 0.3s, color 0.3s;
 }
@@ -129,24 +142,12 @@ main {
 }
 
 .contact-table tr:hover td {
-  background: rgba(0, 113, 227, 0.1);
-  border-radius: 12px;
+  background: rgba(0,113,227,0.1);
+  border-radius:12px;
 }
 
 .contact-table tr:hover a {
-  color: #005bb5;
-}
-
-/* CARD EFFECT (appear on scroll) */
-.card {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s, transform 0.6s;
-}
-
-.card.visible {
-  opacity: 1;
-  transform: translateY(0);
+  color:#005bb5;
 }
 
 /* FOOTER */
@@ -160,7 +161,7 @@ footer {
 }
 
 @media(max-width:768px){
-  .lost-message h1{font-size:48px;}
+  .card h2{font-size:24px;}
 }
 </style>
 </head>
@@ -177,24 +178,38 @@ footer {
 </header>
 
 <main>
-  <div class="lost-message card">
-    <h1>YOU FOUND IT!</h1>
-    <p>Hola! Si ha llegado hasta aquí, es por que ha encontrado algo que me pertenece y que estoy buscando.</p>
+  <!-- CARDS POR IDIOMA -->
+  <div class="card visible">
+    <h2>Español</h2>
+    <p>Hola! Si ha llegado hasta aquí, es porque ha encontrado algo que me pertenece y que estoy buscando.</p>
     <p>Le ruego que se ponga en contacto conmigo lo antes posible. Será recompensado.</p>
     <p>Muchas gracias.</p>
-    <hr>
-    <p>Hello! If you have arrived here, it is because you have found something that belongs to me and that I am looking for. Please contact me as soon as possible. You will be rewarded.</p>
+  </div>
+
+  <div class="card visible">
+    <h2>English</h2>
+    <p>Hello! If you have arrived here, it is because you have found something that belongs to me and that I am looking for.</p>
+    <p>Please contact me as soon as possible. You will be rewarded.</p>
     <p>Thank you very much.</p>
-    <hr>
-    <p>Salut! Si vous êtes arrivé ici, c'est parce que vous avez trouvé quelque chose qui m'appartient et que je recherche. S'il vous plaît, contactez-moi dès que possible. Vous serez récompensé.</p>
+  </div>
+
+  <div class="card visible">
+    <h2>Français</h2>
+    <p>Salut! Si vous êtes arrivé ici, c'est parce que vous avez trouvé quelque chose qui m'appartient et que je recherche.</p>
+    <p>S'il vous plaît, contactez-moi dès que possible. Vous serez récompensé.</p>
     <p>Merci beaucoup.</p>
-    <hr>
-    <p>你好！如果你到了这里，那是因为你找到了属于我的东西，而我正在寻找。请尽快与我联系。你会得到奖励。</p>
+  </div>
+
+  <div class="card visible">
+    <h2>中文</h2>
+    <p>你好！如果你到了这里，那是因为你找到了属于我的东西，而我正在寻找。</p>
+    <p>请尽快与我联系。你会得到奖励。</p>
     <p>非常感谢你。</p>
   </div>
 
-  <div class="contact-table card">
-    <h2>Contact / Contacto / 联系</h2>
+  <!-- CONTACT TABLE -->
+  <div class="contact-table card visible">
+    <h2>Contacto / Contact / 联系</h2>
     <table>
       <tbody>
         <tr>
@@ -213,7 +228,7 @@ footer {
 <footer>© 2025 Gerard Paba Estampa</footer>
 
 <script>
-  // Scroll animation for cards
+  // Animación de aparición de tarjetas
   function showCardsOnScroll(){
     document.querySelectorAll('.card').forEach(el=>{
       const top = el.getBoundingClientRect().top;
@@ -224,6 +239,5 @@ footer {
   window.addEventListener('scroll', showCardsOnScroll);
   window.addEventListener('load', showCardsOnScroll);
 </script>
-
 </body>
 </html>
