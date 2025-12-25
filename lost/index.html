@@ -44,37 +44,6 @@ h1{
 }
 
 /* MESSAGE CARDS */
-.message-card{
-  background:#ffffff;
-  border-radius:24px;
-  padding:32px;
-  max-width:800px;
-  width:100%;
-  margin-bottom:24px;
-  box-shadow:0 12px 40px rgba(0,0,0,0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s, transform 0.6s;
-  opacity:0;
-  transform: translateY(20px);
-}
-
-.message-card.visible{
-  opacity:1;
-  transform: translateY(0);
-}
-
-.message-card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 18px 60px rgba(0,0,0,0.12);
-}
-
-.message-card p{
-  font-size:16px;
-  line-height:1.6;
-  margin-bottom:12px;
-  color:#333;
-}
-
-/* LANGUAGES CARDS */
 .language-cards{
   display:flex;
   flex-wrap:wrap;
@@ -86,9 +55,9 @@ h1{
 .language-card{
   background:#ffffff;
   border-radius:20px;
-  padding:20px 24px;
-  min-width:200px;
-  max-width:250px;
+  padding:24px;
+  min-width:220px;
+  max-width:300px;
   text-align:center;
   box-shadow:0 6px 20px rgba(0,0,0,0.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s, transform 0.6s;
@@ -107,20 +76,22 @@ h1{
 }
 
 .language-card h3{
-  font-weight:600;
-  font-size:18px;
-  margin-bottom:6px;
+  font-weight:700;
+  font-size:20px;
+  margin-bottom:12px;
   color:var(--text);
 }
 
 .language-card p{
-  font-size:14px;
-  color:#555;
+  font-size:15px;
+  line-height:1.6;
+  margin-bottom:8px;
+  color:#333;
 }
 
 /* CONTACT TABLE */
 .contact-table{
-  background:#ffffff;
+  background: var(--accent);
   border-radius:24px;
   padding:32px;
   max-width:400px;
@@ -139,13 +110,13 @@ h1{
   font-size:24px;
   font-weight:700;
   margin-bottom:16px;
-  color:var(--text);
+  color:#fff;
 }
 
 .contact-table a{
   display:block;
   font-size:16px;
-  color:#555; /* grisáceo */
+  color:#e0e0e0; /* gris claro */
   margin-bottom:8px;
   text-decoration:none;
   transition: color 0.3s ease;
@@ -153,7 +124,7 @@ h1{
 }
 
 .contact-table a:hover{
-  color:#333; /* gris más oscuro al pasar */
+  color:#fff; /* más visible al pasar */
 }
 
 /* ANIMATION ON SCROLL */
@@ -163,39 +134,45 @@ h1{
 
 <h1>YOU FOUND IT!</h1>
 
-<div class="message-card visible">
-  <p>Hola! Si ha llegado hasta aquí, es porque ha encontrado algo que me pertenece y que estoy buscando.</p>
-  <p>Le ruego que se ponga en contacto conmigo lo antes posible. Será recompensado.</p>
-  <p>Muchas gracias.</p>
-</div>
+<div class="language-cards">
+  <div class="language-card visible">
+    <h3>ESPAÑOL</h3>
+    <p>Hola! Si ha llegado hasta aquí, es porque ha encontrado algo que me pertenece y que estoy buscando.</p>
+    <p>Le ruego que se ponga en contacto conmigo lo antes posible. Será recompensado.</p>
+    <p>Muchas gracias.</p>
+  </div>
 
-<div class="message-card visible">
-  <p>Hello! If you have arrived here, it is because you have found something that belongs to me and that I am looking for.</p>
-  <p>Please contact me as soon as possible. You will be rewarded.</p>
-  <p>Thank you very much.</p>
-</div>
+  <div class="language-card visible">
+    <h3>ENGLISH</h3>
+    <p>Hello! If you have arrived here, it is because you have found something that belongs to me and that I am looking for.</p>
+    <p>Please contact me as soon as possible. You will be rewarded.</p>
+    <p>Thank you very much.</p>
+  </div>
 
-<div class="message-card visible">
-  <p>Salut! Si vous êtes arrivé ici, c'est parce que vous avez trouvé quelque chose qui m'appartient et que je recherche.</p>
-  <p>S'il vous plaît, contactez-moi dès que possible. Vous serez récompensé.</p>
-  <p>Merci beaucoup.</p>
-</div>
+  <div class="language-card visible">
+    <h3>FRANÇAIS</h3>
+    <p>Salut! Si vous êtes arrivé ici, c'est parce que vous avez trouvé quelque chose qui m'appartient et que je recherche.</p>
+    <p>S'il vous plaît, contactez-moi dès que possible. Vous serez récompensé.</p>
+    <p>Merci beaucoup.</p>
+  </div>
 
-<div class="message-card visible">
-  <p>你好！如果你到了这里，那是因为你找到了属于我的东西，而我正在寻找。</p>
-  <p>请尽快与我联系。你会得到奖励。</p>
-  <p>非常感谢你。</p>
+  <div class="language-card visible">
+    <h3>中文</h3>
+    <p>你好！如果你到了这里，那是因为你找到了属于我的东西，而我正在寻找。</p>
+    <p>请尽快与我联系。你会得到奖励。</p>
+    <p>非常感谢你。</p>
+  </div>
 </div>
 
 <div class="contact-table visible">
   <h2>CONTACT</h2>
-  <a href="mailto:gerard_612@hotmail.com">gerard_612@hotmail.com</a>
-  <a href="https://wa.me/34676820417" target="_blank">+34 676 820 417</a>
+  <a href="mailto:gerard_612@hotmail.com">Email: gerard_612@hotmail.com</a>
+  <a href="https://wa.me/34676820417" target="_blank">Phone: +34 676 820 417</a>
 </div>
 
 <script>
 // Reveal cards on scroll
-const cards = document.querySelectorAll('.message-card, .language-card, .contact-table');
+const cards = document.querySelectorAll('.language-card, .contact-table');
 window.addEventListener('scroll', () => {
   cards.forEach(el => {
     const top = el.getBoundingClientRect().top;
