@@ -430,23 +430,25 @@ h2{
 }
 
 /* MOBILE ADJUSTMENT */
+/* MOBILE ADJUSTMENT */
 @media(max-width:768px){
   /* HERO */
   .hero-container{
     flex-direction:column;
     align-items:center;
-    gap:20px;
+    gap:10px;
   }
   .hero-image{
     flex:1 1 auto;
-    margin-top:30px;
+    margin-top:15px; /* menos espacio que antes */
   }
   .hero-buttons{
     justify-content:center;
   }
   h1{
-    font-size:48px;
+    font-size:44px; /* más pequeño */
     text-align:center;
+    margin-top:10px; /* reducir margen superior */
   }
   h2{
     font-size:42px;
@@ -454,11 +456,11 @@ h2{
     margin-bottom:24px;
   }
   .stats{
-    gap:30px;
-    margin-bottom:30px;
+    gap:20px;
+    margin-bottom:20px;
   }
 
-  /* HEADER */
+  /* HEADER FIJO */
   header{
     position:fixed;
     top:0;
@@ -469,51 +471,68 @@ h2{
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     box-shadow: 0 1px 0 rgba(0,0,0,0.08);
     z-index:999;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:8px 16px;
   }
   .nav{
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 16px;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    gap:6px;
   }
   .nav span{
-    font-size:22px;
+    font-size:20px;
     font-weight:600;
     text-align:center;
+    display:block;
+    margin-bottom:4px;
   }
   .nav-links{
     display:flex;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
     justify-content:center;
-    gap:16px;
+    gap:8px;
+    width:100%;
+    overflow-x:auto;
+    padding:4px 0;
   }
   .nav a{
-    font-size:15px;
+    font-size:14px;
     color: var(--muted);
+    white-space:nowrap;
+    padding:6px 8px;
+    border-radius:12px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+  .nav a:hover{
+    background: rgba(0,0,0,0.05);
+    color: var(--text);
   }
 
   /* CONTACTO */
   .contact-container{
     flex-direction:column;
     align-items:center;
-    gap:12px;
+    gap:8px;
     margin-top:20px;
-    margin-bottom:40px;
+    margin-bottom:30px;
   }
   .contact-item{
-    margin-bottom:10px;
+    margin-bottom:6px;
     text-align:center;
   }
 
   /* EXPERIENCE CAROUSEL */
   .experience-carousel{
     justify-content:flex-start;
-    gap:16px;
+    gap:12px;
   }
 
   /* HERO padding para no tapar contenido con header */
   .hero{
-    padding-top:160px;
+    padding-top:120px; /* menos espacio arriba para que el h1 quede más cerca */
   }
 }
 
@@ -528,7 +547,6 @@ h2{
     background:rgba(0,0,0,.72);
   }
 }
-
 
 </style>
 </head>
