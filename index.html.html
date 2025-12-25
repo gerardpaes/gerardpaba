@@ -429,26 +429,159 @@ h2{
   margin-bottom:48px;
 }
 
-@media(max-width:768px){
-  .hero-container{flex-direction:column;align-items:center;}
-  .hero-image{flex:1 1 auto;margin-top:30px;}
-  .hero-buttons{justify-content:center;}
-  h1{font-size:52px;}
-  h2{font-size:48px;}
-  .stats{gap:30px;margin-bottom:30px;}
-  .contact-container{flex-direction:column;align-items:center;}
-  .experience-carousel{justify-content:start;}
+@media (max-width: 768px){
+
+  /* ===== GENERAL ===== */
+  section{
+    padding: 0 16px;
+  }
+
+  h1{
+    font-size: 48px;
+    text-align: center;
+  }
+
+  h2{
+    font-size: 40px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  p{
+    text-align: center;
+  }
+
+  /* ===== HEADER ===== */
+  header{
+    height: 80px;
+  }
+
+  .nav{
+    padding: 0 16px;
+  }
+
+  .nav span{
+    font-size: 20px;
+    white-space: nowrap;     /* evita salto de línea */
+  }
+
+  .nav-links{
+    gap: 16px;
+  }
+
+  .nav a{
+    font-size: 14px;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding-top: 80px;
+  }
+
+  .hero-container{
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .hero-text{
+    flex: none;
+  }
+
+  .hero-text p.intro{
+    font-size: 18px;
+  }
+
+  .hero-text p.position{
+    font-size: 16px;
+  }
+
+  .hero-buttons{
+    justify-content: center;
+  }
+
+  .hero-image{
+    margin-top: 24px;
+    transform: none !important;
+  }
+
+  /* ===== STATS / KPIs ===== */
+  .stats{
+    gap: 24px;
+    margin-top: 32px;
+    margin-bottom: 32px;
+  }
+
+  .stat-number{
+    font-size: 34px;
+  }
+
+  .stat-label{
+    font-size: 15px;
+  }
+
+  /* ===== EXPERIENCE ===== */
+  .experience-carousel{
+    gap: 20px;
+    padding-top: 16px;
+  }
+
+  .experience-carousel .card{
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  /* ===== PROJECTS ===== */
+  .projects-grid{
+    gap: 24px;
+    margin-top: 16px;
+  }
+
+  .project-card{
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 28px;
+  }
+
+  .project-title{
+    text-align: center;
+  }
+
+  /* ===== CONTACT ===== */
+  #contact{
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+
+  .contact-phrase{
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+
+  .contact-container{
+    flex-direction: column;
+    gap: 18px;
+    margin-top: 0;
+  }
+
+  .contact-label{
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .contact-value a,
+  .contact-value{
+    font-size: 17px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer{
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
 }
 
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#000;
-    --text:#f5f5f7;
-    --muted:#98989d;
-    --accent:#0071e3;
-  }
-  header{background:rgba(0,0,0,.72);}
-}
 </style>
 </head>
 
