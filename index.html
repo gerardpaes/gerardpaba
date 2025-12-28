@@ -454,7 +454,7 @@ h2{
     flex-wrap: wrap;
     justify-content: center;
     gap: 14px;
-    padding-bottom: 0px;
+    padding-bottom: 0;
   }
 
   .nav a{
@@ -474,95 +474,104 @@ h2{
     gap: 20px;
   }
 
-  /* Imagen después del texto */
-  .hero-image{
-    order: 2;
-    margin-top: 20px;
-  }
   .hero-text{
     order: 1;
+    text-align: center;
   }
 
   .hero-text h1{
     font-size: 60px;
-    text-align: center;
+    margin-bottom: 16px;
   }
 
   .hero-text p.intro,
   .hero-text p.position{
     text-align: center;
-  }
-
-  .hero-image img{
-    max-width: 200px; /* foto más pequeña */
+    font-size: 16px;
   }
 
   .hero-buttons{
     justify-content: center;
+    gap: 12px;
   }
 
-  /* TITULOS */
-  h2{
-    font-size: 48px;
-    text-align: center;
-    margin-bottom: 24px;
+  .hero-image{
+    order: 2;
+    margin-top: 16px;
+  }
+
+  .hero-image img{
+    max-width: 180px;
   }
 
   /* STATS */
   .stats{
-    gap: 30px;
-    margin-bottom: 30px;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 24px;
   }
 
-  /* CONTACTO */
+  /* CONTACT */
   .contact-container{
     flex-direction: column;
     align-items: center;
     margin-top: 20px;
     margin-bottom: 20px;
   }
+
   .contact-item{
     flex: 1 1 auto;
     text-align: center;
     margin-bottom: 0;
   }
-  .contact-item:nth-child(1){ margin-bottom: 16px; } /* Email */
-  .contact-item:nth-child(2){ margin-bottom: 24px; } /* LinkedIn */
-  .contact-item:nth-child(3){ margin-bottom: 0; }   /* Location */
 
-  /* EXPERIENCE CARRUSEL */
+  .contact-item:nth-child(1){margin-bottom: 16px;}
+  .contact-item:nth-child(2){margin-bottom: 24px;}
+  .contact-item:nth-child(3){margin-bottom: 0;}
+
+  /* EXPERIENCE CAROUSEL */
   .experience-carousel{
     display: flex;
-    gap: 16px;
+    flex-wrap: nowrap; /* no wrap */
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 16px;
+    gap: 16px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
   }
-  .experience-carousel::-webkit-scrollbar { display: none; }
+
   .experience-carousel .card{
-    flex: 0 0 250px;
+    flex: 0 0 auto;
+    min-width: 260px;
     scroll-snap-align: start;
   }
 
-  /* PROJECTS CARRUSEL */
+  /* PROJECTS CAROUSEL */
   .projects-grid{
     display: flex;
-    gap: 16px;
+    flex-wrap: nowrap;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 16px;
+    gap: 16px;
+    padding-left: 20px;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
   }
-  .projects-grid::-webkit-scrollbar { display: none; }
+
   .projects-grid .project-card{
-    flex: 0 0 280px;
+    flex: 0 0 auto;
+    min-width: 260px;
     scroll-snap-align: start;
   }
-}
 
+  /* TITLES */
+  h2{
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+}
 
 </style>
 </head>
