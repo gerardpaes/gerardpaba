@@ -432,146 +432,104 @@ h2{
 /* MOBILE ADJUSTMENT */
 /* MOBILE ADJUSTMENT */
 @media(max-width: 768px){
-  /* HEADER */
   header{
     height:auto;
-    padding:20px 0 8px 0;
+    padding:20px 0 8px 0; /* <-- Aumenta el primer valor (arriba) */
     border-bottom:0.5px solid rgba(0,0,0,.04);
   }
-  
   .nav{
     flex-direction:column;
-    gap:8px;
+    gap:8px; /* <-- Reduce este gap */
     padding:0 20px;
   }
-  
   .nav span{
     font-size:20px;
   }
-  
   .nav-links{
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 14px;
-    padding-bottom: 0;
+    padding-bottom: 0px; /* <-- Elimina el padding-bottom */
   }
-
   .nav a{
     font-size: 14px;
     color: var(--muted);
   }
 
-  /* HERO */
+  /* HERO - Ajuste del padding superior para compensar header */
   .hero{
     padding-top: 75px;
     min-height: 70vh;
   }
 
+  /* Resto de ajustes móvil */
   .hero-container{
-    flex-direction: column;
+    flex-direction: column; /* columna en móvil */
     align-items: center;
     gap: 20px;
   }
 
+  /* mover la imagen después del texto */
+  .hero-image{
+    order: 2; /* fuerza que aparezca después del texto */
+    margin-top: 20px;
+  }
   .hero-text{
-    order: 1;
+    order: 1; /* asegura que el texto vaya primero */
+  }
+  .hero-text h1{
+    font-size: 60px; /* Más grande */
     text-align: center;
   }
-
-  .hero-text h1{
-    font-size: 60px;
-    margin-bottom: 16px;
-  }
-
   .hero-text p.intro,
   .hero-text p.position{
     text-align: center;
-    font-size: 16px;
   }
-
+  .hero-image img{
+    max-width: 240px; /* Foto más pequeña */
+  }
   .hero-buttons{
     justify-content: center;
-    gap: 12px;
   }
-
-  .hero-image{
-    order: 2;
-    margin-top: 16px;
-  }
-
-  .hero-image img{
-    max-width: 180px;
-  }
-
-  /* STATS */
-  .stats{
-    flex-direction: column;
-    gap: 24px;
+  h2{
+    font-size: 48px;
+    text-align: center;
     margin-bottom: 24px;
   }
-
-  /* CONTACT */
+  .stats{
+    gap: 30px;
+    margin-bottom: 30px;
+  }
   .contact-container{
     flex-direction: column;
     align-items: center;
     margin-top: 20px;
     margin-bottom: 20px;
   }
-
   .contact-item{
     flex: 1 1 auto;
     text-align: center;
+    margin-bottom: 0; /* quitamos margin general */
+  }
+
+  /* espaciado específico */
+  .contact-item:nth-child(1){ /* Email */
+    margin-bottom: 16px; /* pequeño espacio hacia el siguiente */
+  }
+  .contact-item:nth-child(2){ /* LinkedIn */
+    margin-bottom: 24px; /* más espacio hacia Location */
+  }
+  .contact-item:nth-child(3){ /* Location */
     margin-bottom: 0;
   }
 
-  .contact-item:nth-child(1){margin-bottom: 16px;}
-  .contact-item:nth-child(2){margin-bottom: 24px;}
-  .contact-item:nth-child(3){margin-bottom: 0;}
-
-  /* EXPERIENCE CAROUSEL */
   .experience-carousel{
-    display: flex;
-    flex-wrap: nowrap; /* no wrap */
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    justify-content: flex-start;
     gap: 16px;
-    padding-left: 20px;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .experience-carousel .card{
-    flex: 0 0 auto;
-    min-width: 260px;
-    scroll-snap-align: start;
-  }
-
-  /* PROJECTS CAROUSEL */
-  .projects-grid{
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    gap: 16px;
-    padding-left: 20px;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .projects-grid .project-card{
-    flex: 0 0 auto;
-    min-width: 260px;
-    scroll-snap-align: start;
-  }
-
-  /* TITLES */
-  h2{
-    font-size: 48px;
-    text-align: center;
-    margin-bottom: 24px;
   }
 }
+
 
 </style>
 </head>
