@@ -468,9 +468,17 @@ h2{
 
   /* Resto de ajustes móvil */
   .hero-container{
-    flex-direction: column;
+    flex-direction: column; /* columna en móvil */
     align-items: center;
     gap: 20px;
+  }
+  /* mover la imagen después del texto */
+  .hero-image{
+    order: 2; /* fuerza que aparezca después del texto */
+    margin-top: 20px;
+  }
+  .hero-text{
+    order: 1; /* asegura que el texto vaya primero */
   }
 
   .hero-text h1{
@@ -482,12 +490,6 @@ h2{
   .hero-text p.position{
     text-align: center;
   }
-
-  .hero-image{
-    flex: 1 1 auto;
-    margin-top: 20px;
-  }
-
   .hero-image img{
     max-width: 220px; /* Foto más pequeña */
   }
