@@ -472,37 +472,52 @@ h2{
     align-items: center;
     gap: 20px;
   }
-  /* mover la imagen después del texto */
-  .hero-image{
-    order: 2; /* fuerza que aparezca después del texto */
-    margin-top: 20px;
-  }
-  .hero-text{
-    order: 1; /* asegura que el texto vaya primero */
-  }
+ /* HERO - Ajuste del padding superior para compensar header */
+.hero{
+  padding-top: 75px;
+  min-height: 70vh;
+}
 
-  .hero-text h1{
-    font-size: 60px; /* Más grande */
-    text-align: center;
-  }
+/* Resto de ajustes móvil */
+.hero-container{
+  display: flex;
+  flex-direction: column; /* columna en móvil */
+  align-items: center;
+  gap: 10px; /* espacio pequeño entre elementos */
+}
 
-  .hero-text p.intro,
-  .hero-text p.position{
-    text-align: center;
-  }
-  .hero-image img{
-    max-width: 220px; /* Foto más pequeña */
-  }
+/* Mover la imagen justo después del h1 */
+.hero-text h1{
+  font-size: 60px; /* Más grande */
+  text-align: center;
+  display: inline-block; /* necesario para controlar el flujo */
+}
 
-  .hero-buttons{
-    justify-content: center;
-  }
+/* Insertamos imagen justo después del h1 en móvil */
+.hero-text .hero-image{
+  display: block;
+  max-width: 220px;
+  margin: 16px auto; /* espacio arriba y abajo */
+}
 
-  h2{
-    font-size: 48px;
-    text-align: center;
-    margin-bottom: 24px;
-  }
+.hero-text p.intro,
+.hero-text p.position{
+  text-align: center;
+  margin-top: 8px; /* separa del h1 y de la imagen */
+}
+
+.hero-buttons{
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Ajuste de títulos y secciones */
+h2{
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
 
   .stats{
     gap: 30px;
