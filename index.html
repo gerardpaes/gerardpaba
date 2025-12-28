@@ -460,57 +460,49 @@ h2{
     color: var(--muted);
   }
 
- /* HERO - Ajuste del padding superior */
+/* HERO - Ajuste del padding superior para compensar header */
   .hero{
     padding-top: 75px;
     min-height: 70vh;
   }
 
-  /* Hero container en columna */
+  /* Resto de ajustes móvil */
   .hero-container{
-    display: flex;
     flex-direction: column; /* columna en móvil */
     align-items: center;
-    gap: 10px; /* espacio entre elementos */
+    gap: 20px;
   }
-
-  /* Texto primero */
+  /* mover la imagen después del texto */
+  .hero-image{
+    order: 2; /* fuerza que aparezca después del texto */
+    margin-top: 20px;
+  }
   .hero-text{
-    order: 1;
-    width: 100%;
-    text-align: center;
+    order: 1; /* asegura que el texto vaya primero */
   }
 
   .hero-text h1{
-    font-size: 60px;
-    margin-bottom: 16px;
-  }
-
-  .hero-image{
-    order: 2; /* aparece después del h1 y antes del párrafo intro */
-    max-width: 160px; /* más pequeña */
-    margin: 0 auto 16px auto; /* centrada con espacio abajo */
+    font-size: 60px; /* Más grande */
+    text-align: center;
   }
 
   .hero-text p.intro,
   .hero-text p.position{
-    order: 3; /* después de la imagen */
     text-align: center;
+  }
+  .hero-image img{
+    max-width: 220px; /* Foto más pequeña */
   }
 
   .hero-buttons{
-    order: 4; /* botones al final */
     justify-content: center;
-    margin-top: 16px;
   }
 
-/* Ajuste de títulos y secciones */
-h2{
-  font-size: 48px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-
+  h2{
+    font-size: 48px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
 
   .stats{
     gap: 30px;
