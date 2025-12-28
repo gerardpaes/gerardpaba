@@ -460,56 +460,49 @@ h2{
     color: var(--muted);
   }
 
-  /* HERO - Ajuste del padding superior para compensar header */
+ /* HERO - Ajuste del padding superior */
   .hero{
     padding-top: 75px;
     min-height: 70vh;
   }
 
-  /* Resto de ajustes móvil */
+  /* Hero container en columna */
   .hero-container{
+    display: flex;
     flex-direction: column; /* columna en móvil */
     align-items: center;
-    gap: 20px;
+    gap: 10px; /* espacio entre elementos */
   }
- /* HERO - Ajuste del padding superior para compensar header */
-.hero{
-  padding-top: 75px;
-  min-height: 70vh;
-}
 
-/* Resto de ajustes móvil */
-.hero-container{
-  display: flex;
-  flex-direction: column; /* columna en móvil */
-  align-items: center;
-  gap: 10px; /* espacio pequeño entre elementos */
-}
+  /* Texto primero */
+  .hero-text{
+    order: 1;
+    width: 100%;
+    text-align: center;
+  }
 
-/* Mover la imagen justo después del h1 */
-.hero-text h1{
-  font-size: 60px; /* Más grande */
-  text-align: center;
-  display: inline-block; /* necesario para controlar el flujo */
-}
+  .hero-text h1{
+    font-size: 60px;
+    margin-bottom: 16px;
+  }
 
-/* Insertamos imagen justo después del h1 en móvil */
-.hero-text .hero-image{
-  display: block;
-  max-width: 220px;
-  margin: 16px auto; /* espacio arriba y abajo */
-}
+  .hero-image{
+    order: 2; /* aparece después del h1 y antes del párrafo intro */
+    max-width: 160px; /* más pequeña */
+    margin: 0 auto 16px auto; /* centrada con espacio abajo */
+  }
 
-.hero-text p.intro,
-.hero-text p.position{
-  text-align: center;
-  margin-top: 8px; /* separa del h1 y de la imagen */
-}
+  .hero-text p.intro,
+  .hero-text p.position{
+    order: 3; /* después de la imagen */
+    text-align: center;
+  }
 
-.hero-buttons{
-  justify-content: center;
-  margin-top: 16px;
-}
+  .hero-buttons{
+    order: 4; /* botones al final */
+    justify-content: center;
+    margin-top: 16px;
+  }
 
 /* Ajuste de títulos y secciones */
 h2{
