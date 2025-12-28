@@ -364,7 +364,7 @@ section{
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 40px;
-  margin-bottom: 20px; /* espacio antes de la línea del footer */
+  margin-bottom: 20px;
   text-align: center;
 }
 .contact-item{
@@ -390,14 +390,14 @@ section{
   font-weight:500;
 }
 #contact h2 {
-  margin-bottom: 12px; /* reduce el espacio debajo del título */
+  margin-bottom: 12px;
 }
 .contact-note {
   text-align: center;
   font-size: 25px;
   color: #555;
   font-weight: 400;
-  margin-bottom: 30px; /* mantiene separación con el contacto */
+  margin-bottom: 30px;
   letter-spacing: 0.5px;
 }
 .contact-phrase {
@@ -407,6 +407,7 @@ section{
   color:#555;
   margin-bottom:24px;
 }
+
   
 /* Footer */
 footer{
@@ -509,16 +510,24 @@ h2{
   .contact-container{
     flex-direction: column;
     align-items: center;
-    gap: 12px; /* un poco más de espacio entre Gmail, LinkedIn y Location */
     margin-top: 20px;
     margin-bottom: 20px;
   }
   .contact-item{
-    flex: 1 1 auto; /* ajuste automático */
-    margin-bottom: 0; /* elimina espacio extra innecesario */
+    flex: 1 1 auto;
     text-align: center;
+    margin-bottom: 0; /* quitamos margin general */
   }
-
+  /* espaciado específico */
+  .contact-item:nth-child(1){ /* Email */
+    margin-bottom: 16px; /* pequeño espacio hacia el siguiente */
+  }
+  .contact-item:nth-child(2){ /* LinkedIn */
+    margin-bottom: 24px; /* más espacio hacia Location */
+  }
+  .contact-item:nth-child(3){ /* Location */
+    margin-bottom: 0;
+  }
   .experience-carousel{
     justify-content: flex-start;
     gap: 16px;
