@@ -430,16 +430,18 @@ h2{
 
 
 /* MOBILE ADJUSTMENT */
+/* MOBILE ADJUSTMENT */
 @media(max-width: 768px){
+  /* HEADER */
   header{
     height:auto;
-    padding:20px 0 8px 0;  /* <-- Aumenta el primer valor (arriba) */
+    padding:20px 0 8px 0;
     border-bottom:0.5px solid rgba(0,0,0,.04);
   }
   
   .nav{
     flex-direction:column;
-    gap:8px;  /* <-- Reduce este gap */
+    gap:8px;
     padding:0 20px;
   }
   
@@ -452,7 +454,7 @@ h2{
     flex-wrap: wrap;
     justify-content: center;
     gap: 14px;
-    padding-bottom: 0px;  /* <-- Elimina el padding-bottom */
+    padding-bottom: 0px;
   }
 
   .nav a{
@@ -460,29 +462,29 @@ h2{
     color: var(--muted);
   }
 
-/* HERO - Ajuste del padding superior para compensar header */
+  /* HERO */
   .hero{
     padding-top: 75px;
     min-height: 70vh;
   }
 
-  /* Resto de ajustes móvil */
   .hero-container{
-    flex-direction: column; /* columna en móvil */
+    flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  /* mover la imagen después del texto */
+
+  /* Imagen después del texto */
   .hero-image{
-    order: 2; /* fuerza que aparezca después del texto */
+    order: 2;
     margin-top: 20px;
   }
   .hero-text{
-    order: 1; /* asegura que el texto vaya primero */
+    order: 1;
   }
 
   .hero-text h1{
-    font-size: 60px; /* Más grande */
+    font-size: 60px;
     text-align: center;
   }
 
@@ -490,25 +492,29 @@ h2{
   .hero-text p.position{
     text-align: center;
   }
+
   .hero-image img{
-    max-width: 220px; /* Foto más pequeña */
+    max-width: 200px; /* foto más pequeña */
   }
 
   .hero-buttons{
     justify-content: center;
   }
 
+  /* TITULOS */
   h2{
     font-size: 48px;
     text-align: center;
     margin-bottom: 24px;
   }
 
+  /* STATS */
   .stats{
     gap: 30px;
     margin-bottom: 30px;
   }
 
+  /* CONTACTO */
   .contact-container{
     flex-direction: column;
     align-items: center;
@@ -518,25 +524,45 @@ h2{
   .contact-item{
     flex: 1 1 auto;
     text-align: center;
-    margin-bottom: 0; /* quitamos margin general */
-  }
-  /* espaciado específico */
-  .contact-item:nth-child(1){ /* Email */
-    margin-bottom: 16px; /* pequeño espacio hacia el siguiente */
-  }
-  .contact-item:nth-child(2){ /* LinkedIn */
-    margin-bottom: 24px; /* más espacio hacia Location */
-  }
-  .contact-item:nth-child(3){ /* Location */
     margin-bottom: 0;
   }
+  .contact-item:nth-child(1){ margin-bottom: 16px; } /* Email */
+  .contact-item:nth-child(2){ margin-bottom: 24px; } /* LinkedIn */
+  .contact-item:nth-child(3){ margin-bottom: 0; }   /* Location */
+
+  /* EXPERIENCE CARRUSEL */
   .experience-carousel{
-    justify-content: flex-start;
+    display: flex;
     gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+  }
+  .experience-carousel::-webkit-scrollbar { display: none; }
+  .experience-carousel .card{
+    flex: 0 0 250px;
+    scroll-snap-align: start;
+  }
+
+  /* PROJECTS CARRUSEL */
+  .projects-grid{
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+  }
+  .projects-grid::-webkit-scrollbar { display: none; }
+  .projects-grid .project-card{
+    flex: 0 0 280px;
+    scroll-snap-align: start;
   }
 }
 
-  
 
 </style>
 </head>
