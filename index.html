@@ -39,10 +39,10 @@ header{
 }
 
 .nav{
-  max-width:1200px;
+  max-width:1400px;
   margin:0 auto;
   height:100%;
-  padding:0 28px;
+  padding:0 40px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -71,7 +71,7 @@ header{
 
 /* SECCIONES */
 section{
-  max-width:1200px;
+  max-width:1300px;
   margin:0 auto;
   padding:0px 20px;
 }
@@ -349,7 +349,7 @@ section{
   min-height: 24px;
 }
 
-/* Contenedor de imagen consistente - MÁS PEQUEÑO */
+/* Contenedor de imagen consistente */
 .project-image-container {
   width: 100%;
   height: 150px;
@@ -429,6 +429,11 @@ section{
   margin: 0;
 }
 
+/* Espaciado entre líneas de impacto - ACTUALIZADO */
+.star-impact + .star-impact {
+  margin-top: 8px;
+}
+
 .star-impact br {
   content: "";
   display: block;
@@ -469,6 +474,63 @@ section{
   transform: scale(1.05);
   opacity: 0.9;
 }
+/* LIGHTBOX para imágenes */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  animation: fadeIn 0.3s ease;
+}
+
+.lightbox.active {
+  display: flex;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: zoomIn 0.3s ease;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  font-size: 40px;
+  color: white;
+  font-weight: 300;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  z-index: 10000;
+}
+
+.lightbox-close:hover {
+  transform: scale(1.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+
 /* CONTACTO */
 .contact-container{
   display: flex;
@@ -871,7 +933,7 @@ Supported SMEs and large companies in securing <strong>public funding</strong> f
       <p class="project-company">Amazon · Fullfillment Network</p>
       
       <div class="project-image-container">
-        <a href="ppr-table.png" target="_blank">
+        <a href="ppr-table.png">
           <img src="ppr-table.png" alt="Before: Manual calculations, multiple pages. After: Automated KPI summary table">
         </a>
       </div>
@@ -898,7 +960,7 @@ Supported SMEs and large companies in securing <strong>public funding</strong> f
       <p class="project-company">Amazon · Alexa Shopping</p>
       
       <div class="project-image-container">
-        <a href="nilenav-tool.png" target="_blank">
+        <a href="nilenav-tool.png">
           <img src="nilenav-tool.png" alt="Before: 20+ clicks across multiple pages. After: Single-page investigation dashboard">
         </a>
       </div>
@@ -925,7 +987,7 @@ Supported SMEs and large companies in securing <strong>public funding</strong> f
       <p class="project-company">PwC · PERTE VEC (Spain's Flagship EV Initiative)</p>
       
       <div class="project-image-container">
-        <a href="perte-noticia.jpg" target="_blank">
+        <a href="perte-noticia.jpg">
           <img src="perte-noticia.jpg" alt="PERTE VEC Project">
         </a>
       </div>
@@ -979,6 +1041,13 @@ Supported SMEs and large companies in securing <strong>public funding</strong> f
 </section>
 
 <footer> Gerard Paba Estampa © 2026 </footer>
+
+
+<!-- Lightbox para imágenes -->
+<div id="lightbox" class="lightbox">
+  <span class="lightbox-close">&times;</span>
+  <img id="lightbox-img" src="" alt="">
+</div>
 
 <script>
 const navLinks = document.querySelectorAll('.nav-link');
@@ -1060,6 +1129,48 @@ window.addEventListener('scroll', () => {
 // Forzar que cuente al cargar
 window.addEventListener('load', () => {
   animateCounters(true);
+});
+
+// Lightbox functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const lightboxClose = document.querySelector('.lightbox-close');
+  
+  // Agregar evento click a todas las imágenes de proyecto
+  document.querySelectorAll('.project-image-container a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const imgSrc = this.querySelector('img').src;
+      const imgAlt = this.querySelector('img').alt;
+      
+      lightboxImg.src = imgSrc;
+      lightboxImg.alt = imgAlt;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+  
+  // Cerrar lightbox al hacer click
+  lightbox.addEventListener('click', function() {
+    this.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+  
+  // Cerrar con botón X
+  lightboxClose.addEventListener('click', function(e) {
+    e.stopPropagation();
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+  
+  // Cerrar con tecla ESC
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
 });
 
 // Ajustar header al cambiar tamaño de ventana
