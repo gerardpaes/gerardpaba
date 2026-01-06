@@ -523,21 +523,35 @@ h2{
   .contact-item:nth-child(3){ /* Location */
     margin-bottom: 0;
   }
-.experience-carousel {
+ .experience-carousel {
     display: flex;
-    flex-direction: column;   /* ← clave */
-    align-items: center;      /* ← centra las cards */
+    flex-direction: column;   /* vertical en móvil */
+    align-items: center;      /* centra las cards horizontalmente */
     gap: 20px;
     padding-left: 0;
     padding-right: 0;
-    overflow-x: visible;      /* ← elimina scroll horizontal */
+    overflow-x: visible;      /* elimina scroll horizontal */
   }
 
+  /* Cada card ocupa ancho reducido y centrada */
   .experience-carousel .card {
     flex: none;
     width: 92%;               /* ancho elegante */
     max-width: 420px;         /* límite visual */
-    margin: 0 auto;           /* centra */
+    margin: 0 auto;           /* centra card horizontalmente */
+    text-align: center;       /* centra texto dentro de la card */
+  }
+
+  /* Títulos y meta de experiencia centrados */
+  .experience-carousel .card h3,
+  .experience-carousel .card .meta,
+  .experience-carousel .card p {
+    text-align: center;
+  }
+
+  /* Tags centrados */
+  .experience-pills {
+    justify-content: center;  /* centra las pills horizontalmente */
   }
 }
 
