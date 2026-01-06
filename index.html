@@ -523,16 +523,21 @@ h2{
   .contact-item:nth-child(3){ /* Location */
     margin-bottom: 0;
   }
- .experience-carousel{
-    justify-content: flex-start;
-    gap: 16px;
-    padding-left: 20px;
-    padding-right: 20px; /* igual padding ambos lados */
+.experience-carousel {
+    display: flex;
+    flex-direction: column;   /* ← clave */
+    align-items: center;      /* ← centra las cards */
+    gap: 20px;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: visible;      /* ← elimina scroll horizontal */
   }
-  
+
   .experience-carousel .card {
-    flex: 0 0 calc(100% - 40px); /* ancho completo menos padding */
-    max-width: calc(100% - 40px);
+    flex: none;
+    width: 92%;               /* ancho elegante */
+    max-width: 420px;         /* límite visual */
+    margin: 0 auto;           /* centra */
   }
 }
 
