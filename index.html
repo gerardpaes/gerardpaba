@@ -213,30 +213,23 @@ section{
   font-weight:500;
 }
 
-/* Experience Carrusel actualizado con más espacio */
+/* Experience Carrusel actualizado - 4 cards en horizontal fijo */
 .experience-carousel {
-  display: flex;
-  gap: 28px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
   padding-bottom: 36px;
-  padding-right: 40px; /* más espacio a la derecha */
-  padding-top: 25px;   /* espacio superior */
-  padding-left: 20px;  /* opcional, margen inicial */
-}
-.experience-carousel::-webkit-scrollbar {
-  display: none;
+  padding-top: 25px;
+  background: transparent;
 }
 
 /* Experience cards sin borde */
 .experience-carousel .card {
-  flex: 0 0 360px;
-  scroll-snap-align: start;
   margin-top: 10px;
   margin-bottom: 10px;
-  border: none; /* eliminamos borde */
-  background: #ffffff; /* aseguramos fondo blanco */
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08); /* mismo estilo que project cards */
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
   border-radius: 20px;
   padding: 36px;
   transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.6s, transform 0.6s;
@@ -244,24 +237,27 @@ section{
   transform: translateY(20px);
 }
 
+.experience-carousel .card p {
+  text-align: center;
+}
 
 .experience-pills {
   display: flex;
-  flex-wrap: wrap;       /* salto de línea solo si no caben */
-  gap: 6px;              /* espacio entre pills */
-  margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+  justify-content: center;
 }
 
 .experience-pills span {
-  background-color: #cce2f9; /* azul clarito */
-  color: #343434;            /* texto azul oscuro */
-  padding: 4px 10px;
+  background-color: #cce2f9;
+  color: #343434;
+  padding: 4px 9px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 500;
   white-space: nowrap;
 }
-
 
 /* Cards */
 .card{
@@ -631,13 +627,13 @@ h2{
   <h2>Experience</h2>
   <p class="contact-phrase">A journey through years of learning, executing, and achieving results</p>
 
-  <div class="experience-carousel" style="display:flex; gap:20px; flex-wrap:wrap;">
+  <div class="experience-carousel">
 
     <!-- Process Lead, Amazon -->
     <div class="card" style="flex:1; min-width:250px; padding:20px; border-radius:12px;">
       
       <div style="text-align:center; margin-bottom:15px; margin-top:12px;">
-        <img src="amazon-logo.png" alt="Amazon" style="height: 34px;px; width:auto;">
+        <img src="amazon-logo.png" alt="Amazon" style="height:34px; width:auto;">
       </div>
 
       <h3 style="font-size:1.3em; margin:0 0 5px 0; text-align:center;"><strong>Process Lead</strong></h3>
@@ -645,22 +641,22 @@ h2{
       <span class="meta" style="font-size:12px; color:#555; display:block; text-align:center;">Barcelona · mar. 2025 - actualidad</span>
 
       <p style="font-size:13px; margin-top:15px;">
-        <strong>Lead initiatives</strong> to optimize workflows and improve <strong>quality</strong> in the human feedback loop for LLM training. Main operational contact for the <strong>Quality team</strong>, driving <strong>process consistency</strong> and <strong>strategic improvements</strong>
+        Leading <strong>scalable operational processes</strong> supporting Amazon's LLM training. Driving <strong>quality</strong>, <strong>standardisation</strong>, and <strong>data-driven improvements</strong> across cross-functional and international teams.
       </p>
 
       <div class="experience-pills">
-        <span>Leadership</span>
-        <span>Project Management</span>
-        <span>Team Coordination</span>
-        <span>Process Improvement</span>
+        <span>Scalable Operations</span>
+        <span>Process Design</span>
+        <span>Operational Excellence</span>
+        <span>Cross-Functional Leadership</span>
       </div>
     </div>
 
-    <!-- Logistic Analyst, Amazon -->
+    <!-- Logistics Analyst, Amazon -->
     <div class="card" style="flex:1; min-width:250px; padding:20px; border-radius:12px;">
       
       <div style="text-align:center; margin-bottom:15px; margin-top:12px;">
-        <img src="amazon-logo.png" alt="Amazon Logistics" style="height:34px; width:auto;">
+        <img src="amazon-logo.png" alt="Amazon Operations" style="height:34px; width:auto;">
       </div>
 
       <h3 style="font-size:1.3em; margin:0 0 5px 0; text-align:center;"><strong>Logistics Analyst</strong></h3>
@@ -668,14 +664,14 @@ h2{
       <span class="meta" style="font-size:12px; color:#555; display:block; text-align:center;">Barcelona · feb. 2024 - mar. 2025</span>
 
       <p style="font-size:13px; margin-top:15px;">
-        Optimized and standardized <strong>flow management</strong> across IXD European network. Developed <strong>automation scripts</strong> used by 4,500+ users. Focused on <strong>efficiency</strong>, <strong>cost reduction</strong>, and <strong>team support</strong>
+        Improved <strong>efficiency</strong> and reduced <strong>operational costs</strong> by standardising logistics flows across Amazon's European IXD network. Built <strong>automation tools</strong> adopted by <strong>4,500+ users</strong>.
       </p>
 
       <div class="experience-pills">
-        <span>Data Analysis</span>
+        <span>Operational Efficiency</span>
+        <span>Cost Reduction</span>
         <span>Process Automation</span>
-        <span>Project Execution</span>
-        <span>Team Collaboration</span>
+        <span>Performance Analytics</span>
       </div>
     </div>
 
@@ -687,18 +683,18 @@ h2{
       </div>
 
       <h3 style="font-size:1.3em; margin:0 0 5px 0; text-align:center;"><strong>Senior Associate</strong></h3>
-      <span class="meta" style="font-weight:bold; font-size:1em; display:block; text-align:center;color:#666;">PwC España</span>
+      <span class="meta" style="font-weight:bold; font-size:1em; display:block; text-align:center; color:#666;">PwC España</span>
       <span class="meta" style="font-size:12px; color:#555; display:block; text-align:center;">Barcelona · sept. 2021 - feb. 2024</span>
 
       <p style="font-size:13px; margin-top:15px;">
-        Managed large strategic projects in the <strong>automotive sector</strong>. Coordinated with <strong>national & international teams</strong> and delivered projects through <strong>risk management</strong> and <strong>project planning</strong>
+        Delivered <strong>large-scale strategic projects</strong> and <strong>public-funded programs</strong> across automotive, chemical, and food industries, coordinating multi-company teams and supporting senior stakeholders through structured execution.
       </p>
 
       <div class="experience-pills">
         <span>Project Management</span>
-        <span>Strategic Planning</span>
-        <span>Team Coordination</span>
-        <span>Client Advisory</span>
+        <span>Consortium Projects</span>
+        <span>Stakeholder Relation</span>
+        <span>Executive Reporting</span>
       </div>
     </div>
 
@@ -710,18 +706,19 @@ h2{
       </div>
 
       <h3 style="font-size:1.3em; margin:0 0 5px 0; text-align:center;"><strong>Grants Consultant</strong></h3>
-      <span class="meta" style="font-weight:bold; font-size:1em; display:block; text-align:center;color:#666;">FI Group</span>
+      <span class="meta" style="font-weight:bold; font-size:1em; display:block; text-align:center; color:#666;">FI Group</span>
       <span class="meta" style="font-size:12px; color:#555; display:block; text-align:center;">Barcelona · jul. 2020 - jul. 2021</span>
 
       <p style="font-size:13px; margin-top:15px;">
-        Secured <strong>public funds</strong> for R&D projects. Managed documentation, coordinated stakeholders, and defined <strong>financing strategies</strong> for SMEs and large companies
+Supported SMEs and large companies in securing <strong>public funding</strong> for <strong>R&D projects</strong>, defining financing strategies, coordinating documentation and coordinating with <strong>public administration</strong> across multiple sectors.
+  </p>
       </p>
 
       <div class="experience-pills">
-        <span>Project Management</span>
-        <span>Strategic Planning</span>
-        <span>Analysis</span>
-        <span>Stakeholder Coordination</span>
+        <span>Project Coordination</span>
+        <span>Financial Analysis</span>
+        <span>Funding Strategy</span>
+        <span>Public Administration</span>
       </div>
     </div>
 
