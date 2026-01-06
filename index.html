@@ -520,35 +520,52 @@ h2{
     margin-bottom: 0;
   }
  .experience-carousel {
-    display: flex;
-    flex-direction: column;   /* vertical en móvil */
-    align-items: center;      /* centra las cards horizontalmente */
-    gap: 20px;
-    padding-left: 0;
-    padding-right: 0;
-    overflow-x: visible;      /* elimina scroll horizontal */
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding-left: 0;
+  padding-right: 0;
+  overflow-x: visible;
+}
 
-  /* Cada card ocupa ancho reducido y centrada */
-  .experience-carousel .card {
-    flex: none;
-    width: 92%;               /* ancho elegante */
-    max-width: 420px;         /* límite visual */
-    margin: 0 auto;           /* centra card horizontalmente */
-    text-align: center;       /* centra texto dentro de la card */
-  }
+/* Cada card ocupa más ancho y con más padding */
+.experience-carousel .card {
+  flex: none;
+  width: 95%;
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 28px !important;  /* más padding */
+}
 
-  /* Títulos y meta de experiencia centrados */
-  .experience-carousel .card h3,
-  .experience-carousel .card .meta,
-  .experience-carousel .card p {
-    text-align: center;
-  }
+/* Títulos más grandes en móvil */
+.experience-carousel .card h3 {
+  font-size: 1.5em !important;  /* más grande */
+  text-align: center;
+}
 
-  /* Tags centrados */
-  .experience-pills {
-    justify-content: center;  /* centra las pills horizontalmente */
-  }
+.experience-carousel .card .meta {
+  text-align: center;
+  font-size: 14px !important;  /* más grande */
+}
+
+.experience-carousel .card p {
+  text-align: center;
+  font-size: 15px !important;  /* más grande */
+  line-height: 1.6;
+}
+
+/* Pills más grandes en móvil */
+.experience-pills {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.experience-pills span {
+  font-size: 12px !important;  /* más grande */
+  padding: 6px 12px !important;  /* más padding */
+}
 }
 
 
