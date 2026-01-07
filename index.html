@@ -739,7 +739,7 @@
 @media(max-width: 768px) {
   /* Reducir padding general en móvil */
   section {
-    padding: 0 20px; /* Reducido de 80px a 20px */
+    padding: 0 20px;
   }
 
   header {
@@ -781,41 +781,41 @@
   .hero-container {
     flex-direction: column;
     align-items: center;
-    gap: 20px; /* Reducido de 30px a 20px */
+    gap: 10px; /* Reducido aún más de 20px a 10px */
   }
 
   .hero-text {
     order: 1;
     text-align: center;
-    padding: 0; /* Sin padding lateral */
+    padding: 0;
   }
 
   .hero-text h1 {
-    font-size: 48px; /* Reducido de 60px */
+    font-size: 48px;
     text-align: center;
     margin-bottom: 20px;
     line-height: 1.1;
   }
 
   .hero-text p.intro {
-    font-size: 17px; /* Reducido de 20px */
+    font-size: 17px;
     line-height: 1.5;
     text-align: center;
     margin-bottom: 16px;
-    padding: 0 10px; /* Pequeño padding para que no toque los bordes */
+    padding: 0 10px;
   }
 
   .hero-text p.position {
-    font-size: 16px; /* Reducido */
+    font-size: 16px;
     text-align: center;
     line-height: 1.5;
     padding: 0 10px;
-    margin-bottom: 24px;
+    margin-bottom: 16px; /* Reducido de 24px a 16px */
   }
 
-.hero-image {
+  .hero-image {
     order: 2;
-    margin-top: 0; /* Eliminado el margin-top de 10px */
+    margin-top: 0;
   }
 
   .hero-image img {
@@ -824,21 +824,21 @@
 
   .hero-buttons {
     justify-content: center;
-    margin-bottom: 5px; /* Reducido de 20px */
+    margin-bottom: 0; /* Eliminado completamente el margin-bottom */
   }
 
   /* Títulos principales */
   h2 {
-    font-size: 40px; /* Reducido de 48px */
+    font-size: 40px;
     text-align: center;
     margin-bottom: 16px;
     margin-top: 60px;
   }
 
-  /* Subtítulos debajo de h2 */
+  /* Subtítulos debajo de h2 - AUMENTADO +2px */
   .contact-phrase {
-    font-size: 20px; /* Reducido de 25px */
-    margin-bottom: 20px; /* Reducido de 24px */
+    font-size: 20px; /* Aumentado de 18px a 20px */
+    margin-bottom: 20px;
     padding: 0 10px;
     line-height: 1.4;
   }
@@ -856,7 +856,7 @@
   }
 
   .stat-number {
-    font-size: 36px; /* Reducido de 40px */
+    font-size: 36px;
   }
 
   .stat-label {
@@ -865,7 +865,7 @@
 
   /* EXPERIENCE - Corregir alineación */
   #experience {
-    padding: 0 16px; /* Padding uniforme */
+    padding: 0 16px;
   }
 
   .experience-carousel {
@@ -874,16 +874,16 @@
     align-items: center;
     gap: 20px;
     padding: 20px 0;
-    margin: 0; /* Sin márgenes */
+    margin: 0;
   }
 
   .experience-carousel .card {
     flex: none;
-    width: 100%; /* Ancho completo */
-    max-width: none; /* Sin límite máximo */
+    width: 100%;
+    max-width: none;
     margin: 0;
     text-align: center;
-    padding: 24px 20px !important; /* Padding uniforme */
+    padding: 24px 20px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
@@ -924,15 +924,15 @@
   .projects-grid {
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* Cambio importante */
+    align-items: stretch;
     gap: 20px;
     padding: 20px 0;
     margin: 0;
   }
 
   .project-card {
-    width: 100%; /* Ancho completo */
-    max-width: none; /* Sin límite */
+    width: 100%;
+    max-width: none;
     margin: 0;
     padding: 24px 20px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -996,7 +996,7 @@
 
   .contact-container {
     flex-direction: column;
-    align-items: stretch; /* Cambio para alineación */
+    align-items: stretch;
     margin-top: 24px;
     margin-bottom: 40px;
     gap: 20px;
@@ -1036,6 +1036,15 @@
   * {
     max-width: 100%;
   }
+}
+
+/* Actualizar también el tamaño de fuente en desktop para los subtítulos */
+.contact-phrase {
+  text-align: center;
+  font-size: 27px; /* Aumentado de 25px a 27px */
+  font-weight: 400;
+  color: #555;
+  margin-bottom: 24px;
 }
     }
   </style>
