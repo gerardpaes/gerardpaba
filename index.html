@@ -1437,7 +1437,7 @@
 
       // Solo aplicar reducción de altura en desktop
       if (!isMobile()) {
-        header.style.height = `${100 - Math.min(window.scrollY / 4, 30)}px`;
+  header.classList.toggle('header--small', window.scrollY > 40);
         heroText.style.fontSize = `${80 - Math.min(window.scrollY / 6, 20)}px`;
         heroImage.style.transform = `translateY(-${window.scrollY / 8}px) scale(${1 - Math.min(window.scrollY / 1200, 0.1)})`;
       } else {
