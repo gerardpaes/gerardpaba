@@ -735,7 +735,7 @@
       margin-bottom: 40px;
     }
 
-  /* MOBILE ADJUSTMENT - REEMPLAZA TODA LA SECCIÓN @media(max-width: 768px) */
+/* MOBILE ADJUSTMENT - REEMPLAZA TODA LA SECCIÓN @media(max-width: 768px) */
 @media(max-width: 768px) {
   /* Reducir padding general en móvil */
   section {
@@ -781,7 +781,7 @@
   .hero-container {
     flex-direction: column;
     align-items: center;
-    gap: 10px; /* Reducido aún más de 20px a 10px */
+    gap: 0; /* Eliminado completamente el gap */
   }
 
   .hero-text {
@@ -810,12 +810,12 @@
     text-align: center;
     line-height: 1.5;
     padding: 0 10px;
-    margin-bottom: 16px; /* Reducido de 24px a 16px */
+    margin-bottom: 16px;
   }
 
   .hero-image {
     order: 2;
-    margin-top: 0;
+    margin-top: -5px; /* Margen negativo para acercar más la imagen */
   }
 
   .hero-image img {
@@ -824,7 +824,7 @@
 
   .hero-buttons {
     justify-content: center;
-    margin-bottom: 0; /* Eliminado completamente el margin-bottom */
+    margin-bottom: 0;
   }
 
   /* Títulos principales */
@@ -835,9 +835,9 @@
     margin-top: 60px;
   }
 
-  /* Subtítulos debajo de h2 - AUMENTADO +2px */
+  /* Subtítulos debajo de h2 - REDUCIDO */
   .contact-phrase {
-    font-size: 20px; /* Aumentado de 18px a 20px */
+    font-size: 19px; /* Reducido de 20px a 19px */
     margin-bottom: 20px;
     padding: 0 10px;
     line-height: 1.4;
@@ -863,7 +863,7 @@
     font-size: 14px;
   }
 
-  /* EXPERIENCE - Corregir alineación */
+  /* EXPERIENCE - Añadir margen lateral */
   #experience {
     padding: 0 16px;
   }
@@ -873,15 +873,15 @@
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    padding: 20px 0;
+    padding: 20px 8px; /* Añadido padding lateral de 8px */
     margin: 0;
   }
 
   .experience-carousel .card {
     flex: none;
-    width: 100%;
+    width: calc(100% - 16px); /* Reducido para dejar margen */
     max-width: none;
-    margin: 0;
+    margin: 0 auto; /* Centrado */
     text-align: center;
     padding: 24px 20px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -916,7 +916,7 @@
     padding: 5px 10px !important;
   }
 
-  /* PROJECTS - Corregir alineación y ancho */
+  /* PROJECTS - Añadir margen lateral */
   #projects {
     padding: 0 16px;
   }
@@ -926,14 +926,14 @@
     flex-direction: column;
     align-items: stretch;
     gap: 20px;
-    padding: 20px 0;
+    padding: 20px 8px; /* Añadido padding lateral de 8px */
     margin: 0;
   }
 
   .project-card {
-    width: 100%;
+    width: calc(100% - 16px); /* Reducido para dejar margen */
     max-width: none;
-    margin: 0;
+    margin: 0 auto; /* Centrado */
     padding: 24px 20px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
@@ -1041,7 +1041,7 @@
 /* Actualizar también el tamaño de fuente en desktop para los subtítulos */
 .contact-phrase {
   text-align: center;
-  font-size: 27px; /* Aumentado de 25px a 27px */
+  font-size: 26px; /* Reducido de 27px a 26px */
   font-weight: 400;
   color: #555;
   margin-bottom: 24px;
