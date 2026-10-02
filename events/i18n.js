@@ -34,7 +34,7 @@ export const DICT = {
     ev_status_approved: "Data confirmada ✅",
 
     availability_title: "La teva disponibilitat",
-    availability_sub: "Introdueix el teu nom i clica els dies: 1r clic = disponible (verd), 2n clic = tentatiu (taronja), 3r clic = treure.",
+    availability_sub: "Introdueix el teu nom, tria \u201cDisponible\u201d o \u201cTentatiu\u201d i marca els teus dies al calendari.",
     label_your_name: "El teu nom",
     placeholder_your_name: "p. ex. Gerard",
     label_pick_available: "Clica qualsevol data al calendari",
@@ -97,6 +97,17 @@ export const DICT = {
     view_attendees: "Veure assistents",
     hide_attendees: "Amagar assistents",
     attendees_count: (n) => `${n} assistent(s)`,
+
+    btn_delete_event: "Eliminar",
+    confirm_delete_event: "Vols eliminar aquest esdeveniment? Aquesta acció no es pot desfer.",
+    toast_event_deleted: "Esdeveniment eliminat.",
+    toast_delete_error: "Error eliminant l'esdeveniment.",
+    label_confirmed_date_toggle: "Ja tinc una data confirmada",
+    label_date: "Data",
+    label_choose_emoji: "Tria una icona (opcional)",
+    pickmode_available: "Disponible",
+    pickmode_tentative: "Tentatiu",
+
     locale_code: "ca-ES"
   },
 
@@ -132,7 +143,7 @@ export const DICT = {
     ev_status_approved: "Fecha confirmada ✅",
 
     availability_title: "Tu disponibilidad",
-    availability_sub: "Introduce tu nombre y haz clic en los días: 1er clic = disponible (verde), 2º clic = tentativo (naranja), 3er clic = quitar.",
+    availability_sub: "Introduce tu nombre, elige \u201cDisponible\u201d o \u201cTentativo\u201d y marca tus días en el calendario.",
     label_your_name: "Tu nombre",
     placeholder_your_name: "p. ej. Gerard",
     label_pick_available: "Haz clic en cualquier fecha del calendario",
@@ -195,6 +206,17 @@ export const DICT = {
     view_attendees: "Ver asistentes",
     hide_attendees: "Ocultar asistentes",
     attendees_count: (n) => `${n} asistente(s)`,
+
+    btn_delete_event: "Eliminar",
+    confirm_delete_event: "¿Quieres eliminar este evento? Esta acción no se puede deshacer.",
+    toast_event_deleted: "Evento eliminado.",
+    toast_delete_error: "Error al eliminar el evento.",
+    label_confirmed_date_toggle: "Ya tengo una fecha confirmada",
+    label_date: "Fecha",
+    label_choose_emoji: "Elige un icono (opcional)",
+    pickmode_available: "Disponible",
+    pickmode_tentative: "Tentativo",
+
     locale_code: "es-ES"
   },
 
@@ -230,7 +252,7 @@ export const DICT = {
     ev_status_approved: "Date confirmed ✅",
 
     availability_title: "Your availability",
-    availability_sub: "Enter your name and click the days: 1st click = available (green), 2nd click = tentative (orange), 3rd click = remove.",
+    availability_sub: "Enter your name, choose \u201cAvailable\u201d or \u201cTentative\u201d, then mark your days on the calendar.",
     label_your_name: "Your name",
     placeholder_your_name: "e.g. Gerard",
     label_pick_available: "Click any date on the calendar",
@@ -293,6 +315,17 @@ export const DICT = {
     view_attendees: "View attendees",
     hide_attendees: "Hide attendees",
     attendees_count: (n) => `${n} attendee(s)`,
+
+    btn_delete_event: "Delete",
+    confirm_delete_event: "Delete this event? This action cannot be undone.",
+    toast_event_deleted: "Event deleted.",
+    toast_delete_error: "Error deleting event.",
+    label_confirmed_date_toggle: "I already have a confirmed date",
+    label_date: "Date",
+    label_choose_emoji: "Choose an icon (optional)",
+    pickmode_available: "Available",
+    pickmode_tentative: "Tentative",
+
     locale_code: "en-US"
   }
 };
