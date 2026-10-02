@@ -104,26 +104,26 @@ function renderUpcoming() {
     card.className = "upcoming-card";
     card.innerHTML = `
       <div class="upcoming-top">
-        <div>
-          <div class="upcoming-name">${title}</div>
-          <div class="upcoming-datebox">
-            <div class="upcoming-date-pill">
-              <span class="d-num">${dayNum}</span>
-              <span class="d-month">${month}</span>
-            </div>
+        <div class="upcoming-main">
+          <div class="upcoming-date-pill">
+            <span class="d-num">${dayNum}</span>
+            <span class="d-month">${month}</span>
+          </div>
+          <div>
+            <div class="upcoming-name">${title}</div>
             <div class="upcoming-date-text">${full}${time ? " · " + time : ""}</div>
           </div>
-          <div class="time-input-row">
-            <label class="field-label" style="margin:0;" data-i18n="label_time_optional">Time (optional)</label>
-            <input type="time" class="time-input" data-id="${id}" value="${time}">
-          </div>
+        </div>
+        <div class="time-input-row">
+          <label class="field-label" data-i18n="label_time_optional">Time</label>
+          <input type="time" class="time-input" data-id="${id}" value="${time}">
+        </div>
+        <div class="upcoming-actions">
+          <a class="btn cal-export google-link" data-id="${id}" href="#" target="_blank" rel="noopener">${t("calendar_google")}</a>
+          <button class="btn cal-export ics-btn" data-id="${id}" type="button">${t("calendar_ics")}</button>
+          <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
         </div>
       </div>
-      <div class="upcoming-actions">
-        <a class="btn cal-export google-link" data-id="${id}" href="#" target="_blank" rel="noopener">📅 ${t("calendar_google")}</a>
-        <button class="btn cal-export ics-btn" data-id="${id}" type="button">🍎 ${t("calendar_ics")}</button>
-      </div>
-      <button class="attendees-toggle" data-id="${id}" type="button">👥 <span class="toggle-label">${t("view_attendees")}</span></button>
       <div class="attendees-list" id="attendees-${id}"></div>
     `;
     upcomingGridEl.appendChild(card);
@@ -201,7 +201,7 @@ function renderEventList() {
     row.href = `event.html?id=${encodeURIComponent(id)}`;
     row.className = "event-row";
     row.innerHTML = `
-      <div class="ev-icon">🎉</div>
+      <div class="ev-icon">${(data.name || "?").charAt(0).toUpperCase()}</div>
       <div class="ev-info">
         <div class="ev-name">${data.name}</div>
         <div class="ev-meta">${eventTapLabel()}</div>
