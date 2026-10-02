@@ -1165,8 +1165,8 @@ footer.hint {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 18px;
-  padding: 13px 16px;
+  margin: 0;
+  padding: 0 16px;
   background: #fafafa;
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -1175,6 +1175,8 @@ footer.hint {
   font-size: 14px;
   font-weight: 500;
   flex-shrink: 0;
+  height: 47px;
+  box-sizing: border-box;
 }
 
 .plusone-inline input[type="checkbox"] {
@@ -1187,4 +1189,152 @@ footer.hint {
   .name-emoji-row { flex-wrap: wrap; }
   .name-emoji-row input[type="text"] { margin-bottom: 10px; }
   .plusone-inline { width: 100%; justify-content: center; margin-bottom: 18px; }
+}
+
+/* ===== CONFIRM DIALOG (site-styled, replaces window.confirm) ===== */
+.confirm-dialog-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.confirm-dialog {
+  background: #fff;
+  border-radius: 22px;
+  padding: 28px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.confirm-dialog-text {
+  font-size: 16px;
+  color: var(--text);
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+
+/* ===== UPCOMING CARD: VIEW/EDIT TOGGLE ===== */
+.edit-fields-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.edit-fields-inline input[type="date"],
+.edit-fields-inline input[type="time"],
+.edit-fields-inline input[type="text"] {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.edit-fields-inline input[type="text"] { flex: 1; min-width: 120px; }
+
+.edit-toggle-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+
+.edit-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ===== APPROVED BANNER: VIEW/EDIT TOGGLE ===== */
+.approved-view-mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.approved-meta-line {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ===== CALENDAR CHOICE MODAL (replaces dropdown) ===== */
+.cal-choice-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cal-choice-dialog {
+  background: #fff;
+  border-radius: 22px;
+  padding: 32px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.cal-choice-title {
+  text-align: center;
+  font-size: 20px;
+  margin: 0 0 22px;
+}
+
+.cal-choice-options {
+  display: flex;
+  gap: 14px;
+}
+
+.cal-choice-opt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 12px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.cal-choice-opt:hover {
+  border-color: var(--accent);
+  background: #eaf3ff;
+  transform: translateY(-2px);
+}
+
+.cal-choice-opt .cco-icon { font-size: 34px; }
+.cal-choice-opt .cco-label { font-size: 13px; font-weight: 600; color: var(--text); text-align: center; }
+
+@media (max-width: 420px) {
+  .cal-choice-options { flex-direction: column; }
+}
+
+/* ===== RESULTS: TENTATIVE COUNT DISPLAY ===== */
+.rank-who.rank-tentative { color: var(--warn); margin-top: 2px; }
+
+.rank-tent-badge {
+  display: block;
+  font-size: 11px;
+  color: var(--warn);
+  font-weight: 600;
+  margin-top: 2px;
 }
