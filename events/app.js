@@ -63,6 +63,17 @@ function computeCounts() {
   return counts;
 }
 
+function computeTentativeCounts() {
+  const counts = {};
+  Object.values(responses).forEach(r => {
+    const tent = r.tentative || [];
+    tent.forEach(iso => {
+      counts[iso] = (counts[iso] || 0) + 1 + (r.plusOne ? 1 : 0);
+    });
+  });
+  return counts;
+}
+
 function restoreMyResponseIfAny() {
   const savedName = localStorage.getItem(`findadate:${eventId}:name`);
   if (savedName && responses[slugifyName(savedName)]) {
@@ -84,20 +95,20 @@ function renderApprovedBanner() {
   const timeVal = eventData.approvedTime || "";
   const locationVal = eventData.location || "";
 
+  const timeLabel = timeVal || t("no_time_set");
+  const locationLabel = locationVal || t("no_location_set");
+
   approvedBannerArea.innerHTML = `
     <div class="approved-banner card visible">
       <div style="flex:1; min-width:220px;">
         <div class="approved-text">${t("approved_banner", dateLabel)}</div>
-        <div class="edit-date-row">
-          <label class="field-label" style="margin:0;">${t("label_date")}</label>
+        <div class="approved-view-mode">
+          <span class="approved-meta-line">🕒 ${timeLabel} &nbsp;·&nbsp; 📍 ${locationLabel}</span>
+          <button class="edit-toggle-btn" id="approved-edit-btn" type="button">${t("btn_edit")}</button>
+        </div>
+        <div class="edit-fields-inline" id="approved-edit-fields" style="display:none;">
           <input type="date" id="approved-date-input" value="${eventData.approvedDate}">
-        </div>
-        <div class="time-input-row">
-          <label class="field-label" style="margin:0;">${t("label_time_optional")}</label>
           <input type="time" id="approved-time-input" value="${timeVal}">
-        </div>
-        <div class="location-input-row">
-          <label class="field-label" style="margin:0;" data-i18n="label_location_optional">Location</label>
           <input type="text" id="approved-location-input" value="${locationVal}" data-i18n-placeholder="placeholder_location">
         </div>
       </div>
@@ -110,6 +121,22 @@ function renderApprovedBanner() {
   const dateInput = document.getElementById("approved-date-input");
   const timeInput = document.getElementById("approved-time-input");
   const locationInput = document.getElementById("approved-location-input");
+  const editBtn = document.getElementById("approved-edit-btn");
+  const editFields = document.getElementById("approved-edit-fields");
+  const viewMode = document.querySelector(".approved-view-mode");
+
+  editBtn.addEventListener("click", () => {
+    const isEditing = editFields.style.display !== "none";
+    if (isEditing) {
+      editFields.style.display = "none";
+      viewMode.style.display = "";
+      editBtn.textContent = t("btn_edit");
+    } else {
+      editFields.style.display = "flex";
+      viewMode.style.display = "none";
+      editBtn.textContent = t("btn_done");
+    }
+  });
 
   dateInput.addEventListener("change", async () => {
     const dv = dateInput.value;
@@ -139,12 +166,21 @@ function renderApprovedBanner() {
   });
   document.getElementById("approved-cal-actions").prepend(calBtn);
 
+  function refreshApprovedMetaLine() {
+    const metaEl = document.querySelector(".approved-meta-line");
+    if (!metaEl) return;
+    const tLabel = timeInput.value || t("no_time_set");
+    const lLabel = locationInput.value || t("no_location_set");
+    metaEl.textContent = `🕒 ${tLabel} \u00b7 📍 ${lLabel}`;
+  }
+
   timeInput.addEventListener("change", async () => {
     const tv = timeInput.value || null;
     try {
       const eventRef = doc(collection(db, "events"), eventId);
       await updateDoc(eventRef, { approvedTime: tv });
       eventData.approvedTime = tv;
+      refreshApprovedMetaLine();
     } catch (e) { console.error(e); }
   });
 
@@ -154,6 +190,7 @@ function renderApprovedBanner() {
       const eventRef = doc(collection(db, "events"), eventId);
       await updateDoc(eventRef, { location: lv });
       eventData.location = lv;
+      refreshApprovedMetaLine();
     } catch (e) { console.error(e); }
   });
 
@@ -174,7 +211,8 @@ function renderApprovedBanner() {
 
 function renderResults() {
   const counts = computeCounts();
-  const dates = Object.keys(counts).sort();
+  const tentCounts = computeTentativeCounts();
+  const dates = Array.from(new Set([...Object.keys(counts), ...Object.keys(tentCounts)])).sort();
   const totalParticipants = Object.keys(responses).length;
 
   const maxTotal = Math.max(...Object.values(counts), 1);
@@ -189,14 +227,15 @@ function renderResults() {
   }
 
   const tallyList = dates.map(iso => {
-    let names = [];
+    let availNames = [];
+    let tentNames = [];
     Object.values(responses).forEach(r => {
       const avail = r.available || [];
       const tent = r.tentative || [];
-      if (avail.includes(iso)) names.push(r.displayName + (r.plusOne ? " (+1)" : ""));
-      else if (tent.includes(iso)) names.push(r.displayName + " (?)");
+      if (avail.includes(iso)) availNames.push(r.displayName + (r.plusOne ? " (+1)" : ""));
+      else if (tent.includes(iso)) tentNames.push(r.displayName + (r.plusOne ? " (+1)" : ""));
     });
-    return { iso, total: counts[iso] || 0, names };
+    return { iso, total: counts[iso] || 0, tentTotal: tentCounts[iso] || 0, availNames, tentNames };
   });
 
   const ranked = tallyList.slice().sort((a, b) => b.total - a.total);
@@ -211,10 +250,15 @@ function renderResults() {
         <div class="rank-badge ${badgeClass}">${idx + 1}</div>
         <div class="rank-info">
           <div class="rank-date">${formatDateLong(item.iso)} ${isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : ""}</div>
-          <div class="rank-who">${item.names.length ? item.names.join(", ") : "—"}</div>
+          <div class="rank-who">${item.availNames.length ? "✅ " + item.availNames.join(", ") : ""}</div>
+          ${item.tentNames.length ? `<div class="rank-who rank-tentative">❓ ${item.tentNames.join(", ")}</div>` : ""}
+          ${!item.availNames.length && !item.tentNames.length ? `<div class="rank-who">—</div>` : ""}
           <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
         </div>
-        <div class="rank-total">${item.total}</div>
+        <div class="rank-total">
+          ${item.total}
+          ${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}
+        </div>
         <button class="btn secondary approve-date-btn" data-iso="${item.iso}" type="button" style="font-size:12px; padding:8px 14px;">
           ${isApproved ? "✓" : t("approve_btn")}
         </button>
