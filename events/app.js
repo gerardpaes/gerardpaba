@@ -82,19 +82,44 @@ function renderApprovedBanner() {
   const title = eventData.name;
   const gUrl = googleCalendarUrl(title, eventData.approvedDate, `Find a Date: ${title}`);
 
+  const timeVal = eventData.approvedTime || "";
+
   approvedBannerArea.innerHTML = `
     <div class="approved-banner card visible">
-      <div class="approved-text">${t("approved_banner", dateLabel)}</div>
+      <div style="flex:1; min-width:220px;">
+        <div class="approved-text">${t("approved_banner", dateLabel)}</div>
+        <div class="time-input-row">
+          <label class="field-label" style="margin:0;">${t("label_time_optional")}</label>
+          <input type="time" id="approved-time-input" value="${timeVal}">
+        </div>
+      </div>
       <div class="cal-export-row">
-        <a class="btn cal-export" href="${gUrl}" target="_blank" rel="noopener">📅 ${t("calendar_google")}</a>
+        <a class="btn cal-export" id="google-cal-link" href="${gUrl}" target="_blank" rel="noopener">📅 ${t("calendar_google")}</a>
         <button class="btn cal-export" id="ics-export-btn" type="button">🍎 ${t("calendar_ics")}</button>
         <button class="btn cal-export" id="unapprove-btn" type="button">↩️ ${t("unapprove_btn")}</button>
       </div>
     </div>
   `;
 
+  const timeInput = document.getElementById("approved-time-input");
+  const refreshGoogleLink = () => {
+    const tv = timeInput.value || null;
+    document.getElementById("google-cal-link").href = googleCalendarUrl(title, eventData.approvedDate, `Find a Date: ${title}`, tv);
+  };
+
+  timeInput.addEventListener("change", async () => {
+    const tv = timeInput.value || null;
+    refreshGoogleLink();
+    try {
+      const eventRef = doc(collection(db, "events"), eventId);
+      await updateDoc(eventRef, { approvedTime: tv });
+      eventData.approvedTime = tv;
+    } catch (e) { console.error(e); }
+  });
+
   document.getElementById("ics-export-btn").addEventListener("click", () => {
-    downloadIcs(title, eventData.approvedDate, `Find a Date: ${title}`);
+    const tv = timeInput.value || null;
+    downloadIcs(title, eventData.approvedDate, `Find a Date: ${title}`, tv);
   });
 
   document.getElementById("unapprove-btn").addEventListener("click", async () => {
