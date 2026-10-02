@@ -15,6 +15,7 @@ const openModalBtn = document.getElementById("open-create-modal");
 const closeModalBtn = document.getElementById("close-create-modal");
 const modalOverlay = document.getElementById("create-modal-overlay");
 const emojiPickerGrid = document.getElementById("emoji-picker-grid");
+const emojiFreeInput = document.getElementById("emoji-free-input");
 const confirmedDateToggle = document.getElementById("confirmed-date-toggle");
 const confirmedFields = document.getElementById("confirmed-fields");
 const confirmedDateInput = document.getElementById("confirmed-date-input");
@@ -36,15 +37,29 @@ function renderEmojiPicker() {
       } else {
         selectedEmoji = emoji;
       }
+      emojiFreeInput.value = selectedEmoji;
       emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
     });
   });
 }
 renderEmojiPicker();
 
+// Free-text emoji input: lets mobile users open their system emoji keyboard
+// and pick ANY emoji, not just the preset palette above.
+emojiFreeInput.addEventListener("input", () => {
+  selectedEmoji = emojiFreeInput.value.trim();
+  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
+});
+
+function updateCreateBtnLabel() {
+  createBtn.textContent = confirmedDateToggle.checked ? t("btn_create") : t("btn_create_vote");
+}
+
 confirmedDateToggle.addEventListener("change", () => {
   confirmedFields.classList.toggle("open", confirmedDateToggle.checked);
+  updateCreateBtnLabel();
 });
+updateCreateBtnLabel();
 
 function showToast(msg) {
   toastEl.textContent = msg;
@@ -80,12 +95,14 @@ function openConfirmDialog(message, onConfirm) {
 function resetCreateModal() {
   eventNameInput.value = "";
   selectedEmoji = "";
+  emojiFreeInput.value = "";
   emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.remove("active"));
   confirmedDateToggle.checked = false;
   confirmedFields.classList.remove("open");
   confirmedDateInput.value = "";
   confirmedTimeInput.value = "";
   confirmedLocationInput.value = "";
+  updateCreateBtnLabel();
 }
 
 openModalBtn.addEventListener("click", () => { resetCreateModal(); modalOverlay.classList.add("open"); });
@@ -161,7 +178,8 @@ async function fetchAttendees(eventId) {
 let allEvents = [];
 
 function renderUpcoming() {
-  const upcoming = allEvents.filter(ev => ev.data.approvedDate);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const upcoming = allEvents.filter(ev => ev.data.approvedDate && ev.data.approvedDate >= todayIso);
   if (upcoming.length === 0) {
     upcomingGridEl.innerHTML = `<div class="empty-state">${t("no_upcoming")}</div>`;
     return;
