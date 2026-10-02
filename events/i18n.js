@@ -85,6 +85,15 @@ export const DICT = {
     gate_button: "Entrar",
     gate_error: "Contrasenya incorrecta, torna-ho a provar.",
 
+
+    upcoming_title: "Pròxims esdeveniments",
+    upcoming_sub: "Esdeveniments amb data confirmada.",
+    voting_title: "En votació",
+    no_upcoming: "Encara no hi ha cap data confirmada.",
+    label_time_optional: "Hora (opcional)",
+    view_attendees: "Veure assistents",
+    hide_attendees: "Amagar assistents",
+    attendees_count: (n) => `${n} assistent(s)`,
     locale_code: "ca-ES"
   },
 
@@ -171,6 +180,15 @@ export const DICT = {
     gate_button: "Entrar",
     gate_error: "Contraseña incorrecta, inténtalo de nuevo.",
 
+
+    upcoming_title: "Próximos eventos",
+    upcoming_sub: "Eventos con fecha confirmada.",
+    voting_title: "En votación",
+    no_upcoming: "Todavía no hay ninguna fecha confirmada.",
+    label_time_optional: "Hora (opcional)",
+    view_attendees: "Ver asistentes",
+    hide_attendees: "Ocultar asistentes",
+    attendees_count: (n) => `${n} asistente(s)`,
     locale_code: "es-ES"
   },
 
@@ -257,6 +275,15 @@ export const DICT = {
     gate_button: "Enter",
     gate_error: "Incorrect password, try again.",
 
+
+    upcoming_title: "Upcoming events",
+    upcoming_sub: "Events with a confirmed date.",
+    voting_title: "Voting open",
+    no_upcoming: "No confirmed dates yet.",
+    label_time_optional: "Time (optional)",
+    view_attendees: "View attendees",
+    hide_attendees: "Hide attendees",
+    attendees_count: (n) => `${n} attendee(s)`,
     locale_code: "en-US"
   }
 };
