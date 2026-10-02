@@ -869,6 +869,10 @@ footer.hint {
 }
 
 @media (max-width: 600px) {
-  .upcoming-top { flex-direction: column; }
+  .upcoming-top { flex-direction: column; align-items: stretch; }
+  .upcoming-main { min-width: 0; width: 100%; }
+  .time-input-row { width: 100%; justify-content: space-between; }
   .upcoming-actions { width: 100%; }
+  .upcoming-actions .btn.cal-export { flex: 1; justify-content: center; text-align: center; }
+  .attendees-toggle { width: 100%; justify-content: center; }
 }
