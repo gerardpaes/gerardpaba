@@ -14,7 +14,7 @@
 
 <header>
   <div class="nav">
-    <span class="brand">Find a Date</span>
+    <span class="brand">📅 Find a Date</span>
     <div class="nav-links">
       <a href="#availability" class="nav-link" data-i18n="nav_availability">My availability</a>
       <a href="#results" class="nav-link" data-i18n="nav_results">Results</a>
@@ -35,20 +35,21 @@
   <p class="section-sub" data-i18n="availability_sub">Enter your name…</p>
 
   <div class="card">
-    <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
-    <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard">
-
-    <label class="field-label" style="margin-top:6px;" data-i18n="label_pick_available">Click any date on the calendar</label>
-    <div class="calendar" id="pick-calendar"></div>
-    <div class="cal-legend-tristate">
-      <span><span class="legend-swatch" style="background:#34c759;"></span><span data-i18n="legend_available">Available</span></span>
-      <span><span class="legend-swatch" style="background:#ff9f0a;"></span><span data-i18n="legend_tentative">Tentative</span></span>
-      <span class="meta" data-i18n="legend_badge_hint" style="width:100%; text-align:center; margin-top:4px;">The number badge shows how many people already picked that day</span>
+    <div class="name-emoji-row">
+      <div style="flex:1;">
+        <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
+        <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
+      </div>
+      <label class="plusone-inline">
+        <input type="checkbox" id="plus-one">
+        <span data-i18n="plusone_label">I'll bring a +1</span>
+      </label>
     </div>
 
-    <div class="plusone-row">
-      <input type="checkbox" id="plus-one">
-      <label for="plus-one" style="margin:0; font-weight:500; cursor:pointer;" data-i18n="plusone_label">I'll bring a +1</label>
+    <label class="field-label" style="margin-top:18px;" data-i18n="label_pick_available">Click any date on the calendar</label>
+    <div class="calendar" id="pick-calendar"></div>
+    <div class="cal-legend-tristate">
+      <span class="meta" data-i18n="legend_badge_hint" style="width:100%; text-align:center; margin-top:4px;">The number badge shows how many people already picked that day</span>
     </div>
 
     <div class="btn-row">
