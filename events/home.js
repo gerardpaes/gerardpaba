@@ -1,5 +1,4 @@
 import { db, collection, doc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from "./firebase-init.js";
-import { MonthCalendar } from "./calendar.js";
 import { t, applyTranslations, initLanguageSwitcher, getLocale } from "./i18n.js";
 
 document.documentElement.lang = getLocale();
@@ -10,7 +9,6 @@ const eventNameInput = document.getElementById("event-name");
 const createBtn = document.getElementById("create-event-btn");
 const eventListEl = document.getElementById("event-list");
 const toastEl = document.getElementById("toast");
-const calendarContainer = document.getElementById("create-calendar");
 const filtersEl = document.getElementById("dashboard-filters");
 
 function showToast(msg) {
@@ -19,25 +17,19 @@ function showToast(msg) {
   setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
-const createCal = new MonthCalendar(calendarContainer, { mode: "pick-any" });
-createCal.render();
-
 function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "event";
 }
 
 createBtn.addEventListener("click", async () => {
   const name = eventNameInput.value.trim();
-  const dates = createCal.getAvailable();
   if (!name) { showToast(t("toast_need_event_name")); return; }
-  if (dates.length === 0) { showToast(t("toast_need_candidate_date")); return; }
 
   const id = slugify(name) + "-" + Date.now().toString(36).slice(-4);
 
   try {
     await setDoc(doc(collection(db, "events"), id), {
       name,
-      dates: dates.slice().sort(),
       createdAt: serverTimestamp(),
       approvedDate: null
     });
@@ -78,6 +70,16 @@ function renderFilters() {
   });
 }
 
+function eventTapLabel() {
+  const lang = getLocale();
+  const labels = {
+    ca: "Toca per marcar les teves dates",
+    es: "Toca para marcar tus fechas",
+    en: "Tap to mark your dates"
+  };
+  return labels[lang];
+}
+
 function renderEventList() {
   const filtered = allEvents.filter(ev => {
     if (activeFilter === "voting") return !ev.data.approvedDate;
@@ -100,7 +102,7 @@ function renderEventList() {
       <div class="ev-icon">${isApproved ? "✅" : "🎉"}</div>
       <div class="ev-info">
         <div class="ev-name">${data.name}</div>
-        <div class="ev-meta">${t("ev_dates_count", (data.dates || []).length)}</div>
+        <div class="ev-meta">${eventTapLabel()}</div>
         <div class="ev-status">
           <span class="status-badge ${isApproved ? "approved" : "voting"}">${isApproved ? t("ev_status_approved") : t("ev_status_voting")}</span>
         </div>
