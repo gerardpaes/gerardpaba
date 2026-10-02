@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event - Find a Date</title>
+<link rel="icon" type="image/png" href="/gpe-logo.png">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="eff1178a-d95e-49c5-92b3-550625da8bc9"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">📅 Find a Date</span>
+  <a class="back" href="index.html">&larr; All events</a>
+</div>
+
+<main>
+  <h1 id="event-title">Loading…</h1>
+  <p class="subtitle" id="event-subtitle"></p>
+
+  <div class="card">
+    <h2>Your availability</h2>
+    <label class="field-label" for="your-name">Your name</label>
+    <input type="text" id="your-name" placeholder="e.g. Gerard">
+
+    <label class="field-label">Pick the dates you're available</label>
+    <div class="date-grid" id="date-grid"></div>
+
+    <div class="plusone-row">
+      <input type="checkbox" id="plus-one">
+      <label for="plus-one" style="margin:0; font-weight:500; cursor:pointer;">I'll bring a +1</label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="submit-btn" type="button">Save my availability</button>
+      <button class="btn secondary" id="remove-btn" type="button">Remove my response</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Results</h2>
+    <div id="results-area">
+      <div class="empty-state">No responses yet.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Who has responded</h2>
+    <div class="participants-chips" id="participants-chips">
+      <span class="meta">No one yet.</span>
+    </div>
+  </div>
+
+  <footer class="hint">Share this page's link with your friends so they can add their availability too.</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
