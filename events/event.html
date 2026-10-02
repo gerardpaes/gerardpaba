@@ -38,11 +38,12 @@
     <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
     <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard">
 
-    <label class="field-label" style="margin-top:6px;" data-i18n="label_pick_available">Click the candidate dates</label>
+    <label class="field-label" style="margin-top:6px;" data-i18n="label_pick_available">Click any date on the calendar</label>
     <div class="calendar" id="pick-calendar"></div>
     <div class="cal-legend-tristate">
-      <span><span class="legend-swatch" style="background:#34c759;"></span><span data-i18n="legend_none">Available</span></span>
-      <span><span class="legend-swatch" style="background:#ff9f0a;"></span>Tentative</span>
+      <span><span class="legend-swatch" style="background:#34c759;"></span><span data-i18n="legend_available">Available</span></span>
+      <span><span class="legend-swatch" style="background:#ff9f0a;"></span><span data-i18n="legend_tentative">Tentative</span></span>
+      <span class="meta" data-i18n="legend_badge_hint" style="width:100%; text-align:center; margin-top:4px;">The number badge shows how many people already picked that day</span>
     </div>
 
     <div class="plusone-row">
