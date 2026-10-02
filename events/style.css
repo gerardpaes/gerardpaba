@@ -521,6 +521,10 @@ footer.hint {
   .rank-total { text-align: left; }
 }
 
+@media (max-width: 640px) {
+  .nav a.nav-link { display: none; }
+}
+
 /* ===== LANGUAGE SWITCHER ===== */
 .lang-switcher {
   display: flex;
