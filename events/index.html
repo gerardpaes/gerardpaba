@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find a Date - Gerard Paba Estampa</title>
+<link rel="icon" type="image/png" href="/gpe-logo.png">
+<script defer src="https://cloud.umami.is/script.js" data-website-id="eff1178a-d95e-49c5-92b3-550625da8bc9"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">📅 Find a Date</span>
+  <a class="back" href="/">&larr; Back to site</a>
+</div>
+
+<main>
+  <h1>Plan your next event</h1>
+  <p class="subtitle">Create an event, pick candidate dates, and share the link with friends so everyone can mark when they're free.</p>
+
+  <div class="card">
+    <h2>Create a new event</h2>
+    <label class="field-label" for="event-name">Event name</label>
+    <input type="text" id="event-name" placeholder="e.g. Christmas Dinner">
+
+    <label class="field-label" for="event-dates">Candidate dates</label>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <input type="date" id="date-input" style="flex:1; margin-bottom:0;">
+      <button class="btn secondary" id="add-date-btn" type="button">Add date</button>
+    </div>
+    <div class="date-grid" id="pending-dates"></div>
+
+    <div class="btn-row" style="margin-top:18px;">
+      <button class="btn" id="create-event-btn" type="button">Create event</button>
+    </div>
+  </div>
+
+  <h2 style="margin-top:40px;">Existing events</h2>
+  <div class="event-list" id="event-list">
+    <div class="empty-state">Loading events...</div>
+  </div>
+
+  <footer class="hint">Data syncs live via Firebase. Share an event's link with your friends so they can mark their availability.</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="home.js"></script>
+</body>
+</html>
