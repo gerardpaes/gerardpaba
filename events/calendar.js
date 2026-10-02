@@ -1,42 +1,37 @@
 // Reusable visual month-calendar component.
-// Tri-state selection for "pick-from" mode: none -> available -> tentative -> none
+//
+// Modes:
+//   "pick-free"  -> any day is clickable, tri-state (none -> available -> tentative -> none).
+//                   Optionally shows a small count badge of how many other people
+//                   already marked that day (via `counts`), even while picking.
+//   "display"    -> read-only heatmap, no clicking. Colored by `counts` vs `maxCount`.
 //
 // Usage:
 //   const cal = new MonthCalendar(containerEl, {
-//     mode: "pick-any"      // home page: user can click any day to propose it (binary)
-//           | "pick-from"   // event page: tri-state click on candidate days only
-//           | "display"     // results heatmap: no clicking, just show counts/colors
-//     available: Set() of "YYYY-MM-DD" marked green (available)
-//     tentative: Set() of "YYYY-MM-DD" marked orange (tentative)
-//     candidateDates: array of "YYYY-MM-DD" allowed to be picked (for pick-from/display)
-//     counts: map of "YYYY-MM-DD" -> number (for heatmap coloring in display mode)
-//     maxCount: number used to scale heat levels
-//     approvedDate: "YYYY-MM-DD" or null, highlighted with a star ring (display mode)
-//     onChange: (iso, state) => {} called when a day's state changes
+//     mode: "pick-free" | "display",
+//     available: Set<"YYYY-MM-DD">,
+//     tentative: Set<"YYYY-MM-DD">,
+//     counts: { "YYYY-MM-DD": number },   // how many people (total incl. +1) marked this day
+//     maxCount: number,
+//     approvedDate: "YYYY-MM-DD" | null,
+//     onChange: (iso, state) => {}
 //   });
 
 export class MonthCalendar {
   constructor(container, opts = {}) {
     this.container = container;
-    this.mode = opts.mode || "pick-any";
+    this.mode = opts.mode || "pick-free";
     this.available = opts.available || new Set();
     this.tentative = opts.tentative || new Set();
-    this.candidateDates = new Set(opts.candidateDates || []);
     this.counts = opts.counts || {};
     this.maxCount = opts.maxCount || 1;
     this.approvedDate = opts.approvedDate || null;
     this.onChange = opts.onChange || (() => {});
+    this.showCountBadges = opts.showCountBadges !== false;
 
     const today = new Date();
     this.viewYear = today.getFullYear();
     this.viewMonth = today.getMonth();
-
-    if (this.candidateDates.size > 0) {
-      const first = Array.from(this.candidateDates).sort()[0];
-      const d = new Date(first + "T00:00:00");
-      this.viewYear = d.getFullYear();
-      this.viewMonth = d.getMonth();
-    }
   }
 
   isoOf(y, m, d) {
@@ -84,26 +79,25 @@ export class MonthCalendar {
       let badge = "";
       let extra = "";
 
-      if (this.mode === "pick-any") {
+      if (this.mode === "pick-free") {
         classes.push("candidate");
-        if (this.available.has(iso)) classes.push("selected");
-      } else if (this.mode === "pick-from") {
-        if (this.candidateDates.has(iso)) {
-          classes.push("candidate");
-          if (this.available.has(iso)) classes.push("state-available");
-          else if (this.tentative.has(iso)) classes.push("state-tentative");
+        if (this.available.has(iso)) classes.push("state-available");
+        else if (this.tentative.has(iso)) classes.push("state-tentative");
+
+        const count = this.counts[iso] || 0;
+        if (this.showCountBadges && count > 0) {
+          badge = `<span class="count-badge">${count}</span>`;
         }
       } else if (this.mode === "display") {
-        if (this.candidateDates.has(iso)) {
-          const count = this.counts[iso] || 0;
+        const count = this.counts[iso] || 0;
+        if (count > 0) {
           const level = this.heatLevel(count);
-          if (level > 0) classes.push(`heat-${level}`);
-          else classes.push("candidate");
-          if (count > 0) badge = `<span class="count-badge">${count}</span>`;
-          if (this.approvedDate === iso) {
-            classes.push("approved-day");
-            extra = `<span class="approved-star">★</span>`;
-          }
+          classes.push(`heat-${level}`);
+          badge = `<span class="count-badge">${count}</span>`;
+        }
+        if (this.approvedDate === iso) {
+          classes.push("approved-day");
+          extra = `<span class="approved-star">★</span>`;
         }
       }
 
@@ -125,21 +119,10 @@ export class MonthCalendar {
       });
     });
 
-    if (this.mode === "pick-any") {
+    if (this.mode === "pick-free") {
       this.container.querySelectorAll(".cal-day.candidate").forEach(dayEl => {
         dayEl.addEventListener("click", () => {
           const iso = dayEl.dataset.iso;
-          if (this.available.has(iso)) this.available.delete(iso);
-          else this.available.add(iso);
-          this.onChange(iso, this.available.has(iso) ? "available" : "none");
-          this.render();
-        });
-      });
-    } else if (this.mode === "pick-from") {
-      this.container.querySelectorAll(".cal-day.candidate").forEach(dayEl => {
-        dayEl.addEventListener("click", () => {
-          const iso = dayEl.dataset.iso;
-          // Cycle: none -> available -> tentative -> none
           if (this.available.has(iso)) {
             this.available.delete(iso);
             this.tentative.add(iso);
@@ -166,11 +149,6 @@ export class MonthCalendar {
     this.render();
   }
 
-  setCandidateDates(arr) {
-    this.candidateDates = new Set(arr);
-    this.render();
-  }
-
   setCounts(counts, maxCount) {
     this.counts = counts;
     this.maxCount = maxCount || 1;
@@ -179,6 +157,13 @@ export class MonthCalendar {
 
   setApprovedDate(iso) {
     this.approvedDate = iso;
+    this.render();
+  }
+
+  jumpToMonthOf(iso) {
+    const d = new Date(iso + "T00:00:00");
+    this.viewYear = d.getFullYear();
+    this.viewMonth = d.getMonth();
     this.render();
   }
 }
