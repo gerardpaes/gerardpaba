@@ -92,47 +92,56 @@ function slugify(str) {
   return String(str).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "event";
 }
 
-// Close any other open calendar-add dropdowns in the document.
-function closeAllCalDropdowns(except) {
-  document.querySelectorAll(".cal-add-wrap.open").forEach(el => {
-    if (el !== except) el.classList.remove("open");
-  });
-}
-
-document.addEventListener("click", (e) => {
-  if (!e.target.closest(".cal-add-wrap")) closeAllCalDropdowns(null);
-});
-
-// Builds a single "Add to calendar" button that opens a small dropdown
-// with two options: Google Calendar / Apple-iPhone Calendar (.ics).
-// `getParams()` is called lazily each time an option is clicked, so the
-// caller can always supply the latest title/time/location at click time.
+// Builds a single "Add to calendar" button that, on click, opens a
+// centered modal with two big options: Google Calendar / Apple-iPhone
+// Calendar (.ics). `getParams()` is called lazily each time an option is
+// clicked, so the caller can always supply the latest title/time/location.
 //
 // Returns the wrapper DOM element — insert it wherever the two old
 // buttons used to live.
 export function createCalendarAddButton(getParams, labels) {
   const wrap = document.createElement("div");
   wrap.className = "cal-add-wrap";
-  wrap.innerHTML = `
-    <button class="btn cal-export cal-add-btn" type="button">${labels.addToCalendar}</button>
-    <div class="cal-add-menu">
-      <button class="cal-add-menu-item" type="button" data-kind="google">${labels.google}</button>
-      <button class="cal-add-menu-item" type="button" data-kind="apple">${labels.apple}</button>
-    </div>
-  `;
+  wrap.innerHTML = `<button class="btn cal-export cal-add-btn" type="button">${labels.addToCalendar}</button>`;
 
   const btn = wrap.querySelector(".cal-add-btn");
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const willOpen = !wrap.classList.contains("open");
-    closeAllCalDropdowns(wrap);
-    wrap.classList.toggle("open", willOpen);
+    openCalChoiceModal(getParams, labels);
   });
 
-  wrap.querySelectorAll(".cal-add-menu-item").forEach(item => {
-    item.addEventListener("click", (e) => {
-      e.stopPropagation();
-      wrap.classList.remove("open");
+  return wrap;
+}
+
+function openCalChoiceModal(getParams, labels) {
+  const overlay = document.createElement("div");
+  overlay.className = "cal-choice-overlay open";
+  overlay.innerHTML = `
+    <div class="cal-choice-dialog">
+      <button class="modal-close-btn" type="button" data-action="close">&times;</button>
+      <h3 class="cal-choice-title">${labels.addToCalendar}</h3>
+      <div class="cal-choice-options">
+        <button class="cal-choice-opt" type="button" data-kind="google">
+          <span class="cco-icon">📅</span>
+          <span class="cco-label">${labels.google}</span>
+        </button>
+        <button class="cal-choice-opt" type="button" data-kind="apple">
+          <span class="cco-icon">🍏</span>
+          <span class="cco-label">${labels.apple}</span>
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  function close() { overlay.remove(); }
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-action="close"]').addEventListener("click", close);
+
+  overlay.querySelectorAll(".cal-choice-opt").forEach(item => {
+    item.addEventListener("click", () => {
+      close();
       const { title, isoDate, details, time, location } = getParams();
       if (item.dataset.kind === "google") {
         window.open(googleCalendarUrl(title, isoDate, details, time, location), "_blank", "noopener");
@@ -141,6 +150,4 @@ export function createCalendarAddButton(getParams, labels) {
       }
     });
   });
-
-  return wrap;
 }
