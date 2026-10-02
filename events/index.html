@@ -14,7 +14,7 @@
 
 <header>
   <div class="nav">
-    <span class="brand">Find a Date</span>
+    <span class="brand">📅 Find a Date</span>
     <div class="nav-links">
       <a href="/" class="back-link" data-i18n="back_to_site">Back to site</a>
       <div class="lang-switcher" id="lang-switcher"></div>
@@ -57,6 +57,31 @@
 
     <label class="field-label" for="event-name" data-i18n="label_event_name">Event name</label>
     <input type="text" id="event-name" data-i18n-placeholder="placeholder_event_name" placeholder="e.g. Christmas Dinner">
+
+    <div class="emoji-picker-row">
+      <label class="field-label" data-i18n="label_choose_emoji">Choose an icon (optional)</label>
+      <div class="emoji-picker-grid" id="emoji-picker-grid"></div>
+    </div>
+
+    <div class="confirmed-toggle-row">
+      <input type="checkbox" id="confirmed-date-toggle">
+      <label for="confirmed-date-toggle" style="margin:0; font-weight:500; cursor:pointer;" data-i18n="label_confirmed_date_toggle">I already have a confirmed date</label>
+    </div>
+
+    <div class="confirmed-fields" id="confirmed-fields">
+      <div>
+        <label class="field-label" data-i18n="label_date">Date</label>
+        <input type="date" id="confirmed-date-input">
+      </div>
+      <div>
+        <label class="field-label" data-i18n="label_time_optional">Time</label>
+        <input type="time" id="confirmed-time-input">
+      </div>
+      <div>
+        <label class="field-label" data-i18n="label_location_optional">Location</label>
+        <input type="text" id="confirmed-location-input" data-i18n-placeholder="placeholder_location">
+      </div>
+    </div>
 
     <div class="btn-row" style="margin-top:10px;">
       <button class="btn block" id="create-event-btn" type="button" data-i18n="btn_create">Create event</button>
