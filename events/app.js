@@ -1,7 +1,7 @@
 import { db, doc, collection, getDoc, setDoc, deleteDoc, updateDoc, onSnapshot } from "./firebase-init.js";
 import { MonthCalendar } from "./calendar.js";
 import { t, applyTranslations, initLanguageSwitcher, getLocale } from "./i18n.js";
-import { googleCalendarUrl, downloadIcs } from "./calendar-export.js";
+import { createCalendarAddButton } from "./calendar-export.js";
 
 document.documentElement.lang = getLocale();
 applyTranslations();
@@ -80,9 +80,9 @@ function renderApprovedBanner() {
   }
   const dateLabel = formatDateLong(eventData.approvedDate);
   const title = eventData.name;
-  const gUrl = googleCalendarUrl(title, eventData.approvedDate, `Find a Date: ${title}`);
 
   const timeVal = eventData.approvedTime || "";
+  const locationVal = eventData.location || "";
 
   approvedBannerArea.innerHTML = `
     <div class="approved-banner card visible">
@@ -92,24 +92,36 @@ function renderApprovedBanner() {
           <label class="field-label" style="margin:0;">${t("label_time_optional")}</label>
           <input type="time" id="approved-time-input" value="${timeVal}">
         </div>
+        <div class="location-input-row">
+          <label class="field-label" style="margin:0;" data-i18n="label_location_optional">Location</label>
+          <input type="text" id="approved-location-input" value="${locationVal}" data-i18n-placeholder="placeholder_location">
+        </div>
       </div>
-      <div class="cal-export-row">
-        <a class="btn cal-export" id="google-cal-link" href="${gUrl}" target="_blank" rel="noopener">${t("calendar_google")}</a>
-        <button class="btn cal-export" id="ics-export-btn" type="button">${t("calendar_ics")}</button>
+      <div class="cal-export-row" id="approved-cal-actions">
         <button class="btn cal-export" id="unapprove-btn" type="button">${t("unapprove_btn")}</button>
       </div>
     </div>
   `;
 
   const timeInput = document.getElementById("approved-time-input");
-  const refreshGoogleLink = () => {
-    const tv = timeInput.value || null;
-    document.getElementById("google-cal-link").href = googleCalendarUrl(title, eventData.approvedDate, `Find a Date: ${title}`, tv);
-  };
+  const locationInput = document.getElementById("approved-location-input");
+
+  const getParams = () => ({
+    title,
+    isoDate: eventData.approvedDate,
+    details: `Find a Date: ${title}`,
+    time: timeInput.value || null,
+    location: locationInput.value || ""
+  });
+  const calBtn = createCalendarAddButton(getParams, {
+    addToCalendar: t("add_to_calendar"),
+    google: t("calendar_google"),
+    apple: t("calendar_ics")
+  });
+  document.getElementById("approved-cal-actions").prepend(calBtn);
 
   timeInput.addEventListener("change", async () => {
     const tv = timeInput.value || null;
-    refreshGoogleLink();
     try {
       const eventRef = doc(collection(db, "events"), eventId);
       await updateDoc(eventRef, { approvedTime: tv });
@@ -117,9 +129,13 @@ function renderApprovedBanner() {
     } catch (e) { console.error(e); }
   });
 
-  document.getElementById("ics-export-btn").addEventListener("click", () => {
-    const tv = timeInput.value || null;
-    downloadIcs(title, eventData.approvedDate, `Find a Date: ${title}`, tv);
+  locationInput.addEventListener("change", async () => {
+    const lv = locationInput.value || "";
+    try {
+      const eventRef = doc(collection(db, "events"), eventId);
+      await updateDoc(eventRef, { location: lv });
+      eventData.location = lv;
+    } catch (e) { console.error(e); }
   });
 
   document.getElementById("unapprove-btn").addEventListener("click", async () => {
