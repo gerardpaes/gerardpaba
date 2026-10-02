@@ -52,6 +52,31 @@ function showToast(msg) {
   setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
+function openConfirmDialog(message, onConfirm) {
+  const overlay = document.createElement("div");
+  overlay.className = "confirm-dialog-overlay open";
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <p class="confirm-dialog-text"></p>
+      <div class="btn-row">
+        <button class="btn secondary" data-action="cancel" type="button">${t("btn_cancel")}</button>
+        <button class="btn danger" data-action="confirm" type="button">${t("btn_delete_event")}</button>
+      </div>
+    </div>
+  `;
+  overlay.querySelector(".confirm-dialog-text").textContent = message;
+  document.body.appendChild(overlay);
+
+  function close() { overlay.remove(); }
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-action="cancel"]').addEventListener("click", close);
+  overlay.querySelector('[data-action="confirm"]').addEventListener("click", () => {
+    close();
+    onConfirm();
+  });
+}
+
 function resetCreateModal() {
   eventNameInput.value = "";
   selectedEmoji = "";
@@ -162,22 +187,16 @@ function renderUpcoming() {
           </div>
           <div>
             <div class="upcoming-name">${title}</div>
-            <div class="upcoming-date-text">${full}${time ? " · " + time : ""}</div>
+            <div class="upcoming-date-text view-mode-text">${full}${time ? " · " + time : ""}${location ? " · " + location : ""}</div>
+            <div class="edit-fields-inline" style="display:none;">
+              <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
+              <input type="time" class="time-input" data-id="${id}" value="${time}">
+              <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
+            </div>
           </div>
         </div>
-        <div class="edit-date-row">
-          <label class="field-label" data-i18n="label_date">Date</label>
-          <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
-        </div>
-        <div class="time-input-row">
-          <label class="field-label" data-i18n="label_time_optional">Time</label>
-          <input type="time" class="time-input" data-id="${id}" value="${time}">
-        </div>
-        <div class="location-input-row">
-          <label class="field-label" data-i18n="label_location_optional">Location</label>
-          <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
-        </div>
         <div class="upcoming-actions cal-actions-slot">
+          <button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>
           <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
           <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
         </div>
@@ -200,11 +219,38 @@ function renderUpcoming() {
     });
     card.querySelector(".cal-actions-slot").prepend(calBtn);
 
+    const viewText = card.querySelector(".view-mode-text");
+    const editFields = card.querySelector(".edit-fields-inline");
+    const editBtn = card.querySelector(".edit-toggle-btn");
+
+    function refreshViewText() {
+      const d = card.querySelector(".date-input").value || data.approvedDate;
+      const tm = card.querySelector(".time-input").value || "";
+      const loc = card.querySelector(".location-input").value || "";
+      const parts = formatDateParts(d);
+      viewText.textContent = `${parts.full}${tm ? " · " + tm : ""}${loc ? " · " + loc : ""}`;
+    }
+
+    editBtn.addEventListener("click", () => {
+      const isEditing = editFields.style.display !== "none";
+      if (isEditing) {
+        editFields.style.display = "none";
+        viewText.style.display = "";
+        editBtn.textContent = t("btn_edit");
+      } else {
+        editFields.style.display = "flex";
+        viewText.style.display = "none";
+        editBtn.textContent = t("btn_done");
+      }
+    });
+
     card.querySelector(".date-input").addEventListener("change", async (e) => {
       const dateVal = e.target.value;
       if (!dateVal) return;
       try {
         await updateDoc(doc(collection(db, "events"), id), { approvedDate: dateVal });
+        data.approvedDate = dateVal;
+        refreshViewText();
       } catch (err) { console.error(err); }
     });
 
@@ -212,6 +258,7 @@ function renderUpcoming() {
       const timeVal = e.target.value || null;
       try {
         await updateDoc(doc(collection(db, "events"), id), { approvedTime: timeVal });
+        refreshViewText();
       } catch (err) { console.error(err); }
     });
 
@@ -219,19 +266,21 @@ function renderUpcoming() {
       const locVal = e.target.value || "";
       try {
         await updateDoc(doc(collection(db, "events"), id), { location: locVal });
+        refreshViewText();
       } catch (err) { console.error(err); }
     });
 
-    card.querySelector(".delete-event-btn").addEventListener("click", async (e) => {
+    card.querySelector(".delete-event-btn").addEventListener("click", (e) => {
       e.stopPropagation();
-      if (!window.confirm(t("confirm_delete_event"))) return;
-      try {
-        await deleteDoc(doc(collection(db, "events"), id));
-        showToast(t("toast_event_deleted"));
-      } catch (err) {
-        console.error(err);
-        showToast(t("toast_delete_error"));
-      }
+      openConfirmDialog(t("confirm_delete_event"), async () => {
+        try {
+          await deleteDoc(doc(collection(db, "events"), id));
+          showToast(t("toast_event_deleted"));
+        } catch (err) {
+          console.error(err);
+          showToast(t("toast_delete_error"));
+        }
+      });
     });
 
     const toggleBtn = card.querySelector(".attendees-toggle");
@@ -299,17 +348,18 @@ function renderEventList() {
       </a>
       <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
     `;
-    row.querySelector(".delete-event-btn").addEventListener("click", async (e) => {
+    row.querySelector(".delete-event-btn").addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!window.confirm(t("confirm_delete_event"))) return;
-      try {
-        await deleteDoc(doc(collection(db, "events"), id));
-        showToast(t("toast_event_deleted"));
-      } catch (err) {
-        console.error(err);
-        showToast(t("toast_delete_error"));
-      }
+      openConfirmDialog(t("confirm_delete_event"), async () => {
+        try {
+          await deleteDoc(doc(collection(db, "events"), id));
+          showToast(t("toast_event_deleted"));
+        } catch (err) {
+          console.error(err);
+          showToast(t("toast_delete_error"));
+        }
+      });
     });
     eventListEl.appendChild(row);
   });
