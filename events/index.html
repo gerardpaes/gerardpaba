@@ -11,42 +11,56 @@
 </head>
 <body>
 
-<div class="topbar">
-  <span class="brand">📅 Find a Date</span>
-  <a class="back" href="/">&larr; Back to site</a>
-</div>
+<header>
+  <div class="nav">
+    <span class="brand">📅 Find a Date</span>
+    <div class="nav-links">
+      <a href="#create" class="nav-link">New event</a>
+      <a href="#events" class="nav-link">Events</a>
+      <a href="/" class="back-link">&larr; Back to site</a>
+    </div>
+  </div>
+</header>
 
-<main>
-  <h1>Plan your next event</h1>
-  <p class="subtitle">Create an event, pick candidate dates, and share the link with friends so everyone can mark when they're free.</p>
+<section class="hero">
+  <h1>Plan your next get-together</h1>
+  <p class="intro">Create an event, propose candidate dates, and share the link with friends so everyone marks when they're free — then see instantly which date works best for the group.</p>
+  <div class="hero-buttons">
+    <a href="#create" class="btn">Create an event</a>
+    <a href="#events" class="btn secondary">See existing events</a>
+  </div>
+</section>
+
+<section id="create">
+  <h2>Create a new event</h2>
+  <p class="section-sub">Give it a name and propose a few candidate dates on the calendar below.</p>
 
   <div class="card">
-    <h2>Create a new event</h2>
     <label class="field-label" for="event-name">Event name</label>
     <input type="text" id="event-name" placeholder="e.g. Christmas Dinner">
 
-    <label class="field-label" for="event-dates">Candidate dates</label>
-    <div class="btn-row" style="margin-bottom:10px;">
-      <input type="date" id="date-input" style="flex:1; margin-bottom:0;">
-      <button class="btn secondary" id="add-date-btn" type="button">Add date</button>
-    </div>
-    <div class="date-grid" id="pending-dates"></div>
+    <label class="field-label" style="margin-top:10px;">Candidate dates — click days on the calendar</label>
+    <div class="calendar" id="create-calendar"></div>
 
-    <div class="btn-row" style="margin-top:18px;">
+    <div class="btn-row" style="margin-top:24px;">
       <button class="btn" id="create-event-btn" type="button">Create event</button>
     </div>
   </div>
+</section>
 
-  <h2 style="margin-top:40px;">Existing events</h2>
+<section id="events">
+  <h2>Existing events</h2>
+  <p class="section-sub">Open an event to add your availability or check the current results.</p>
   <div class="event-list" id="event-list">
     <div class="empty-state">Loading events...</div>
   </div>
+</section>
 
-  <footer class="hint">Data syncs live via Firebase. Share an event's link with your friends so they can mark their availability.</footer>
-</main>
+<footer class="hint">Data syncs live via Firebase. Share an event's link with your friends so they can mark their availability too.</footer>
 
 <div class="toast" id="toast"></div>
 
+<script type="module" src="calendar.js"></script>
 <script type="module" src="home.js"></script>
 </body>
 </html>
