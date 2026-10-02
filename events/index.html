@@ -16,42 +16,35 @@
   <div class="nav">
     <span class="brand">📅 Find a Date</span>
     <div class="nav-links">
-      <a href="#create" class="nav-link" data-i18n="nav_new_event">New event</a>
-      <a href="#events" class="nav-link" data-i18n="nav_events">Events</a>
       <a href="/" class="back-link" data-i18n="back_to_site">Back to site</a>
       <div class="lang-switcher" id="lang-switcher"></div>
     </div>
   </div>
 </header>
 
-<section class="hero">
+<section class="hero" style="min-height:22vh; padding-bottom:20px;">
   <h1 data-i18n="hero_title">Plan your next get-together</h1>
   <p class="intro" data-i18n="hero_intro">Create an event…</p>
-  <div class="hero-buttons">
-    <a href="#create" class="btn" data-i18n="btn_create_event">Create an event</a>
-    <a href="#events" class="btn secondary" data-i18n="btn_see_events">See existing events</a>
+</section>
+
+<section class="upcoming-section">
+  <h2 data-i18n="upcoming_title">Pròxims esdeveniments</h2>
+  <p class="section-sub" data-i18n="upcoming_sub">Confirmed events with a date.</p>
+  <div class="upcoming-grid" id="upcoming-grid">
+    <div class="empty-state" data-i18n="loading_events">Loading…</div>
   </div>
 </section>
 
-<section id="create">
-  <h2 data-i18n="create_title">Create a new event</h2>
-  <p class="section-sub" data-i18n="create_sub">Give it a name…</p>
-
-  <div class="card">
-    <label class="field-label" for="event-name" data-i18n="label_event_name">Event name</label>
-    <input type="text" id="event-name" data-i18n-placeholder="placeholder_event_name" placeholder="e.g. Christmas Dinner">
-
-    <div class="btn-row" style="margin-top:10px;">
-      <button class="btn" id="create-event-btn" type="button" data-i18n="btn_create">Create event</button>
-    </div>
-  </div>
-</section>
+<div class="create-trigger-row">
+  <button class="create-fab-btn" id="open-create-modal" type="button">
+    <span class="plus-icon">+</span>
+    <span data-i18n="btn_create_event">Create an event</span>
+  </button>
+</div>
 
 <section id="events">
-  <h2 data-i18n="events_title">Existing events</h2>
+  <h2 data-i18n="voting_title">En votació</h2>
   <p class="section-sub" data-i18n="events_sub">Open an event…</p>
-
-  <div class="dashboard-filters" id="dashboard-filters"></div>
 
   <div class="event-list" id="event-list">
     <div class="empty-state" data-i18n="loading_events">Loading events...</div>
@@ -59,6 +52,22 @@
 </section>
 
 <footer class="hint" data-i18n="footer_hint">Data syncs live via Firebase.</footer>
+
+<!-- Create event modal -->
+<div class="create-modal-overlay" id="create-modal-overlay">
+  <div class="create-modal" style="position:relative;">
+    <button class="modal-close-btn" id="close-create-modal" type="button">&times;</button>
+    <h2 data-i18n="create_title">Create a new event</h2>
+    <p class="section-sub" data-i18n="create_sub">Give it a name…</p>
+
+    <label class="field-label" for="event-name" data-i18n="label_event_name">Event name</label>
+    <input type="text" id="event-name" data-i18n-placeholder="placeholder_event_name" placeholder="e.g. Christmas Dinner">
+
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn block" id="create-event-btn" type="button" data-i18n="btn_create">Create event</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
