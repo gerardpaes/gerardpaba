@@ -49,12 +49,26 @@ function initials(name) {
   return name.trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase() || "").join("");
 }
 
+// Compute, for every date that appears in ANY response, the total headcount
+// (people who marked it "available", counting +1s). Tentative marks are
+// listed but don't count toward the total.
+function computeCounts() {
+  const counts = {};
+  Object.values(responses).forEach(r => {
+    const avail = r.available || [];
+    avail.forEach(iso => {
+      counts[iso] = (counts[iso] || 0) + 1 + (r.plusOne ? 1 : 0);
+    });
+  });
+  return counts;
+}
+
 function restoreMyResponseIfAny() {
   const savedName = localStorage.getItem(`findadate:${eventId}:name`);
   if (savedName && responses[slugifyName(savedName)]) {
     nameInput.value = savedName;
     const r = responses[slugifyName(savedName)];
-    pickCal.setState(r.available || r.dates || [], r.tentative || []);
+    pickCal.setState(r.available || [], r.tentative || []);
     plusOneCheckbox.checked = !!r.plusOne;
   }
 }
@@ -99,35 +113,31 @@ function renderApprovedBanner() {
 }
 
 function renderResults() {
-  const dates = (eventData.dates || []).slice().sort();
+  const counts = computeCounts();
+  const dates = Object.keys(counts).sort();
   const totalParticipants = Object.keys(responses).length;
 
-  const counts = {};
-  const tallyList = dates.map(iso => {
-    let people = 0, withPlusOne = 0, names = [];
-    Object.entries(responses).forEach(([, r]) => {
-      const avail = r.available || r.dates || [];
-      const tent = r.tentative || [];
-      if (avail.includes(iso)) {
-        people += 1;
-        if (r.plusOne) withPlusOne += 1;
-        names.push(r.displayName + (r.plusOne ? " (+1)" : ""));
-      } else if (tent.includes(iso)) {
-        names.push(r.displayName + " (?)");
-      }
-    });
-    const total = people + withPlusOne;
-    counts[iso] = total;
-    return { iso, people, withPlusOne, total, names };
-  });
-
   const maxTotal = Math.max(...Object.values(counts), 1);
+
+  // Keep the "who's picking" calendar showing live counts too, even before results exist.
+  if (pickCal) pickCal.setCounts(counts, maxTotal);
   if (resultsCal) resultsCal.setCounts(counts, maxTotal);
 
-  if (totalParticipants === 0) {
+  if (totalParticipants === 0 || dates.length === 0) {
     resultsAreaEl.innerHTML = `<div class="empty-state">${t("no_responses")}</div>`;
     return;
   }
+
+  const tallyList = dates.map(iso => {
+    let names = [];
+    Object.values(responses).forEach(r => {
+      const avail = r.available || [];
+      const tent = r.tentative || [];
+      if (avail.includes(iso)) names.push(r.displayName + (r.plusOne ? " (+1)" : ""));
+      else if (tent.includes(iso)) names.push(r.displayName + " (?)");
+    });
+    return { iso, total: counts[iso] || 0, names };
+  });
 
   const ranked = tallyList.slice().sort((a, b) => b.total - a.total);
 
@@ -210,18 +220,13 @@ async function loadEvent() {
     }
     eventData = snap.data();
     titleEl.textContent = eventData.name;
-    subtitleEl.textContent = `${(eventData.dates || []).length} ${t("ev_dates_count", "").trim()}`.replace(/\s+/g, " ");
-    subtitleEl.textContent = t("ev_dates_count", (eventData.dates || []).length);
+    subtitleEl.textContent = "";
 
-    pickCal = new MonthCalendar(pickCalendarEl, {
-      mode: "pick-from",
-      candidateDates: eventData.dates || []
-    });
+    pickCal = new MonthCalendar(pickCalendarEl, { mode: "pick-free" });
     pickCal.render();
 
     resultsCal = new MonthCalendar(resultsCalendarEl, {
       mode: "display",
-      candidateDates: eventData.dates || [],
       approvedDate: eventData.approvedDate || null
     });
     resultsCal.render();
@@ -259,7 +264,6 @@ submitBtn.addEventListener("click", async () => {
       displayName: name,
       available: availableDates,
       tentative: tentativeDates,
-      dates: availableDates, // backward-compat field used by ranking counts
       plusOne: plusOneCheckbox.checked
     });
     localStorage.setItem(`findadate:${eventId}:name`, name);
