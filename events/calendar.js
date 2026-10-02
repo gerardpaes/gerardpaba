@@ -1,10 +1,14 @@
 // Reusable visual month-calendar component.
 //
 // Modes:
-//   "pick-free"  -> any day is clickable, tri-state (none -> available -> tentative -> none).
-//                   Optionally shows a small count badge of how many other people
-//                   already marked that day (via `counts`), even while picking.
+//   "pick-free"  -> uses a mode toggle (Available / Tentative) above the grid;
+//                   clicking a day sets/clears that state directly (no blind
+//                   click-cycling). Optionally shows a small count badge of
+//                   how many other people already marked that day (via
+//                   `counts`), even while picking.
 //   "display"    -> read-only heatmap, no clicking. Colored by `counts` vs `maxCount`.
+//
+// Weeks start on Monday.
 //
 // Usage:
 //   const cal = new MonthCalendar(containerEl, {
@@ -28,6 +32,8 @@ export class MonthCalendar {
     this.approvedDate = opts.approvedDate || null;
     this.onChange = opts.onChange || (() => {});
     this.showCountBadges = opts.showCountBadges !== false;
+    this.pickMode = "available"; // which state clicking a day applies, in "pick-free" mode
+    this.pickModeLabels = opts.pickModeLabels || { available: "Available", tentative: "Tentative" };
 
     const today = new Date();
     this.viewYear = today.getFullYear();
@@ -53,13 +59,14 @@ export class MonthCalendar {
   render() {
     const y = this.viewYear, m = this.viewMonth;
     const first = new Date(y, m, 1);
-    const startWeekday = first.getDay();
+    // Monday-start week: getDay() is 0=Sun..6=Sat, shift so Monday=0.
+    const startWeekday = (first.getDay() + 6) % 7;
     const daysInMonth = new Date(y, m + 1, 0).getDate();
     const localeCode = document.documentElement.lang || "en";
     const monthLabel = first.toLocaleDateString(localeCode, { month: "long", year: "numeric" });
 
     const todayIso = this.isoOf(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-    const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
+    const weekdayLabels = ["M", "T", "W", "T", "F", "S", "S"];
 
     let html = `
       <div class="calendar-header">
@@ -67,9 +74,22 @@ export class MonthCalendar {
         <div class="cal-title">${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}</div>
         <button class="cal-nav-btn" data-nav="1" type="button">&rsaquo;</button>
       </div>
-      <div class="cal-grid">
     `;
 
+    if (this.mode === "pick-free") {
+      html += `
+        <div class="pick-mode-toggle" role="group">
+          <button type="button" class="pick-mode-btn ${this.pickMode === "available" ? "active" : ""}" data-mode="available">
+            <span class="pmb-dot pmb-available"></span><span class="pmb-label"></span>
+          </button>
+          <button type="button" class="pick-mode-btn ${this.pickMode === "tentative" ? "active" : ""}" data-mode="tentative">
+            <span class="pmb-dot pmb-tentative"></span><span class="pmb-label"></span>
+          </button>
+        </div>
+      `;
+    }
+
+    html += `<div class="cal-grid">`;
     weekdayLabels.forEach(w => { html += `<div class="cal-weekday">${w}</div>`; });
     for (let i = 0; i < startWeekday; i++) html += `<div class="cal-day empty"></div>`;
 
@@ -81,8 +101,8 @@ export class MonthCalendar {
 
       if (this.mode === "pick-free") {
         classes.push("candidate");
-        if (this.available.has(iso)) classes.push("state-available");
-        else if (this.tentative.has(iso)) classes.push("state-tentative");
+        if (this.available.has(iso)) { classes.push("state-available"); extra = `<span class="state-icon">✓</span>`; }
+        else if (this.tentative.has(iso)) { classes.push("state-tentative"); extra = `<span class="state-icon">?</span>`; }
 
         const count = this.counts[iso] || 0;
         if (this.showCountBadges && count > 0) {
@@ -109,6 +129,15 @@ export class MonthCalendar {
     html += `</div>`;
     this.container.innerHTML = html;
 
+    this.container.querySelectorAll(".pick-mode-btn").forEach(btn => {
+      const lbl = btn.querySelector(".pmb-label");
+      if (lbl) lbl.textContent = this.pickModeLabels[btn.dataset.mode] || btn.dataset.mode;
+      btn.addEventListener("click", () => {
+        this.pickMode = btn.dataset.mode;
+        this.render();
+      });
+    });
+
     this.container.querySelectorAll(".cal-nav-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const delta = parseInt(btn.dataset.nav, 10);
@@ -123,16 +152,15 @@ export class MonthCalendar {
       this.container.querySelectorAll(".cal-day.candidate").forEach(dayEl => {
         dayEl.addEventListener("click", () => {
           const iso = dayEl.dataset.iso;
-          if (this.available.has(iso)) {
-            this.available.delete(iso);
-            this.tentative.add(iso);
-            this.onChange(iso, "tentative");
-          } else if (this.tentative.has(iso)) {
-            this.tentative.delete(iso);
+          const targetSet = this.pickMode === "tentative" ? this.tentative : this.available;
+          const otherSet = this.pickMode === "tentative" ? this.available : this.tentative;
+          otherSet.delete(iso);
+          if (targetSet.has(iso)) {
+            targetSet.delete(iso);
             this.onChange(iso, "none");
           } else {
-            this.available.add(iso);
-            this.onChange(iso, "available");
+            targetSet.add(iso);
+            this.onChange(iso, this.pickMode);
           }
           this.render();
         });
