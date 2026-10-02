@@ -1,6 +1,6 @@
 import { db, collection, doc, setDoc, updateDoc, onSnapshot, serverTimestamp, query, orderBy, getDocs } from "./firebase-init.js";
 import { t, applyTranslations, initLanguageSwitcher, getLocale } from "./i18n.js";
-import { googleCalendarUrl, downloadIcs } from "./calendar-export.js";
+import { createCalendarAddButton } from "./calendar-export.js";
 
 document.documentElement.lang = getLocale();
 applyTranslations();
@@ -40,7 +40,8 @@ createBtn.addEventListener("click", async () => {
       name,
       createdAt: serverTimestamp(),
       approvedDate: null,
-      approvedTime: null
+      approvedTime: null,
+      location: ""
     });
     showToast(t("toast_event_created"));
     window.location.href = `event.html?id=${encodeURIComponent(id)}`;
@@ -99,6 +100,7 @@ function renderUpcoming() {
     const { dayNum, month, full } = formatDateParts(data.approvedDate);
     const title = data.name;
     const time = data.approvedTime || "";
+    const location = data.location || "";
 
     const card = document.createElement("div");
     card.className = "upcoming-card";
@@ -118,9 +120,11 @@ function renderUpcoming() {
           <label class="field-label" data-i18n="label_time_optional">Time</label>
           <input type="time" class="time-input" data-id="${id}" value="${time}">
         </div>
-        <div class="upcoming-actions">
-          <a class="btn cal-export google-link" data-id="${id}" href="#" target="_blank" rel="noopener">${t("calendar_google")}</a>
-          <button class="btn cal-export ics-btn" data-id="${id}" type="button">${t("calendar_ics")}</button>
+        <div class="location-input-row">
+          <label class="field-label" data-i18n="label_location_optional">Location</label>
+          <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
+        </div>
+        <div class="upcoming-actions cal-actions-slot">
           <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
         </div>
       </div>
@@ -128,24 +132,32 @@ function renderUpcoming() {
     `;
     upcomingGridEl.appendChild(card);
 
-    const updateCalLinks = () => {
-      const timeVal = card.querySelector(".time-input").value || null;
-      const gUrl = googleCalendarUrl(title, data.approvedDate, `Find a Date: ${title}`, timeVal);
-      card.querySelector(".google-link").href = gUrl;
-    };
-    updateCalLinks();
+    const getParams = () => ({
+      title,
+      isoDate: data.approvedDate,
+      details: `Find a Date: ${title}`,
+      time: card.querySelector(".time-input").value || null,
+      location: card.querySelector(".location-input").value || ""
+    });
+    const calBtn = createCalendarAddButton(getParams, {
+      addToCalendar: t("add_to_calendar"),
+      google: t("calendar_google"),
+      apple: t("calendar_ics")
+    });
+    card.querySelector(".cal-actions-slot").prepend(calBtn);
 
     card.querySelector(".time-input").addEventListener("change", async (e) => {
       const timeVal = e.target.value || null;
-      updateCalLinks();
       try {
         await updateDoc(doc(collection(db, "events"), id), { approvedTime: timeVal });
       } catch (err) { console.error(err); }
     });
 
-    card.querySelector(".ics-btn").addEventListener("click", () => {
-      const timeVal = card.querySelector(".time-input").value || null;
-      downloadIcs(title, data.approvedDate, `Find a Date: ${title}`, timeVal);
+    card.querySelector(".location-input").addEventListener("change", async (e) => {
+      const locVal = e.target.value || "";
+      try {
+        await updateDoc(doc(collection(db, "events"), id), { location: locVal });
+      } catch (err) { console.error(err); }
     });
 
     const toggleBtn = card.querySelector(".attendees-toggle");
