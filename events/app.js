@@ -94,9 +94,9 @@ function renderApprovedBanner() {
         </div>
       </div>
       <div class="cal-export-row">
-        <a class="btn cal-export" id="google-cal-link" href="${gUrl}" target="_blank" rel="noopener">📅 ${t("calendar_google")}</a>
-        <button class="btn cal-export" id="ics-export-btn" type="button">🍎 ${t("calendar_ics")}</button>
-        <button class="btn cal-export" id="unapprove-btn" type="button">↩️ ${t("unapprove_btn")}</button>
+        <a class="btn cal-export" id="google-cal-link" href="${gUrl}" target="_blank" rel="noopener">${t("calendar_google")}</a>
+        <button class="btn cal-export" id="ics-export-btn" type="button">${t("calendar_ics")}</button>
+        <button class="btn cal-export" id="unapprove-btn" type="button">${t("unapprove_btn")}</button>
       </div>
     </div>
   `;
@@ -179,7 +179,7 @@ function renderResults() {
           <div class="rank-who">${item.names.length ? item.names.join(", ") : "—"}</div>
           <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
         </div>
-        <div class="rank-total">${item.total}<span class="unit">👥</span></div>
+        <div class="rank-total">${item.total}</div>
         <button class="btn secondary approve-date-btn" data-iso="${item.iso}" type="button" style="font-size:12px; padding:8px 14px;">
           ${isApproved ? "✓" : t("approve_btn")}
         </button>
