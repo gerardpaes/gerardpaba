@@ -1,20 +1,14 @@
 // ============================================================
 // FIREBASE CONFIGURATION
-// ============================================================
-// 1. Go to https://console.firebase.google.com/
-// 2. Click "Add project" -> give it any name (e.g. "gerard-events") -> finish creation.
-// 3. In the project, click the "</>" (Web) icon to register a web app.
-// 4. Copy the config object Firebase shows you and paste the values below.
-// 5. In the left menu go to "Build" -> "Firestore Database" -> "Create database".
-//    - Start in "test mode" (fine for a small friends-only tool).
-// That's it - no server, no billing required for this small usage.
+// Project: gerard-events (console.firebase.google.com)
+// This apiKey is a public, client-side identifier by design (not a secret).
 // ============================================================
 
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDe6JQ6r7hEYhiH4UhsBDZotP99ztgcE8k",
+  authDomain: "gerard-events.firebaseapp.com",
+  projectId: "gerard-events",
+  storageBucket: "gerard-events.firebasestorage.app",
+  messagingSenderId: "18424375233",
+  appId: "1:18424375233:web:19d41e7d1e6a6e5b3ef140"
 };
