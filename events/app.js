@@ -88,6 +88,10 @@ function renderApprovedBanner() {
     <div class="approved-banner card visible">
       <div style="flex:1; min-width:220px;">
         <div class="approved-text">${t("approved_banner", dateLabel)}</div>
+        <div class="edit-date-row">
+          <label class="field-label" style="margin:0;">${t("label_date")}</label>
+          <input type="date" id="approved-date-input" value="${eventData.approvedDate}">
+        </div>
         <div class="time-input-row">
           <label class="field-label" style="margin:0;">${t("label_time_optional")}</label>
           <input type="time" id="approved-time-input" value="${timeVal}">
@@ -103,8 +107,23 @@ function renderApprovedBanner() {
     </div>
   `;
 
+  const dateInput = document.getElementById("approved-date-input");
   const timeInput = document.getElementById("approved-time-input");
   const locationInput = document.getElementById("approved-location-input");
+
+  dateInput.addEventListener("change", async () => {
+    const dv = dateInput.value;
+    if (!dv) return;
+    try {
+      const eventRef = doc(collection(db, "events"), eventId);
+      await updateDoc(eventRef, { approvedDate: dv });
+      eventData.approvedDate = dv;
+      resultsCal.setApprovedDate(dv);
+      renderApprovedBanner();
+      renderResults();
+      showToast(t("toast_approved", formatDateLong(dv)));
+    } catch (e) { console.error(e); }
+  });
 
   const getParams = () => ({
     title,
@@ -263,7 +282,10 @@ async function loadEvent() {
     titleEl.textContent = eventData.name;
     subtitleEl.textContent = "";
 
-    pickCal = new MonthCalendar(pickCalendarEl, { mode: "pick-free" });
+    pickCal = new MonthCalendar(pickCalendarEl, {
+      mode: "pick-free",
+      pickModeLabels: { available: t("pickmode_available"), tentative: t("pickmode_tentative") }
+    });
     pickCal.render();
 
     resultsCal = new MonthCalendar(resultsCalendarEl, {
