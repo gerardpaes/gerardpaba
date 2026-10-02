@@ -108,6 +108,12 @@ export const DICT = {
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentatiu",
 
+    btn_edit: "Editar",
+    btn_done: "Fet",
+    btn_cancel: "Cancel·lar",
+    no_time_set: "Sense hora",
+    no_location_set: "Sense ubicació",
+
     locale_code: "ca-ES"
   },
 
@@ -217,6 +223,12 @@ export const DICT = {
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentativo",
 
+    btn_edit: "Editar",
+    btn_done: "Hecho",
+    btn_cancel: "Cancelar",
+    no_time_set: "Sin hora",
+    no_location_set: "Sin ubicación",
+
     locale_code: "es-ES"
   },
 
@@ -325,6 +337,12 @@ export const DICT = {
     label_choose_emoji: "Choose an icon (optional)",
     pickmode_available: "Available",
     pickmode_tentative: "Tentative",
+
+    btn_edit: "Edit",
+    btn_done: "Done",
+    btn_cancel: "Cancel",
+    no_time_set: "No time set",
+    no_location_set: "No location set",
 
     locale_code: "en-US"
   }
