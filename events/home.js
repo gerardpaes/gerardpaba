@@ -1,4 +1,4 @@
-import { db, collection, doc, setDoc, updateDoc, onSnapshot, serverTimestamp, query, orderBy, getDocs } from "./firebase-init.js";
+import { db, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy, getDocs } from "./firebase-init.js";
 import { t, applyTranslations, initLanguageSwitcher, getLocale } from "./i18n.js";
 import { createCalendarAddButton } from "./calendar-export.js";
 
@@ -14,6 +14,37 @@ const toastEl = document.getElementById("toast");
 const openModalBtn = document.getElementById("open-create-modal");
 const closeModalBtn = document.getElementById("close-create-modal");
 const modalOverlay = document.getElementById("create-modal-overlay");
+const emojiPickerGrid = document.getElementById("emoji-picker-grid");
+const confirmedDateToggle = document.getElementById("confirmed-date-toggle");
+const confirmedFields = document.getElementById("confirmed-fields");
+const confirmedDateInput = document.getElementById("confirmed-date-input");
+const confirmedTimeInput = document.getElementById("confirmed-time-input");
+const confirmedLocationInput = document.getElementById("confirmed-location-input");
+
+const EMOJI_CHOICES = ["🎉", "🎂", "🍕", "🍻", "🏖️", "⚽", "🎮", "🎬", "🎵", "🏔️", "🚗", "📚"];
+let selectedEmoji = "";
+
+function renderEmojiPicker() {
+  emojiPickerGrid.innerHTML = EMOJI_CHOICES.map(e =>
+    `<button type="button" class="emoji-opt-btn" data-emoji="${e}">${e}</button>`
+  ).join("");
+  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const emoji = btn.dataset.emoji;
+      if (selectedEmoji === emoji) {
+        selectedEmoji = "";
+      } else {
+        selectedEmoji = emoji;
+      }
+      emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
+    });
+  });
+}
+renderEmojiPicker();
+
+confirmedDateToggle.addEventListener("change", () => {
+  confirmedFields.classList.toggle("open", confirmedDateToggle.checked);
+});
 
 function showToast(msg) {
   toastEl.textContent = msg;
@@ -21,7 +52,18 @@ function showToast(msg) {
   setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
-openModalBtn.addEventListener("click", () => modalOverlay.classList.add("open"));
+function resetCreateModal() {
+  eventNameInput.value = "";
+  selectedEmoji = "";
+  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.remove("active"));
+  confirmedDateToggle.checked = false;
+  confirmedFields.classList.remove("open");
+  confirmedDateInput.value = "";
+  confirmedTimeInput.value = "";
+  confirmedLocationInput.value = "";
+}
+
+openModalBtn.addEventListener("click", () => { resetCreateModal(); modalOverlay.classList.add("open"); });
 closeModalBtn.addEventListener("click", () => modalOverlay.classList.remove("open"));
 modalOverlay.addEventListener("click", (e) => { if (e.target === modalOverlay) modalOverlay.classList.remove("open"); });
 
@@ -30,21 +72,28 @@ function slugify(name) {
 }
 
 createBtn.addEventListener("click", async () => {
-  const name = eventNameInput.value.trim();
-  if (!name) { showToast(t("toast_need_event_name")); return; }
+  const rawName = eventNameInput.value.trim();
+  if (!rawName) { showToast(t("toast_need_event_name")); return; }
+  const name = selectedEmoji ? `${selectedEmoji} ${rawName}` : rawName;
 
-  const id = slugify(name) + "-" + Date.now().toString(36).slice(-4);
+  const id = slugify(rawName) + "-" + Date.now().toString(36).slice(-4);
+
+  const hasConfirmedDate = confirmedDateToggle.checked && confirmedDateInput.value;
 
   try {
     await setDoc(doc(collection(db, "events"), id), {
       name,
       createdAt: serverTimestamp(),
-      approvedDate: null,
-      approvedTime: null,
-      location: ""
+      approvedDate: hasConfirmedDate ? confirmedDateInput.value : null,
+      approvedTime: hasConfirmedDate ? (confirmedTimeInput.value || null) : null,
+      location: hasConfirmedDate ? (confirmedLocationInput.value || "") : ""
     });
     showToast(t("toast_event_created"));
-    window.location.href = `event.html?id=${encodeURIComponent(id)}`;
+    if (hasConfirmedDate) {
+      modalOverlay.classList.remove("open");
+    } else {
+      window.location.href = `event.html?id=${encodeURIComponent(id)}`;
+    }
   } catch (e) {
     console.error(e);
     showToast(t("toast_create_error"));
@@ -116,6 +165,10 @@ function renderUpcoming() {
             <div class="upcoming-date-text">${full}${time ? " · " + time : ""}</div>
           </div>
         </div>
+        <div class="edit-date-row">
+          <label class="field-label" data-i18n="label_date">Date</label>
+          <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
+        </div>
         <div class="time-input-row">
           <label class="field-label" data-i18n="label_time_optional">Time</label>
           <input type="time" class="time-input" data-id="${id}" value="${time}">
@@ -126,6 +179,7 @@ function renderUpcoming() {
         </div>
         <div class="upcoming-actions cal-actions-slot">
           <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
+          <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
         </div>
       </div>
       <div class="attendees-list" id="attendees-${id}"></div>
@@ -146,6 +200,14 @@ function renderUpcoming() {
     });
     card.querySelector(".cal-actions-slot").prepend(calBtn);
 
+    card.querySelector(".date-input").addEventListener("change", async (e) => {
+      const dateVal = e.target.value;
+      if (!dateVal) return;
+      try {
+        await updateDoc(doc(collection(db, "events"), id), { approvedDate: dateVal });
+      } catch (err) { console.error(err); }
+    });
+
     card.querySelector(".time-input").addEventListener("change", async (e) => {
       const timeVal = e.target.value || null;
       try {
@@ -158,6 +220,18 @@ function renderUpcoming() {
       try {
         await updateDoc(doc(collection(db, "events"), id), { location: locVal });
       } catch (err) { console.error(err); }
+    });
+
+    card.querySelector(".delete-event-btn").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!window.confirm(t("confirm_delete_event"))) return;
+      try {
+        await deleteDoc(doc(collection(db, "events"), id));
+        showToast(t("toast_event_deleted"));
+      } catch (err) {
+        console.error(err);
+        showToast(t("toast_delete_error"));
+      }
     });
 
     const toggleBtn = card.querySelector(".attendees-toggle");
@@ -209,20 +283,34 @@ function renderEventList() {
 
   eventListEl.innerHTML = "";
   voting.forEach(({ id, data }) => {
-    const row = document.createElement("a");
-    row.href = `event.html?id=${encodeURIComponent(id)}`;
+    const row = document.createElement("div");
     row.className = "event-row";
     row.innerHTML = `
-      <div class="ev-icon">${(data.name || "?").charAt(0).toUpperCase()}</div>
-      <div class="ev-info">
-        <div class="ev-name">${data.name}</div>
-        <div class="ev-meta">${eventTapLabel()}</div>
-        <div class="ev-status">
-          <span class="status-badge voting">${t("ev_status_voting")}</span>
+      <a href="event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
+        <div class="ev-icon">${(data.name || "?").charAt(0).toUpperCase()}</div>
+        <div class="ev-info">
+          <div class="ev-name">${data.name}</div>
+          <div class="ev-meta">${eventTapLabel()}</div>
+          <div class="ev-status">
+            <span class="status-badge voting">${t("ev_status_voting")}</span>
+          </div>
         </div>
-      </div>
-      <span class="chip">${t("chip_open")}</span>
+        <span class="chip">${t("chip_open")}</span>
+      </a>
+      <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
     `;
+    row.querySelector(".delete-event-btn").addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!window.confirm(t("confirm_delete_event"))) return;
+      try {
+        await deleteDoc(doc(collection(db, "events"), id));
+        showToast(t("toast_event_deleted"));
+      } catch (err) {
+        console.error(err);
+        showToast(t("toast_delete_error"));
+      }
+    });
     eventListEl.appendChild(row);
   });
   requestAnimationFrame(revealOnScroll);
