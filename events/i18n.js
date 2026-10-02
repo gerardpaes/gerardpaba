@@ -22,6 +22,7 @@ export const DICT = {
     placeholder_event_name: "p. ex. Sopar de Nadal",
     label_pick_dates: "Dates candidates — clica els dies al calendari",
     btn_create: "Crear esdeveniment",
+    btn_create_vote: "Crear esdeveniment i començar votació",
 
     events_title: "Esdeveniments",
     events_sub: "Obre un esdeveniment per afegir la teva disponibilitat o veure els resultats.",
@@ -137,6 +138,7 @@ export const DICT = {
     placeholder_event_name: "p. ej. Cena de Navidad",
     label_pick_dates: "Fechas candidatas — haz clic en los días del calendario",
     btn_create: "Crear evento",
+    btn_create_vote: "Crear evento y empezar votación",
 
     events_title: "Eventos",
     events_sub: "Abre un evento para añadir tu disponibilidad o ver los resultados.",
@@ -252,6 +254,7 @@ export const DICT = {
     placeholder_event_name: "e.g. Christmas Dinner",
     label_pick_dates: "Candidate dates — click days on the calendar",
     btn_create: "Create event",
+    btn_create_vote: "Create event and start voting",
 
     events_title: "Events",
     events_sub: "Open an event to add your availability or check the current results.",
