@@ -1,14 +1,11 @@
-import { db, collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp, query, orderBy } from "./firebase-init.js";
+import { db, collection, doc, setDoc, onSnapshot, serverTimestamp, query, orderBy } from "./firebase-init.js";
+import { MonthCalendar } from "./calendar.js";
 
-const pendingDatesEl = document.getElementById("pending-dates");
-const dateInput = document.getElementById("date-input");
-const addDateBtn = document.getElementById("add-date-btn");
 const eventNameInput = document.getElementById("event-name");
 const createBtn = document.getElementById("create-event-btn");
 const eventListEl = document.getElementById("event-list");
 const toastEl = document.getElementById("toast");
-
-let pendingDates = [];
+const calendarContainer = document.getElementById("create-calendar");
 
 function showToast(msg) {
   toastEl.textContent = msg;
@@ -16,40 +13,8 @@ function showToast(msg) {
   setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
-function formatDate(iso) {
-  const d = new Date(iso + "T00:00:00");
-  return {
-    weekday: d.toLocaleDateString(undefined, { weekday: "short" }),
-    label: d.toLocaleDateString(undefined, { day: "numeric", month: "short" })
-  };
-}
-
-function renderPendingDates() {
-  pendingDatesEl.innerHTML = "";
-  pendingDates.sort();
-  pendingDates.forEach(iso => {
-    const { weekday, label } = formatDate(iso);
-    const pill = document.createElement("div");
-    pill.className = "date-pill selected";
-    pill.innerHTML = `<div class="d-weekday">${weekday}</div><div class="d-date">${label}</div>`;
-    pill.title = "Click to remove";
-    pill.addEventListener("click", () => {
-      pendingDates = pendingDates.filter(d => d !== iso);
-      renderPendingDates();
-    });
-    pendingDatesEl.appendChild(pill);
-  });
-}
-
-addDateBtn.addEventListener("click", () => {
-  const val = dateInput.value;
-  if (!val) return;
-  if (!pendingDates.includes(val)) {
-    pendingDates.push(val);
-    renderPendingDates();
-  }
-  dateInput.value = "";
-});
+const createCal = new MonthCalendar(calendarContainer, { mode: "pick-any" });
+createCal.render();
 
 function slugify(name) {
   return name
@@ -61,15 +26,16 @@ function slugify(name) {
 
 createBtn.addEventListener("click", async () => {
   const name = eventNameInput.value.trim();
+  const dates = createCal.getSelected();
   if (!name) { showToast("Please enter an event name"); return; }
-  if (pendingDates.length === 0) { showToast("Add at least one candidate date"); return; }
+  if (dates.length === 0) { showToast("Click at least one candidate date on the calendar"); return; }
 
-  let id = slugify(name) + "-" + Date.now().toString(36).slice(-4);
+  const id = slugify(name) + "-" + Date.now().toString(36).slice(-4);
 
   try {
     await setDoc(doc(collection(db, "events"), id), {
       name,
-      dates: pendingDates.slice().sort(),
+      dates: dates.slice().sort(),
       createdAt: serverTimestamp()
     });
     showToast("Event created!");
@@ -80,37 +46,44 @@ createBtn.addEventListener("click", async () => {
   }
 });
 
-async function loadEvents() {
-  try {
-    const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
-    onSnapshot(q, (snap) => {
-      if (snap.empty) {
-        eventListEl.innerHTML = `<div class="empty-state">No events yet. Create your first one above! 🎉</div>`;
-        return;
-      }
-      eventListEl.innerHTML = "";
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const row = document.createElement("a");
-        row.href = `event.html?id=${encodeURIComponent(docSnap.id)}`;
-        row.className = "event-row";
-        row.innerHTML = `
-          <div>
-            <strong>${data.name}</strong>
-            <div class="meta">${(data.dates || []).length} candidate date(s)</div>
-          </div>
-          <span class="chip">Open &rarr;</span>
-        `;
-        eventListEl.appendChild(row);
-      });
-    }, (err) => {
-      console.error(err);
-      eventListEl.innerHTML = `<div class="empty-state">Could not load events. Check your Firebase config in firebase-config.js.</div>`;
-    });
-  } catch (e) {
-    console.error(e);
-    eventListEl.innerHTML = `<div class="empty-state">Could not load events. Check your Firebase config in firebase-config.js.</div>`;
-  }
+function revealOnScroll() {
+  document.querySelectorAll(".card, .event-row").forEach(el => {
+    const top = el.getBoundingClientRect().top;
+    if (top < window.innerHeight * 0.9) el.classList.add("visible");
+  });
 }
+
+function loadEvents() {
+  const q = query(collection(db, "events"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    if (snap.empty) {
+      eventListEl.innerHTML = `<div class="empty-state">No events yet. Create your first one above! 🎉</div>`;
+      return;
+    }
+    eventListEl.innerHTML = "";
+    snap.forEach(docSnap => {
+      const data = docSnap.data();
+      const row = document.createElement("a");
+      row.href = `event.html?id=${encodeURIComponent(docSnap.id)}`;
+      row.className = "event-row";
+      row.innerHTML = `
+        <div class="ev-icon">🎉</div>
+        <div class="ev-info">
+          <div class="ev-name">${data.name}</div>
+          <div class="ev-meta">${(data.dates || []).length} candidate date(s)</div>
+        </div>
+        <span class="chip">Open &rarr;</span>
+      `;
+      eventListEl.appendChild(row);
+    });
+    requestAnimationFrame(revealOnScroll);
+  }, (err) => {
+    console.error(err);
+    eventListEl.innerHTML = `<div class="empty-state">Could not load events. Check your Firebase config in firebase-config.js.</div>`;
+  });
+}
+
+window.addEventListener("scroll", revealOnScroll);
+window.addEventListener("load", revealOnScroll);
 
 loadEvents();
