@@ -134,7 +134,7 @@ createBtn.addEventListener("click", async () => {
     if (hasConfirmedDate) {
       modalOverlay.classList.remove("open");
     } else {
-      window.location.href = `event.html?id=${encodeURIComponent(id)}`;
+      window.location.href = `/events/event.html?id=${encodeURIComponent(id)}`;
     }
   } catch (e) {
     console.error(e);
@@ -353,7 +353,7 @@ function renderEventList() {
     const row = document.createElement("div");
     row.className = "event-row";
     row.innerHTML = `
-      <a href="event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
+      <a href="/events/event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
         <div class="ev-icon">${(data.name || "?").charAt(0).toUpperCase()}</div>
         <div class="ev-info">
           <div class="ev-name">${data.name}</div>
