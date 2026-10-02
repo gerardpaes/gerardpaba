@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,73 +16,80 @@
   <div class="nav">
     <span class="brand">📅 Find a Date</span>
     <div class="nav-links">
-      <a href="#availability" class="nav-link">My availability</a>
-      <a href="#results" class="nav-link">Results</a>
-      <a href="#people" class="nav-link">Who's in</a>
-      <a href="index.html" class="back-link">&larr; All events</a>
+      <a href="#availability" class="nav-link" data-i18n="nav_availability">My availability</a>
+      <a href="#results" class="nav-link" data-i18n="nav_results">Results</a>
+      <a href="#people" class="nav-link" data-i18n="nav_people">Who's in</a>
+      <a href="index.html" class="back-link" data-i18n="back_all_events">All events</a>
+      <div class="lang-switcher" id="lang-switcher"></div>
     </div>
   </div>
 </header>
 
-<section class="hero" style="min-height:30vh;">
+<section class="hero" style="min-height:28vh;">
   <h1 id="event-title">Loading…</h1>
   <p class="intro" id="event-subtitle"></p>
 </section>
 
 <section id="availability">
-  <h2>Your availability</h2>
-  <p class="section-sub">Enter your name, click the highlighted days you're free, and save.</p>
+  <h2 data-i18n="availability_title">Your availability</h2>
+  <p class="section-sub" data-i18n="availability_sub">Enter your name…</p>
 
   <div class="card">
-    <label class="field-label" for="your-name">Your name</label>
-    <input type="text" id="your-name" placeholder="e.g. Gerard">
+    <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
+    <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard">
 
-    <label class="field-label" style="margin-top:6px;">Click the candidate dates you're available</label>
+    <label class="field-label" style="margin-top:6px;" data-i18n="label_pick_available">Click the candidate dates</label>
     <div class="calendar" id="pick-calendar"></div>
+    <div class="cal-legend-tristate">
+      <span><span class="legend-swatch" style="background:#34c759;"></span><span data-i18n="legend_none">Available</span></span>
+      <span><span class="legend-swatch" style="background:#ff9f0a;"></span>Tentative</span>
+    </div>
 
     <div class="plusone-row">
       <input type="checkbox" id="plus-one">
-      <label for="plus-one" style="margin:0; font-weight:500; cursor:pointer;">I'll bring a +1</label>
+      <label for="plus-one" style="margin:0; font-weight:500; cursor:pointer;" data-i18n="plusone_label">I'll bring a +1</label>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="submit-btn" type="button">Save my availability</button>
-      <button class="btn danger" id="remove-btn" type="button">Remove my response</button>
+      <button class="btn" id="submit-btn" type="button" data-i18n="btn_save">Save my availability</button>
+      <button class="btn danger" id="remove-btn" type="button" data-i18n="btn_remove">Remove my response</button>
     </div>
   </div>
 </section>
 
 <section id="results">
-  <h2>Results</h2>
-  <p class="section-sub">Darker days = more people available. Numbers show total attendees (including +1s).</p>
+  <h2 data-i18n="results_title">Results</h2>
+  <p class="section-sub" data-i18n="results_sub">Darker days…</p>
+
+  <div id="approved-banner-area"></div>
 
   <div class="card">
     <div class="calendar" id="results-calendar"></div>
     <div class="cal-legend">
-      <span><span class="legend-swatch" style="background:#f0f6ff;"></span>No one yet</span>
-      <span><span class="legend-swatch" style="background:#8fe09d;"></span>Some available</span>
-      <span><span class="legend-swatch" style="background:#2fb850;"></span>Everyone available</span>
+      <span><span class="legend-swatch" style="background:#f0f6ff;"></span><span data-i18n="legend_none">No one yet</span></span>
+      <span><span class="legend-swatch" style="background:#8fe09d;"></span><span data-i18n="legend_some">Some available</span></span>
+      <span><span class="legend-swatch" style="background:#2fb850;"></span><span data-i18n="legend_all">Everyone available</span></span>
     </div>
   </div>
 
   <div class="card">
-    <h2 style="font-size:20px; text-align:left; margin-bottom:18px;">Ranking</h2>
+    <h2 style="font-size:20px; text-align:left; margin-bottom:18px;" data-i18n="ranking_title">Ranking</h2>
     <div id="results-area">
-      <div class="empty-state">No responses yet.</div>
+      <div class="empty-state" data-i18n="no_responses">No responses yet.</div>
     </div>
   </div>
 </section>
 
 <section id="people">
-  <h2>Who has responded</h2>
+  <h2 data-i18n="people_title">Who has responded</h2>
   <div class="card">
     <div class="participants-chips" id="participants-chips">
-      <span class="meta">No one yet.</span>
+      <span class="meta" data-i18n="no_people">No one yet.</span>
     </div>
   </div>
 </section>
 
-<footer class="hint">Share this page's link with your friends so they can add their availability too.</footer>
+<footer class="hint" data-i18n="footer_event_hint">Share this page's link with your friends too.</footer>
 
 <div class="toast" id="toast"></div>
 
