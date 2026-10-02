@@ -62,11 +62,18 @@ export class MonthCalendar {
     // Monday-start week: getDay() is 0=Sun..6=Sat, shift so Monday=0.
     const startWeekday = (first.getDay() + 6) % 7;
     const daysInMonth = new Date(y, m + 1, 0).getDate();
-    const localeCode = document.documentElement.lang || "en";
+    const langShort = document.documentElement.lang || "en";
+    const localeMap = { ca: "ca-ES", es: "es-ES", en: "en-US" };
+    const localeCode = localeMap[langShort] || langShort;
     const monthLabel = first.toLocaleDateString(localeCode, { month: "long", year: "numeric" });
 
     const todayIso = this.isoOf(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-    const weekdayLabels = ["M", "T", "W", "T", "F", "S", "S"];
+    // Monday-start weekday labels, in the current language, derived from Intl so they're always correct.
+    const weekdayLabels = [1, 2, 3, 4, 5, 6, 7].map(dow => {
+      // 2024-01-01 was a Monday; dow-1 days later gives Mon..Sun.
+      const d = new Date(2024, 0, 1 + (dow - 1));
+      return d.toLocaleDateString(localeCode, { weekday: "short" }).replace(".", "").slice(0, 3);
+    });
 
     let html = `
       <div class="calendar-header">
@@ -90,7 +97,10 @@ export class MonthCalendar {
     }
 
     html += `<div class="cal-grid">`;
-    weekdayLabels.forEach(w => { html += `<div class="cal-weekday">${w}</div>`; });
+    weekdayLabels.forEach((w, idx) => {
+      const isWeekend = idx === 5 || idx === 6; // Sat, Sun in Monday-start layout
+      html += `<div class="cal-weekday${isWeekend ? " cal-weekday-weekend" : ""}">${w}</div>`;
+    });
     for (let i = 0; i < startWeekday; i++) html += `<div class="cal-day empty"></div>`;
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -98,6 +108,9 @@ export class MonthCalendar {
       let classes = ["cal-day"];
       let badge = "";
       let extra = "";
+
+      const dowMondayStart = (new Date(y, m, d).getDay() + 6) % 7;
+      if (dowMondayStart === 5 || dowMondayStart === 6) classes.push("cal-day-weekend");
 
       if (this.mode === "pick-free") {
         classes.push("candidate");
