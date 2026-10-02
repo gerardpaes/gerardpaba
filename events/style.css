@@ -1141,6 +1141,22 @@ footer.hint {
   transform: scale(1.08);
 }
 
+.emoji-free-input {
+  width: 70px; height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: #fafafa;
+  font-size: 18px;
+  text-align: center;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.emoji-free-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
 .name-emoji-row {
   display: flex;
   align-items: flex-end;
@@ -1338,3 +1354,12 @@ footer.hint {
   font-weight: 600;
   margin-top: 2px;
 }
+
+/* ===== WEEKEND HIGHLIGHTING ===== */
+.cal-weekday.cal-weekday-weekend { color: var(--text); font-weight: 800; }
+
+.cal-day.cal-day-weekend:not(.candidate):not(.state-available):not(.state-tentative) {
+  background: #ececef;
+}
+
+.cal-day.cal-day-weekend.heat-0 { background: #ececef; }
