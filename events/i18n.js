@@ -60,8 +60,9 @@ export const DICT = {
     people_title: "Qui ha respost",
     no_people: "Ningú encara.",
 
-    calendar_google: "Afegir a Google Calendar",
-    calendar_ics: "Afegir a Apple / iPhone Calendar",
+    calendar_google: "Google Calendar",
+    calendar_ics: "Apple / iPhone Calendar",
+    add_to_calendar: "Afegir al calendari",
 
     footer_event_hint: "Comparteix l'enllaç d'aquesta pàgina amb els teus amics perquè també afegeixin la seva disponibilitat.",
 
@@ -91,6 +92,8 @@ export const DICT = {
     voting_title: "En votació",
     no_upcoming: "Encara no hi ha cap data confirmada.",
     label_time_optional: "Hora (opcional)",
+    label_location_optional: "Ubicació",
+    placeholder_location: "p. ex. Casa d'en Marc",
     view_attendees: "Veure assistents",
     hide_attendees: "Amagar assistents",
     attendees_count: (n) => `${n} assistent(s)`,
@@ -155,8 +158,9 @@ export const DICT = {
     people_title: "Quién ha respondido",
     no_people: "Nadie todavía.",
 
-    calendar_google: "Añadir a Google Calendar",
-    calendar_ics: "Añadir a Apple / iPhone Calendar",
+    calendar_google: "Google Calendar",
+    calendar_ics: "Apple / iPhone Calendar",
+    add_to_calendar: "Añadir al calendario",
 
     footer_event_hint: "Comparte el enlace de esta página con tus amigos para que también añadan su disponibilidad.",
 
@@ -186,6 +190,8 @@ export const DICT = {
     voting_title: "En votación",
     no_upcoming: "Todavía no hay ninguna fecha confirmada.",
     label_time_optional: "Hora (opcional)",
+    label_location_optional: "Ubicación",
+    placeholder_location: "p. ej. Casa de Marc",
     view_attendees: "Ver asistentes",
     hide_attendees: "Ocultar asistentes",
     attendees_count: (n) => `${n} asistente(s)`,
@@ -250,8 +256,9 @@ export const DICT = {
     people_title: "Who has responded",
     no_people: "No one yet.",
 
-    calendar_google: "Add to Google Calendar",
-    calendar_ics: "Add to Apple / iPhone Calendar",
+    calendar_google: "Google Calendar",
+    calendar_ics: "Apple / iPhone Calendar",
+    add_to_calendar: "Add to calendar",
 
     footer_event_hint: "Share this page's link with your friends so they can add their availability too.",
 
@@ -281,6 +288,8 @@ export const DICT = {
     voting_title: "Voting open",
     no_upcoming: "No confirmed dates yet.",
     label_time_optional: "Time (optional)",
+    label_location_optional: "Location",
+    placeholder_location: "e.g. Marc's place",
     view_attendees: "View attendees",
     hide_attendees: "Hide attendees",
     attendees_count: (n) => `${n} attendee(s)`,
