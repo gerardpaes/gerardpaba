@@ -1,15 +1,39 @@
-// Helpers to add an approved event date to Google Calendar or Apple/iPhone Calendar (.ics download)
+// Helpers to add an approved event date (optionally with a time) to
+// Google Calendar or Apple/iPhone Calendar (.ics download).
+//
+// If `time` ("HH:MM") is omitted, the event is created as an all-day event.
+// If provided, the event defaults to a 2-hour block starting at that time.
 
 function pad(n) { return String(n).padStart(2, "0"); }
 
-// Build a Google Calendar "render" link for an all-day event.
-export function googleCalendarUrl(title, isoDate, details = "") {
-  const d = new Date(isoDate + "T00:00:00");
-  const next = new Date(d);
-  next.setDate(next.getDate() + 1);
+function buildDateTimes(isoDate, time) {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  if (!time) {
+    const start = new Date(y, m - 1, d);
+    const end = new Date(y, m - 1, d);
+    end.setDate(end.getDate() + 1);
+    return { start, end, allDay: true };
+  }
+  const [hh, mm] = time.split(":").map(Number);
+  const start = new Date(y, m - 1, d, hh, mm);
+  const end = new Date(start);
+  end.setHours(end.getHours() + 2);
+  return { start, end, allDay: false };
+}
 
-  const fmt = (dt) => `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}`;
-  const dates = `${fmt(d)}/${fmt(next)}`;
+function fmtDateOnly(dt) {
+  return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}`;
+}
+
+function fmtDateTime(dt) {
+  return `${fmtDateOnly(dt)}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+}
+
+export function googleCalendarUrl(title, isoDate, details = "", time = null) {
+  const { start, end, allDay } = buildDateTimes(isoDate, time);
+  const dates = allDay
+    ? `${fmtDateOnly(start)}/${fmtDateOnly(end)}`
+    : `${fmtDateTime(start)}/${fmtDateTime(end)}`;
 
   const params = new URLSearchParams({
     action: "TEMPLATE",
@@ -20,17 +44,15 @@ export function googleCalendarUrl(title, isoDate, details = "") {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-// Build and trigger download of an .ics file (works with Apple Calendar / iPhone / Outlook).
-export function downloadIcs(title, isoDate, details = "") {
-  const d = new Date(isoDate + "T00:00:00");
-  const next = new Date(d);
-  next.setDate(next.getDate() + 1);
-
-  const fmt = (dt) => `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}`;
+export function downloadIcs(title, isoDate, details = "", time = null) {
+  const { start, end, allDay } = buildDateTimes(isoDate, time);
 
   const uid = `${Date.now()}@findadate`;
   const now = new Date();
   const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}Z`;
+
+  const dtStart = allDay ? `DTSTART:${fmtDateOnly(start)}` : `DTSTART:${fmtDateTime(start)}`;
+  const dtEnd = allDay ? `DTEND:${fmtDateOnly(end)}` : `DTEND:${fmtDateTime(end)}`;
 
   const ics = [
     "BEGIN:VCALENDAR",
@@ -40,8 +62,8 @@ export function downloadIcs(title, isoDate, details = "") {
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${stamp}`,
-    `DTSTART:${fmt(d)}`,
-    `DTEND:${fmt(next)}`,
+    dtStart,
+    dtEnd,
     `SUMMARY:${escapeIcs(title)}`,
     details ? `DESCRIPTION:${escapeIcs(details)}` : "",
     "END:VEVENT",
