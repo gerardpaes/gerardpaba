@@ -11,22 +11,33 @@
 </head>
 <body>
 
-<div class="topbar">
-  <span class="brand">📅 Find a Date</span>
-  <a class="back" href="index.html">&larr; All events</a>
-</div>
+<header>
+  <div class="nav">
+    <span class="brand">📅 Find a Date</span>
+    <div class="nav-links">
+      <a href="#availability" class="nav-link">My availability</a>
+      <a href="#results" class="nav-link">Results</a>
+      <a href="#people" class="nav-link">Who's in</a>
+      <a href="index.html" class="back-link">&larr; All events</a>
+    </div>
+  </div>
+</header>
 
-<main>
+<section class="hero" style="min-height:30vh;">
   <h1 id="event-title">Loading…</h1>
-  <p class="subtitle" id="event-subtitle"></p>
+  <p class="intro" id="event-subtitle"></p>
+</section>
+
+<section id="availability">
+  <h2>Your availability</h2>
+  <p class="section-sub">Enter your name, click the highlighted days you're free, and save.</p>
 
   <div class="card">
-    <h2>Your availability</h2>
     <label class="field-label" for="your-name">Your name</label>
     <input type="text" id="your-name" placeholder="e.g. Gerard">
 
-    <label class="field-label">Pick the dates you're available</label>
-    <div class="date-grid" id="date-grid"></div>
+    <label class="field-label" style="margin-top:6px;">Click the candidate dates you're available</label>
+    <div class="calendar" id="pick-calendar"></div>
 
     <div class="plusone-row">
       <input type="checkbox" id="plus-one">
@@ -35,29 +46,46 @@
 
     <div class="btn-row">
       <button class="btn" id="submit-btn" type="button">Save my availability</button>
-      <button class="btn secondary" id="remove-btn" type="button">Remove my response</button>
+      <button class="btn danger" id="remove-btn" type="button">Remove my response</button>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <p class="section-sub">Darker days = more people available. Numbers show total attendees (including +1s).</p>
+
+  <div class="card">
+    <div class="calendar" id="results-calendar"></div>
+    <div class="cal-legend">
+      <span><span class="legend-swatch" style="background:#f0f6ff;"></span>No one yet</span>
+      <span><span class="legend-swatch" style="background:#8fe09d;"></span>Some available</span>
+      <span><span class="legend-swatch" style="background:#2fb850;"></span>Everyone available</span>
     </div>
   </div>
 
   <div class="card">
-    <h2>Results</h2>
+    <h2 style="font-size:20px; text-align:left; margin-bottom:18px;">Ranking</h2>
     <div id="results-area">
       <div class="empty-state">No responses yet.</div>
     </div>
   </div>
+</section>
 
+<section id="people">
+  <h2>Who has responded</h2>
   <div class="card">
-    <h2>Who has responded</h2>
     <div class="participants-chips" id="participants-chips">
       <span class="meta">No one yet.</span>
     </div>
   </div>
+</section>
 
-  <footer class="hint">Share this page's link with your friends so they can add their availability too.</footer>
-</main>
+<footer class="hint">Share this page's link with your friends so they can add their availability too.</footer>
 
 <div class="toast" id="toast"></div>
 
+<script type="module" src="calendar.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>
