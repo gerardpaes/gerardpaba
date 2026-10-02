@@ -518,3 +518,166 @@ footer.hint {
   .rank-card { flex-wrap: wrap; }
   .rank-total { text-align: left; }
 }
+
+/* ===== LANGUAGE SWITCHER ===== */
+.lang-switcher {
+  display: flex;
+  gap: 6px;
+}
+
+.lang-btn {
+  border: 1px solid var(--border);
+  background: #fafafa;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.lang-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ===== TRI-STATE CALENDAR DAYS ===== */
+.cal-day.state-available {
+  background: var(--good);
+  border-color: #28a745;
+  color: #fff;
+}
+
+.cal-day.state-tentative {
+  background: var(--warn);
+  border-color: #e68a00;
+  color: #fff;
+}
+
+.cal-legend-tristate {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cal-legend-tristate .legend-swatch {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ===== APPROVED DAY MARKER (results calendar) ===== */
+.cal-day.approved-day {
+  outline: 3px solid #ffd60a;
+  outline-offset: 2px;
+}
+
+.approved-star {
+  position: absolute;
+  top: -10px; left: -6px;
+  font-size: 12px;
+  color: #ffb300;
+}
+
+/* ===== EVENT STATUS BADGE (dashboard) ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.status-badge.voting { background: #fff4e5; color: #b5720a; }
+.status-badge.approved { background: #e7f8ec; color: #1f8a3b; }
+
+/* ===== APPROVED BANNER (event page) ===== */
+.approved-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(135deg, #e7f8ec, #d4f3dc);
+  border: 1px solid #bfe8c9;
+  border-radius: 16px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.approved-banner .approved-text {
+  font-weight: 600;
+  color: #1f8a3b;
+  font-size: 16px;
+}
+
+.approved-banner .cal-export-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn.cal-export {
+  background: #fff;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 9px 16px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn.cal-export:hover { border-color: var(--accent); color: var(--accent); background: #fff; }
+
+/* ===== DASHBOARD GRID (home page events) ===== */
+.dashboard-filters {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  border: 1px solid var(--border);
+  background: #fafafa;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-chip:hover { border-color: var(--accent); }
+
+.event-row .ev-status { margin-top: 6px; }
+
+/* ===== Extra mobile tweaks for new features ===== */
+@media (max-width: 600px) {
+  .nav-links { flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+  .lang-switcher { order: 10; }
+  .rank-card { flex-direction: column; align-items: stretch; text-align: left; }
+  .rank-total { text-align: left; }
+  .approve-date-btn { align-self: flex-start; }
+  .approved-banner { flex-direction: column; align-items: stretch; }
+  .cal-export-row { justify-content: flex-start; }
+  .cal-grid { gap: 4px; }
+  .cal-day { font-size: 12px; }
+}
