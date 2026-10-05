@@ -98,66 +98,33 @@ function renderApprovedBanner() {
   const timeLabel = timeVal || t("no_time_set");
   const locationLabel = locationVal || t("no_location_set");
 
+  const admin = window.isAdmin();
   approvedBannerArea.innerHTML = `
     <div class="approved-banner card visible">
       <div style="flex:1; min-width:220px;">
         <div class="approved-text">${t("approved_banner", dateLabel)}</div>
         <div class="approved-view-mode">
           <span class="approved-meta-line">🕒 ${timeLabel} &nbsp;·&nbsp; 📍 ${locationLabel}</span>
-          <button class="edit-toggle-btn" id="approved-edit-btn" type="button">${t("btn_edit")}</button>
+          ${admin ? `<button class="edit-toggle-btn" id="approved-edit-btn" type="button">${t("btn_edit")}</button>` : ""}
         </div>
-        <div class="edit-fields-inline" id="approved-edit-fields" style="display:none;">
+        ${admin ? `<div class="edit-fields-inline" id="approved-edit-fields" style="display:none;">
           <input type="date" id="approved-date-input" value="${eventData.approvedDate}">
           <input type="time" id="approved-time-input" value="${timeVal}">
           <input type="text" id="approved-location-input" value="${locationVal}" data-i18n-placeholder="placeholder_location">
-        </div>
+        </div>` : ""}
       </div>
       <div class="cal-export-row" id="approved-cal-actions">
-        <button class="btn cal-export" id="unapprove-btn" type="button">${t("unapprove_btn")}</button>
+        ${admin ? `<button class="btn cal-export" id="unapprove-btn" type="button">${t("unapprove_btn")}</button>` : ""}
       </div>
     </div>
   `;
-
-  const dateInput = document.getElementById("approved-date-input");
-  const timeInput = document.getElementById("approved-time-input");
-  const locationInput = document.getElementById("approved-location-input");
-  const editBtn = document.getElementById("approved-edit-btn");
-  const editFields = document.getElementById("approved-edit-fields");
-  const viewMode = document.querySelector(".approved-view-mode");
-
-  editBtn.addEventListener("click", () => {
-    const isEditing = editFields.style.display !== "none";
-    if (isEditing) {
-      editFields.style.display = "none";
-      viewMode.style.display = "";
-      editBtn.textContent = t("btn_edit");
-    } else {
-      editFields.style.display = "flex";
-      viewMode.style.display = "none";
-      editBtn.textContent = t("btn_done");
-    }
-  });
-
-  dateInput.addEventListener("change", async () => {
-    const dv = dateInput.value;
-    if (!dv) return;
-    try {
-      const eventRef = doc(collection(db, "events"), eventId);
-      await updateDoc(eventRef, { approvedDate: dv });
-      eventData.approvedDate = dv;
-      resultsCal.setApprovedDate(dv);
-      renderApprovedBanner();
-      renderResults();
-      showToast(t("toast_approved", formatDateLong(dv)));
-    } catch (e) { console.error(e); }
-  });
 
   const getParams = () => ({
     title,
     isoDate: eventData.approvedDate,
     details: `Find a Date: ${title}`,
-    time: timeInput.value || null,
-    location: locationInput.value || ""
+    time: eventData.approvedTime || null,
+    location: eventData.location || ""
   });
   const calBtn = createCalendarAddButton(getParams, {
     addToCalendar: t("add_to_calendar"),
@@ -166,47 +133,83 @@ function renderApprovedBanner() {
   });
   document.getElementById("approved-cal-actions").prepend(calBtn);
 
-  function refreshApprovedMetaLine() {
-    const metaEl = document.querySelector(".approved-meta-line");
-    if (!metaEl) return;
-    const tLabel = timeInput.value || t("no_time_set");
-    const lLabel = locationInput.value || t("no_location_set");
-    metaEl.textContent = `🕒 ${tLabel} \u00b7 📍 ${lLabel}`;
-  }
+  if (admin) {
+    const dateInput = document.getElementById("approved-date-input");
+    const timeInput = document.getElementById("approved-time-input");
+    const locationInput = document.getElementById("approved-location-input");
+    const editBtn = document.getElementById("approved-edit-btn");
+    const editFields = document.getElementById("approved-edit-fields");
+    const viewMode = document.querySelector(".approved-view-mode");
 
-  timeInput.addEventListener("change", async () => {
-    const tv = timeInput.value || null;
-    try {
-      const eventRef = doc(collection(db, "events"), eventId);
-      await updateDoc(eventRef, { approvedTime: tv });
-      eventData.approvedTime = tv;
-      refreshApprovedMetaLine();
-    } catch (e) { console.error(e); }
-  });
+    editBtn.addEventListener("click", () => {
+      const isEditing = editFields.style.display !== "none";
+      if (isEditing) {
+        editFields.style.display = "none";
+        viewMode.style.display = "";
+        editBtn.textContent = t("btn_edit");
+      } else {
+        editFields.style.display = "flex";
+        viewMode.style.display = "none";
+        editBtn.textContent = t("btn_done");
+      }
+    });
 
-  locationInput.addEventListener("change", async () => {
-    const lv = locationInput.value || "";
-    try {
-      const eventRef = doc(collection(db, "events"), eventId);
-      await updateDoc(eventRef, { location: lv });
-      eventData.location = lv;
-      refreshApprovedMetaLine();
-    } catch (e) { console.error(e); }
-  });
+    dateInput.addEventListener("change", async () => {
+      const dv = dateInput.value;
+      if (!dv) return;
+      try {
+        const eventRef = doc(collection(db, "events"), eventId);
+        await updateDoc(eventRef, { approvedDate: dv });
+        eventData.approvedDate = dv;
+        resultsCal.setApprovedDate(dv);
+        renderApprovedBanner();
+        renderResults();
+        showToast(t("toast_approved", formatDateLong(dv)));
+      } catch (e) { console.error(e); }
+    });
 
-  document.getElementById("unapprove-btn").addEventListener("click", async () => {
-    try {
-      const eventRef = doc(collection(db, "events"), eventId);
-      await updateDoc(eventRef, { approvedDate: null });
-      eventData.approvedDate = null;
-      renderApprovedBanner();
-      resultsCal.setApprovedDate(null);
-      renderResults();
-      showToast(t("toast_unapproved"));
-    } catch (e) {
-      console.error(e);
+    function refreshApprovedMetaLine() {
+      const metaEl = document.querySelector(".approved-meta-line");
+      if (!metaEl) return;
+      const tLabel = timeInput.value || t("no_time_set");
+      const lLabel = locationInput.value || t("no_location_set");
+      metaEl.textContent = `🕒 ${tLabel} \u00b7 📍 ${lLabel}`;
     }
-  });
+
+    timeInput.addEventListener("change", async () => {
+      const tv = timeInput.value || null;
+      try {
+        const eventRef = doc(collection(db, "events"), eventId);
+        await updateDoc(eventRef, { approvedTime: tv });
+        eventData.approvedTime = tv;
+        refreshApprovedMetaLine();
+      } catch (e) { console.error(e); }
+    });
+
+    locationInput.addEventListener("change", async () => {
+      const lv = locationInput.value || "";
+      try {
+        const eventRef = doc(collection(db, "events"), eventId);
+        await updateDoc(eventRef, { location: lv });
+        eventData.location = lv;
+        refreshApprovedMetaLine();
+      } catch (e) { console.error(e); }
+    });
+
+    document.getElementById("unapprove-btn").addEventListener("click", async () => {
+      try {
+        const eventRef = doc(collection(db, "events"), eventId);
+        await updateDoc(eventRef, { approvedDate: null });
+        eventData.approvedDate = null;
+        renderApprovedBanner();
+        resultsCal.setApprovedDate(null);
+        renderResults();
+        showToast(t("toast_unapproved"));
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  }
 }
 
 function renderResults() {
@@ -246,22 +249,24 @@ function renderResults() {
     const pct = Math.round((item.total / maxTotal) * 100);
     const isApproved = eventData.approvedDate === item.iso;
     html += `
-      <div class="rank-card">
-        <div class="rank-badge ${badgeClass}">${idx + 1}</div>
-        <div class="rank-info">
-          <div class="rank-date">${formatDateLong(item.iso)} ${isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : ""}</div>
-          <div class="rank-who">${item.availNames.length ? "✅ " + item.availNames.join(", ") : ""}</div>
-          ${item.tentNames.length ? `<div class="rank-who rank-tentative">❓ ${item.tentNames.join(", ")}</div>` : ""}
-          ${!item.availNames.length && !item.tentNames.length ? `<div class="rank-who">—</div>` : ""}
-          <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="rank-card${isApproved ? " is-approved" : ""}">
+        <div class="rank-top-row">
+          <div class="rank-badge ${badgeClass}">${idx + 1}</div>
+          <div class="rank-date">${formatDateLong(item.iso)}</div>
+          ${isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : ""}
+          <div class="rank-total">
+            ${item.total}${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}
+          </div>
         </div>
-        <div class="rank-total">
-          ${item.total}
-          ${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}
+        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="rank-names">
+          ${item.availNames.length ? `<span class="rank-who">✅ ${item.availNames.join(", ")}</span>` : ""}
+          ${item.tentNames.length ? `<span class="rank-who rank-tentative">❓ ${item.tentNames.join(", ")}</span>` : ""}
+          ${!item.availNames.length && !item.tentNames.length ? `<span class="rank-who">—</span>` : ""}
         </div>
-        <button class="btn secondary approve-date-btn" data-iso="${item.iso}" type="button" style="font-size:12px; padding:8px 14px;">
-          ${isApproved ? "✓" : t("approve_btn")}
-        </button>
+        ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-iso="${item.iso}" type="button">
+          ${isApproved ? "✓ " + t("approved_tag") : t("approve_btn")}
+        </button>` : ""}
       </div>
     `;
   });
