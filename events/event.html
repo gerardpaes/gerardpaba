@@ -14,12 +14,12 @@
 
 <header>
   <div class="nav">
-    <span class="brand">📅 Find a Date</span>
+    <span class="brand">📅 <span class="brand-text">Find a Date</span></span>
     <div class="nav-links">
       <a href="#availability" class="nav-link" data-i18n="nav_availability">My availability</a>
       <a href="#results" class="nav-link" data-i18n="nav_results">Results</a>
       <a href="#people" class="nav-link" data-i18n="nav_people">Who's in</a>
-      <a href="/events/index.html" class="back-link" data-i18n="back_all_events">All events</a>
+      <a href="/events/index.html" class="back-link"><span class="back-link-icon">←</span><span class="back-link-text" data-i18n="back_all_events">All events</span></a>
       <div class="lang-switcher" id="lang-switcher"></div>
     </div>
   </div>
@@ -41,7 +41,7 @@
         <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
       </div>
       <div>
-        <label class="field-label" style="visibility:hidden;">&nbsp;</label>
+        <label class="field-label spacer-label">&nbsp;</label>
         <label class="plusone-inline">
           <input type="checkbox" id="plus-one">
           <span data-i18n="plusone_label">I'll bring a +1</span>
