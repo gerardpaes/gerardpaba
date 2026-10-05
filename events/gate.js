@@ -4,8 +4,9 @@
 // The password is intentionally simple; anyone determined could read
 // the source and find it. Good enough for sharing with friends.
 
-const GATE_PASSWORD = "gay";
+const GATE_PASSWORDS = { "gay": "guest", "admin": "admin" };
 const GATE_SESSION_KEY = "findadate:unlocked";
+const GATE_ROLE_KEY = "findadate:role";
 
 function buildOverlay() {
   const overlay = document.createElement("div");
@@ -58,8 +59,10 @@ function buildOverlay() {
   const errorEl = overlay.querySelector("#gate-error");
 
   function tryUnlock() {
-    if (input.value === GATE_PASSWORD) {
+    const role = GATE_PASSWORDS[input.value];
+    if (role) {
       sessionStorage.setItem(GATE_SESSION_KEY, "1");
+      sessionStorage.setItem(GATE_ROLE_KEY, role);
       overlay.remove();
       style.remove();
     } else {
@@ -82,3 +85,10 @@ if (sessionStorage.getItem(GATE_SESSION_KEY) !== "1") {
     buildOverlay();
   });
 }
+
+// Exposed globally (gate.js is a plain classic script, loaded before the
+// module scripts) so home.js/app.js can check the current user's role
+// without re-implementing the password/session logic.
+window.isAdmin = function () {
+  return sessionStorage.getItem(GATE_ROLE_KEY) === "admin";
+};
