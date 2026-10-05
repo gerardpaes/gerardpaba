@@ -7,8 +7,20 @@
 
 function pad(n) { return String(n).padStart(2, "0"); }
 
-function buildDateTimes(isoDate, time) {
+// `endIsoDate`, if given and different from `isoDate`, makes this a
+// multi-day all-day event (e.g. a 3-day trip): DTEND becomes the day AFTER
+// endIsoDate, per the iCal/Google convention that DTEND is exclusive.
+// `time` is ignored for multi-day ranges (a span of days has no single
+// start/end clock time).
+function buildDateTimes(isoDate, time, endIsoDate) {
   const [y, m, d] = isoDate.split("-").map(Number);
+  if (endIsoDate && endIsoDate !== isoDate) {
+    const [ey, em, ed] = endIsoDate.split("-").map(Number);
+    const start = new Date(y, m - 1, d);
+    const end = new Date(ey, em - 1, ed);
+    end.setDate(end.getDate() + 1);
+    return { start, end, allDay: true };
+  }
   if (!time) {
     const start = new Date(y, m - 1, d);
     const end = new Date(y, m - 1, d);
@@ -30,8 +42,8 @@ function fmtDateTime(dt) {
   return `${fmtDateOnly(dt)}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
 }
 
-export function googleCalendarUrl(title, isoDate, details = "", time = null, location = "") {
-  const { start, end, allDay } = buildDateTimes(isoDate, time);
+export function googleCalendarUrl(title, isoDate, details = "", time = null, location = "", endIsoDate = null) {
+  const { start, end, allDay } = buildDateTimes(isoDate, time, endIsoDate);
   const dates = allDay
     ? `${fmtDateOnly(start)}/${fmtDateOnly(end)}`
     : `${fmtDateTime(start)}/${fmtDateTime(end)}`;
@@ -56,8 +68,8 @@ function isIOS() {
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
-export function downloadIcs(title, isoDate, details = "", time = null, location = "") {
-  const { start, end, allDay } = buildDateTimes(isoDate, time);
+export function downloadIcs(title, isoDate, details = "", time = null, location = "", endIsoDate = null) {
+  const { start, end, allDay } = buildDateTimes(isoDate, time, endIsoDate);
 
   const uid = `${Date.now()}@findadate`;
   const now = new Date();
@@ -84,11 +96,20 @@ export function downloadIcs(title, isoDate, details = "", time = null, location 
   ].filter(Boolean).join("\r\n");
 
   if (isIOS()) {
-    // On iOS Safari, navigating to a data: URI with calendar content opens
-    // the native "Add to Calendar" preview directly (the download attribute
-    // trick below does not work there at all).
+    // On iOS Safari, assigning window.location.href = "data:..." from a
+    // script is silently blocked (it is not treated as a direct result of
+    // the user gesture), so nothing visibly happens. The reliable method is
+    // to create a real <a href="data:..."> anchor and dispatch a click on it
+    // synchronously, inside the same click handler call stack: Safari then
+    // opens its native "Add to Calendar" preview for the .ics content.
     const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
-    window.location.href = dataUrl;
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.setAttribute("download", `${slugify(title)}.ics`);
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 0);
     return;
   }
 
@@ -161,11 +182,11 @@ function openCalChoiceModal(getParams, labels) {
   overlay.querySelectorAll(".cal-choice-opt").forEach(item => {
     item.addEventListener("click", () => {
       close();
-      const { title, isoDate, details, time, location } = getParams();
+      const { title, isoDate, details, time, location, endIsoDate } = getParams();
       if (item.dataset.kind === "google") {
-        window.open(googleCalendarUrl(title, isoDate, details, time, location), "_blank", "noopener");
+        window.open(googleCalendarUrl(title, isoDate, details, time, location, endIsoDate), "_blank", "noopener");
       } else {
-        downloadIcs(title, isoDate, details, time, location);
+        downloadIcs(title, isoDate, details, time, location, endIsoDate);
       }
     });
   });
