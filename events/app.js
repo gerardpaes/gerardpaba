@@ -10,6 +10,14 @@ initLanguageSwitcher();
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
 
+// Fixed shortlist of frequent friends, offered as native <datalist>
+// suggestions on the name field. Pure convenience — any other name can
+// still be typed freely, it's not a restricted/validated list.
+const FRIEND_NAMES = [
+  "Gerard Paba", "Gerard Padrós", "Pol", "Laura Sánchez",
+  "Laura Alcoberro", "Angola", "Guillem", "Artur"
+];
+
 const titleEl = document.getElementById("event-title");
 const subtitleEl = document.getElementById("event-subtitle");
 const nameInput = document.getElementById("your-name");
@@ -20,6 +28,10 @@ const resultsAreaEl = document.getElementById("results-area");
 const participantsChipsEl = document.getElementById("participants-chips");
 const toastEl = document.getElementById("toast");
 const approvedBannerArea = document.getElementById("approved-banner-area");
+const friendSuggestionsEl = document.getElementById("friend-suggestions");
+if (friendSuggestionsEl) {
+  friendSuggestionsEl.innerHTML = FRIEND_NAMES.map(n => `<option value="${n}"></option>`).join("");
+}
 
 const pickCalendarEl = document.getElementById("pick-calendar");
 const resultsCalendarEl = document.getElementById("results-calendar");
@@ -47,6 +59,81 @@ function slugifyName(name) {
 
 function initials(name) {
   return name.trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase() || "").join("");
+}
+
+function isoAddDays(iso, n) {
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// Finds every maximal run of CONSECUTIVE calendar days where at least 2
+// distinct people marked themselves "available" on ALL of those days (a
+// true intersection, not just "available on at least one day in range").
+// This is what lets a 3-day-trip style event surface naturally: if you
+// mark 1-2-3-4 available and a friend only marks 1-2, the only day set
+// both of you share on every day is 1-2, so that's the stretch returned
+// — not 1-4.
+//
+// Returns a list of { startIso, endIso, days, names } candidate stretches,
+// one entry per distinct group of people sharing a maximal stretch,
+// including single-day stretches (length 1) so the normal "one day" case
+// still works exactly like before. Sorted by: more people first, then
+// longer stretch first.
+function computeStretches() {
+  const people = Object.entries(responses).map(([key, r]) => ({
+    key,
+    name: r.displayName + (r.plusOne ? " (+1)" : ""),
+    available: new Set(r.available || [])
+  }));
+  if (people.length === 0) return [];
+
+  const allIsos = new Set();
+  people.forEach(p => p.available.forEach(iso => allIsos.add(iso)));
+  if (allIsos.size === 0) return [];
+
+  const sortedIsos = Array.from(allIsos).sort();
+  const stretches = [];
+  const seen = new Set(); // dedupe identical {startIso,endIso,memberKeys} combos
+
+  // For every possible start day, grow the stretch day by day for as long
+  // as at least 2 people remain available on EVERY day so far; record each
+  // length along the way (so shorter sub-stretches with potentially more
+  // people also get considered — e.g. day 1 alone might have 4 people
+  // while 1-2 only has 2).
+  sortedIsos.forEach(startIso => {
+    let currentIso = startIso;
+    let commonKeys = new Set(people.filter(p => p.available.has(startIso)).map(p => p.key));
+    let len = 1;
+    while (commonKeys.size >= 1) {
+      const dedupeKey = `${startIso}|${currentIso}|${Array.from(commonKeys).sort().join(",")}`;
+      if (!seen.has(dedupeKey)) {
+        seen.add(dedupeKey);
+        const members = people.filter(p => commonKeys.has(p.key));
+        stretches.push({
+          startIso,
+          endIso: currentIso,
+          days: len,
+          names: members.map(p => p.name)
+        });
+      }
+      const nextIso = isoAddDays(currentIso, 1);
+      const nextKeys = new Set(
+        Array.from(commonKeys).filter(k => people.find(p => p.key === k).available.has(nextIso))
+      );
+      if (nextKeys.size === 0) break;
+      commonKeys = nextKeys;
+      currentIso = nextIso;
+      len++;
+    }
+  });
+
+  // Keep only stretches with 2+ people (true coincidences) OR single days
+  // with 1 person (so the "just one person voted" case still shows up),
+  // then sort by headcount desc, then length desc.
+  const filtered = stretches.filter(s => s.names.length >= 2 || s.days === 1);
+  filtered.sort((a, b) => (b.names.length - a.names.length) || (b.days - a.days));
+  return filtered;
 }
 
 // Compute, for every date that appears in ANY response, the total headcount
@@ -89,7 +176,10 @@ function renderApprovedBanner() {
     approvedBannerArea.innerHTML = "";
     return;
   }
-  const dateLabel = formatDateLong(eventData.approvedDate);
+  const isRange = eventData.approvedEndDate && eventData.approvedEndDate !== eventData.approvedDate;
+  const dateLabel = isRange
+    ? `${formatDateLong(eventData.approvedDate)} → ${formatDateLong(eventData.approvedEndDate)}`
+    : formatDateLong(eventData.approvedDate);
   const title = eventData.name;
 
   const timeVal = eventData.approvedTime || "";
@@ -104,12 +194,13 @@ function renderApprovedBanner() {
       <div style="flex:1; min-width:220px;">
         <div class="approved-text">${t("approved_banner", dateLabel)}</div>
         <div class="approved-view-mode">
-          <span class="approved-meta-line">🕒 ${timeLabel} &nbsp;·&nbsp; 📍 ${locationLabel}</span>
+          ${isRange ? "" : `<span class="approved-meta-line">🕒 ${timeLabel} &nbsp;·&nbsp; 📍 ${locationLabel}</span>`}
+          ${isRange ? `<span class="approved-meta-line">📍 ${locationLabel}</span>` : ""}
           ${admin ? `<button class="edit-toggle-btn" id="approved-edit-btn" type="button">${t("btn_edit")}</button>` : ""}
         </div>
         ${admin ? `<div class="edit-fields-inline" id="approved-edit-fields" style="display:none;">
           <input type="date" id="approved-date-input" value="${eventData.approvedDate}">
-          <input type="time" id="approved-time-input" value="${timeVal}">
+          ${isRange ? `<input type="date" id="approved-end-date-input" value="${eventData.approvedEndDate}">` : `<input type="time" id="approved-time-input" value="${timeVal}">`}
           <input type="text" id="approved-location-input" value="${locationVal}" data-i18n-placeholder="placeholder_location">
         </div>` : ""}
       </div>
@@ -123,8 +214,9 @@ function renderApprovedBanner() {
     title,
     isoDate: eventData.approvedDate,
     details: `Find a Date: ${title}`,
-    time: eventData.approvedTime || null,
-    location: eventData.location || ""
+    time: isRange ? null : (eventData.approvedTime || null),
+    location: eventData.location || "",
+    endIsoDate: eventData.approvedEndDate || null
   });
   const calBtn = createCalendarAddButton(getParams, {
     addToCalendar: t("add_to_calendar"),
@@ -135,6 +227,7 @@ function renderApprovedBanner() {
 
   if (admin) {
     const dateInput = document.getElementById("approved-date-input");
+    const endDateInput = document.getElementById("approved-end-date-input");
     const timeInput = document.getElementById("approved-time-input");
     const locationInput = document.getElementById("approved-location-input");
     const editBtn = document.getElementById("approved-edit-btn");
@@ -161,30 +254,52 @@ function renderApprovedBanner() {
         const eventRef = doc(collection(db, "events"), eventId);
         await updateDoc(eventRef, { approvedDate: dv });
         eventData.approvedDate = dv;
-        resultsCal.setApprovedDate(dv);
+        resultsCal.setApprovedDate(dv, eventData.approvedEndDate);
         renderApprovedBanner();
         renderResults();
         showToast(t("toast_approved", formatDateLong(dv)));
       } catch (e) { console.error(e); }
     });
 
+    if (endDateInput) {
+      endDateInput.addEventListener("change", async () => {
+        const ev = endDateInput.value;
+        if (!ev) return;
+        try {
+          const eventRef = doc(collection(db, "events"), eventId);
+          await updateDoc(eventRef, { approvedEndDate: ev });
+          eventData.approvedEndDate = ev;
+          resultsCal.setApprovedDate(eventData.approvedDate, ev);
+          renderApprovedBanner();
+          renderResults();
+          showToast(t("toast_approved", `${formatDateLong(eventData.approvedDate)} \u2192 ${formatDateLong(ev)}`));
+        } catch (e) { console.error(e); }
+      });
+    }
+
     function refreshApprovedMetaLine() {
       const metaEl = document.querySelector(".approved-meta-line");
       if (!metaEl) return;
-      const tLabel = timeInput.value || t("no_time_set");
       const lLabel = locationInput.value || t("no_location_set");
-      metaEl.textContent = `🕒 ${tLabel} \u00b7 📍 ${lLabel}`;
+      if (timeInput) {
+        const tLabel = timeInput.value || t("no_time_set");
+        metaEl.textContent = `🕒 ${tLabel} \u00b7 📍 ${lLabel}`;
+      } else {
+        metaEl.textContent = `📍 ${lLabel}`;
+      }
     }
 
-    timeInput.addEventListener("change", async () => {
-      const tv = timeInput.value || null;
-      try {
-        const eventRef = doc(collection(db, "events"), eventId);
-        await updateDoc(eventRef, { approvedTime: tv });
-        eventData.approvedTime = tv;
-        refreshApprovedMetaLine();
-      } catch (e) { console.error(e); }
-    });
+    if (timeInput) {
+      timeInput.addEventListener("change", async () => {
+        const tv = timeInput.value || null;
+        try {
+          const eventRef = doc(collection(db, "events"), eventId);
+          await updateDoc(eventRef, { approvedTime: tv });
+          eventData.approvedTime = tv;
+          refreshApprovedMetaLine();
+        } catch (e) { console.error(e); }
+      });
+    }
 
     locationInput.addEventListener("change", async () => {
       const lv = locationInput.value || "";
@@ -199,8 +314,9 @@ function renderApprovedBanner() {
     document.getElementById("unapprove-btn").addEventListener("click", async () => {
       try {
         const eventRef = doc(collection(db, "events"), eventId);
-        await updateDoc(eventRef, { approvedDate: null });
+        await updateDoc(eventRef, { approvedDate: null, approvedEndDate: null });
         eventData.approvedDate = null;
+        eventData.approvedEndDate = null;
         renderApprovedBanner();
         resultsCal.setApprovedDate(null);
         renderResults();
@@ -229,6 +345,10 @@ function renderResults() {
     return;
   }
 
+  // Single-day tallies (keeps tentative-mark display working exactly like
+  // before) plus multi-day stretches (true availability intersections,
+  // e.g. a 3-day trip where everyone's free days overlap on only 2 of
+  // them). Both kinds are merged into one ranked list.
   const tallyList = dates.map(iso => {
     let availNames = [];
     let tentNames = [];
@@ -238,21 +358,38 @@ function renderResults() {
       if (avail.includes(iso)) availNames.push(r.displayName + (r.plusOne ? " (+1)" : ""));
       else if (tent.includes(iso)) tentNames.push(r.displayName + (r.plusOne ? " (+1)" : ""));
     });
-    return { iso, total: counts[iso] || 0, tentTotal: tentCounts[iso] || 0, availNames, tentNames };
+    return {
+      startIso: iso, endIso: iso, days: 1,
+      total: counts[iso] || 0, tentTotal: tentCounts[iso] || 0,
+      availNames, tentNames
+    };
   });
 
-  const ranked = tallyList.slice().sort((a, b) => b.total - a.total);
+  const stretchList = computeStretches()
+    .filter(s => s.days > 1) // length-1 stretches are already covered by tallyList (with tentative support)
+    .map(s => ({
+      startIso: s.startIso, endIso: s.endIso, days: s.days,
+      total: s.names.length, tentTotal: 0,
+      availNames: s.names, tentNames: []
+    }));
+
+  const combined = [...tallyList, ...stretchList];
+  const ranked = combined.slice().sort((a, b) => (b.total - a.total) || (b.days - a.days));
 
   let html = `<div class="rank-list">`;
   ranked.forEach((item, idx) => {
     const badgeClass = idx === 0 ? "gold" : idx === 1 ? "silver" : idx === 2 ? "bronze" : "";
     const pct = Math.round((item.total / maxTotal) * 100);
-    const isApproved = eventData.approvedDate === item.iso;
+    const isApproved = eventData.approvedDate === item.startIso &&
+      (eventData.approvedEndDate || eventData.approvedDate) === item.endIso;
+    const dateLabel = item.days > 1
+      ? `${formatDateLong(item.startIso)} → ${formatDateLong(item.endIso)}`
+      : formatDateLong(item.startIso);
     html += `
       <div class="rank-card${isApproved ? " is-approved" : ""}">
         <div class="rank-top-row">
           <div class="rank-badge ${badgeClass}">${idx + 1}</div>
-          <div class="rank-date">${formatDateLong(item.iso)}</div>
+          <div class="rank-date">${dateLabel}${item.days > 1 ? `<span class="rank-days-badge">${item.days}d</span>` : ""}</div>
           ${isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : ""}
           <div class="rank-total">
             ${item.total}${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}
@@ -264,7 +401,7 @@ function renderResults() {
           ${item.tentNames.length ? `<span class="rank-who rank-tentative">❓ ${item.tentNames.join(", ")}</span>` : ""}
           ${!item.availNames.length && !item.tentNames.length ? `<span class="rank-who">—</span>` : ""}
         </div>
-        ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-iso="${item.iso}" type="button">
+        ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-start="${item.startIso}" data-end="${item.endIso}" type="button">
           ${isApproved ? "✓ " + t("approved_tag") : t("approve_btn")}
         </button>` : ""}
       </div>
@@ -275,15 +412,20 @@ function renderResults() {
 
   resultsAreaEl.querySelectorAll(".approve-date-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
-      const iso = btn.dataset.iso;
+      const startIso = btn.dataset.start;
+      const endIso = btn.dataset.end;
       try {
         const eventRef = doc(collection(db, "events"), eventId);
-        await updateDoc(eventRef, { approvedDate: iso });
-        eventData.approvedDate = iso;
-        resultsCal.setApprovedDate(iso);
+        await updateDoc(eventRef, {
+          approvedDate: startIso,
+          approvedEndDate: endIso !== startIso ? endIso : null
+        });
+        eventData.approvedDate = startIso;
+        eventData.approvedEndDate = endIso !== startIso ? endIso : null;
+        resultsCal.setApprovedDate(startIso, eventData.approvedEndDate);
         renderApprovedBanner();
         renderResults();
-        showToast(t("toast_approved", formatDateLong(iso)));
+        showToast(t("toast_approved", endIso !== startIso ? `${formatDateLong(startIso)} → ${formatDateLong(endIso)}` : formatDateLong(startIso)));
       } catch (e) {
         console.error(e);
       }
@@ -339,7 +481,8 @@ async function loadEvent() {
 
     resultsCal = new MonthCalendar(resultsCalendarEl, {
       mode: "display",
-      approvedDate: eventData.approvedDate || null
+      approvedDate: eventData.approvedDate || null,
+      approvedEndDate: eventData.approvedEndDate || null
     });
     resultsCal.render();
 
