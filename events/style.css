@@ -312,10 +312,38 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  --cal-gap: 6px;
+  gap: var(--cal-gap);
+  position: relative;
+}
+
+/* Weekend background: a tinted panel that sits OUTSIDE/behind the Sat+Dom
+   day cells (and their header), spanning the full column height, rather
+   than any mark drawn inside the cell itself. The cells keep their normal
+   candidate/heat/state backgrounds on top (z-index 1); this pseudo layer
+   only shows in the gaps around/between them. */
+.cal-grid::before,
+.cal-grid::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap) * 1.4);
+  background: #ececef;
+  border-radius: 14px;
+  z-index: 0;
+  pointer-events: none;
+}
+.cal-grid::before {
+  left: calc(5 * ((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap)) - var(--cal-gap) * 0.7);
+}
+.cal-grid::after {
+  left: calc(6 * ((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap)) - var(--cal-gap) * 0.7);
 }
 
 .cal-weekday {
+  position: relative;
+  z-index: 1;
   text-align: center;
   font-size: 11px;
   font-weight: 700;
@@ -326,6 +354,7 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 
 .cal-day {
   position: relative;
+  z-index: 1;
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
@@ -341,6 +370,8 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 }
 
 .cal-day.empty { visibility: hidden; }
+
+.cal-day-num { display: inline-block; }
 
 .cal-day.candidate {
   cursor: pointer;
@@ -609,6 +640,21 @@ footer.hint {
   border-color: var(--accent);
 }
 
+.role-switch-btn {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #fafafa;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+}
+
+.role-switch-btn:hover { border-color: var(--accent); background: #eaf3ff; }
+
 /* ===== TRI-STATE CALENDAR DAYS (see redesigned rules further below) ===== */
 
 .cal-legend-tristate {
@@ -735,7 +781,7 @@ footer.hint {
   .lang-switcher { order: 10; }
   .approved-banner { flex-direction: column; align-items: stretch; }
   .cal-export-row { justify-content: flex-start; }
-  .cal-grid { gap: 4px; }
+  .cal-grid { --cal-gap: 4px; gap: var(--cal-gap); }
   .cal-day { font-size: 12px; }
 }
 
@@ -1056,21 +1102,25 @@ footer.hint {
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-/* Redesigned tri-state day marks: big, unmistakable icon badge instead of
-   a tiny corner tick, flat solid colors instead of stripes/gradients so
-   the state reads instantly even at a glance. These rules intentionally
+/* Tri-state day marks: flat solid background for available/tentative
+   (reads instantly at a glance) plus a small corner badge icon. The badge
+   is deliberately NOT a full-cell overlay so the day number underneath
+   stays fully legible at normal size/opacity. These rules intentionally
    come after (and are at least as specific as) the weekend-grey rule
    below, so available/tentative always wins over the weekend tint. */
 .cal-day .state-icon {
   position: absolute;
-  inset: 0;
+  top: 3px;
+  right: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1;
-  opacity: 0.92;
+  opacity: 0.95;
   pointer-events: none;
 }
 
@@ -1090,11 +1140,7 @@ footer.hint {
   box-shadow: 0 2px 8px rgba(255,159,10,0.4);
 }
 
-.cal-day.state-available .cal-day-num,
-.cal-day.state-tentative .cal-day-num {
-  opacity: 0.35;
-  font-size: 11px;
-}
+
 
 /* ===== DELETE EVENT BUTTON ===== */
 .delete-event-btn {
@@ -1415,35 +1461,21 @@ footer.hint {
 }
 
 /* ===== WEEKEND HIGHLIGHTING =====
-   Weekends get a small corner dot so Sat/Sun are easy to spot at a glance,
-   without ever changing the actual background color: once a day carries a
-   real answer (available/tentative) or a heat-N vote level, it must look
-   IDENTICAL to a weekday with the same state/level. The dot itself is
-   hidden once a day is marked available/tentative, so a selected day never
-   looks "different" just because it falls on a weekend. */
+   Weekend cells must NEVER differ in fill color from a weekday cell in
+   the same state (empty / candidate / available / tentative / heat-N):
+   that's why there is no `.cal-day.cal-day-weekend.candidate` override
+   here (it used to exist and, by sheer file-order luck, overrode the
+   green/orange available/tentative fill on weekends - removed).
+   The weekend marker itself now lives OUTSIDE the day cells: see the
+   .cal-grid::before/::after tinted column panels declared next to
+   .cal-grid above. Those sit behind the cells (z-index 0) so Sat/Dom
+   read as a highlighted column without ever touching a cell's own
+   background/fill. Only the heat levels still need a per-cell override
+   here, since the plain weekend grey is now handled by the grid panel. */
 .cal-weekday.cal-weekday-weekend { color: var(--text); font-weight: 800; }
-
-.cal-day.cal-day-weekend { background: #ececef; }
-
-.cal-day.cal-day-weekend.candidate { background: #f0f6ff; }
 
 .cal-day.cal-day-weekend.heat-1 { background: #e8f6ea; }
 .cal-day.cal-day-weekend.heat-2 { background: #c3edc9; }
 .cal-day.cal-day-weekend.heat-3 { background: #8fe09d; }
 .cal-day.cal-day-weekend.heat-4 { background: #4fcf68; }
 .cal-day.cal-day-weekend.heat-5 { background: #2fb850; }
-
-.cal-day.cal-day-weekend::before {
-  content: "";
-  position: absolute;
-  top: 5px; right: 5px;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: #9a9aa5;
-  z-index: 1;
-}
-
-.cal-day.cal-day-weekend.state-available::before,
-.cal-day.cal-day-weekend.state-tentative::before {
-  display: none;
-}
