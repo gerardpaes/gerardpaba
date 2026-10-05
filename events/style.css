@@ -256,48 +256,57 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
   cursor: pointer;
 }
 
-/* ===== EVENT LIST (home page) ===== */
-.event-list { display: flex; flex-direction: column; gap: 16px; }
+/* ===== EVENT LIST (home page) — compact "votar" card (V2) ===== */
+.event-list { display: flex; flex-direction: column; gap: 10px; }
 
 .event-row {
   display: flex;
   align-items: center;
+  gap: 12px;
   background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.25s ease;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(16px);
 }
 
 .event-row.visible { opacity: 1; transform: translateY(0); }
-.event-row:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1); }
+.event-row:hover { box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08); }
+
+.event-row .ev-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: #f0f0f3;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
 
 .event-row .ev-link-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex: 1;
-  padding: 22px 26px;
+  min-width: 0;
   text-decoration: none;
   color: inherit;
 }
 
-.event-row .delete-event-btn { margin-right: 16px; flex-shrink: 0; }
-
-.event-row .ev-icon {
-  width: 54px; height: 54px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #0071e3, #4da3ff);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; color: #fff;
-  flex-shrink: 0;
-  margin-right: 18px;
+.event-row .ev-info { min-width: 0; }
+.event-row .ev-info .ev-name {
+  font-size: 15.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.event-row .ev-info .ev-meta { color: var(--muted); font-size: 13px; margin-top: 3px; }
 
-.event-row .ev-info { flex: 1; }
-.event-row .ev-info .ev-name { font-size: 18px; font-weight: 600; }
-.event-row .ev-info .ev-meta { color: var(--muted); font-size: 14px; margin-top: 3px; }
+.event-row .vote-btn {
+  background: var(--accent); color: #fff; border: none; border-radius: 999px;
+  padding: 8px 18px; font-size: 13.5px; font-weight: 600;
+  flex-shrink: 0;
+}
+.event-row .vote-btn:hover { background: var(--accent-dark); }
+
+.event-row .delete-event-btn { flex-shrink: 0; }
 
 .chip {
   display: inline-flex;
@@ -780,7 +789,6 @@ footer.hint {
 .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .filter-chip:hover { border-color: var(--accent); }
 
-.event-row .ev-status { margin-top: 6px; }
 
 /* ===== Extra mobile tweaks for new features ===== */
 @media (max-width: 600px) {
@@ -832,17 +840,18 @@ footer.hint {
   transition: opacity 0.4s, transform 0.4s, box-shadow 0.2s;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  position: relative;
 }
 
 .upcoming-card:hover { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); }
 
 .upcoming-card.visible { opacity: 1; transform: translateY(0); }
 
-/* Compact, stacked layout: 1) name row, 2) date+location row,
-   3) edit/calendar row, 4) attendees row, 5) delete row (admin only).
-   Each row is deliberately thin so the whole card stays short on mobile
-   instead of wrapping into many tall lines. */
+/* Compact layout: 1) head row (date pill centered with name+meta text),
+   2) foot row (view-attendees only - calendar button gets prepended
+   here too). Edit/delete for admins live behind the "..." kebab menu
+   in the corner instead of their own rows, so the card stays short. */
 .uc-row {
   display: flex;
   align-items: center;
@@ -850,50 +859,93 @@ footer.hint {
   flex-wrap: wrap;
 }
 
-.uc-head { gap: 10px; }
+.uc-head { align-items: center; gap: 10px; }
+
+.uc-head-text { flex: 1; min-width: 0; }
 
 .upcoming-name {
   font-size: 15px;
   font-weight: 600;
-  flex: 1;
-  min-width: 0;
 }
 
-.uc-meta { padding-left: 50px; margin-top: -4px; }
+.uc-meta { margin-top: -4px; }
 
-.uc-actions-primary,
-.uc-actions-attendees,
-.uc-actions-delete {
-  padding-left: 50px;
-}
+.uc-foot { padding-left: 50px; }
 
-.uc-actions-primary:empty,
-.uc-actions-attendees:empty,
-.uc-actions-delete:empty { display: none; }
-
-.upcoming-datebox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 0;
-}
+.uc-foot:empty { display: none; }
 
 .upcoming-date-pill {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: var(--accent);
   color: #fff;
   border-radius: 10px;
   padding: 4px 10px;
   min-width: 42px;
+  min-height: 42px;
   flex-shrink: 0;
+  align-self: center;
 }
 
 .upcoming-date-pill .d-num { font-size: 16px; font-weight: 700; line-height: 1.1; }
 .upcoming-date-pill .d-month { font-size: 9px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px; }
 
 .upcoming-date-text { font-size: 13px; color: var(--muted); }
+
+/* "..." kebab menu (admin only): opens a small floating menu with
+   Edit/Delete, instead of two extra always-visible rows/buttons. */
+.kebab-wrap { position: absolute; top: 10px; right: 10px; }
+
+.kebab-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fafafa;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kebab-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  min-width: 150px;
+  display: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.kebab-menu.open { display: block; }
+
+.kebab-menu button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.kebab-menu button:hover { background: #f5f5f7; }
+.kebab-menu button.danger { color: var(--danger); }
 
 .time-input-row {
   display: flex;
@@ -913,23 +965,13 @@ footer.hint {
   font-family: inherit;
 }
 
-.uc-actions-primary {
+.uc-foot {
   gap: 6px;
 }
 
-.uc-actions-primary .btn.cal-export,
-.uc-actions-primary .edit-toggle-btn {
+.uc-foot .btn.cal-export {
   font-size: 12px;
   padding: 6px 12px;
-}
-
-.edit-toggle-btn {
-  border: 1px solid var(--border);
-  background: #fafafa;
-  border-radius: 999px;
-  color: var(--text);
-  cursor: pointer;
-  font-family: inherit;
 }
 
 .attendees-toggle {
@@ -941,19 +983,6 @@ footer.hint {
   cursor: pointer;
   padding: 0;
   margin-top: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.uc-actions-delete .delete-event-btn {
-  background: none;
-  border: none;
-  color: var(--danger);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -1034,7 +1063,7 @@ footer.hint {
   .upcoming-card { padding: 10px 14px; gap: 4px; }
   .upcoming-date-pill { min-width: 36px; padding: 3px 8px; }
   .upcoming-date-pill .d-num { font-size: 14px; }
-  .uc-meta, .uc-actions-primary, .uc-actions-attendees, .uc-actions-delete { padding-left: 44px; }
+  .uc-foot { padding-left: 44px; }
   .upcoming-name { font-size: 14px; }
   .upcoming-date-text { font-size: 12px; }
 }
@@ -1258,6 +1287,18 @@ footer.hint {
   display: none;
   gap: 12px;
   margin-bottom: 6px;
+}
+
+.multi-day-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 6px;
+}
+.multi-day-toggle-row input[type="checkbox"] {
+  width: 18px; height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .confirmed-fields.open { display: flex; flex-wrap: wrap; }
@@ -1520,6 +1561,22 @@ footer.hint {
   font-weight: 600;
   margin-left: 4px;
 }
+
+/* Multi-day stretch badge next to a rank-date range (e.g. "3d") */
+.rank-days-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 700;
+  background: #eef4ff;
+  border-radius: 999px;
+  padding: 2px 7px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Multi-day pill in the "Upcoming events" card ("12-14" instead of "12") */
+.upcoming-date-pill .d-num-range { font-size: 13px; }
 
 /* ===== WEEKEND / BANK HOLIDAY HIGHLIGHTING =====
    Non-working days (Sat, Sun, and fixed Spain/Catalonia/Barcelona bank
