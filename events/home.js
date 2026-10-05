@@ -197,28 +197,31 @@ function renderUpcoming() {
     const card = document.createElement("div");
     card.className = "upcoming-card";
     card.innerHTML = `
-      <div class="upcoming-top">
-        <div class="upcoming-main">
-          <div class="upcoming-date-pill">
-            <span class="d-num">${dayNum}</span>
-            <span class="d-month">${month}</span>
-          </div>
-          <div>
-            <div class="upcoming-name">${title}</div>
-            <div class="upcoming-date-text view-mode-text">${full}${time ? " · " + time : ""}${location ? " · " + location : ""}</div>
-            <div class="edit-fields-inline" style="display:none;">
-              <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
-              <input type="time" class="time-input" data-id="${id}" value="${time}">
-              <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
-            </div>
-          </div>
+      <div class="uc-row uc-head">
+        <div class="upcoming-date-pill">
+          <span class="d-num">${dayNum}</span>
+          <span class="d-month">${month}</span>
         </div>
-        <div class="upcoming-actions cal-actions-slot">
-          ${window.isAdmin() ? `<button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>` : ""}
-          <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
-          ${window.isAdmin() ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
+        <div class="upcoming-name">${title}</div>
+      </div>
+      <div class="uc-row uc-meta">
+        <div class="upcoming-date-text view-mode-text">${full}${time ? " · " + time : ""}${location ? " · " + location : ""}</div>
+        <div class="edit-fields-inline" style="display:none;">
+          <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
+          <input type="time" class="time-input" data-id="${id}" value="${time}">
+          <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
         </div>
       </div>
+      <div class="uc-row uc-actions-primary cal-actions-slot">
+        ${window.isAdmin() ? `<button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>` : ""}
+      </div>
+      <div class="uc-row uc-actions-attendees">
+        <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
+      </div>
+      ${window.isAdmin() ? `
+      <div class="uc-row uc-actions-delete">
+        <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑 ${t("btn_delete_event")}</button>
+      </div>` : ""}
       <div class="attendees-list" id="attendees-${id}"></div>
     `;
     upcomingGridEl.appendChild(card);
