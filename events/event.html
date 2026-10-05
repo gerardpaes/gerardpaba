@@ -39,7 +39,8 @@
     <div class="name-emoji-row">
       <div style="flex:1;">
         <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
-        <input type="text" id="your-name" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
+        <input type="text" id="your-name" list="friend-suggestions" autocomplete="off" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
+        <datalist id="friend-suggestions"></datalist>
       </div>
       <div>
         <label class="field-label spacer-label">&nbsp;</label>
