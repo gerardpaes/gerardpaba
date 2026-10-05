@@ -46,6 +46,16 @@ export function googleCalendarUrl(title, isoDate, details = "", time = null, loc
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
+function isIOS() {
+  // iPhone/iPad Safari ignores the <a download> attribute on blob: URLs,
+  // so the normal "create blob + click hidden link" trick silently does
+  // nothing there. iPadOS 13+ also reports as "MacIntel" but is touch-only,
+  // so we check maxTouchPoints too.
+  const ua = navigator.userAgent || "";
+  return /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
 export function downloadIcs(title, isoDate, details = "", time = null, location = "") {
   const { start, end, allDay } = buildDateTimes(isoDate, time);
 
@@ -72,6 +82,15 @@ export function downloadIcs(title, isoDate, details = "", time = null, location 
     "END:VEVENT",
     "END:VCALENDAR"
   ].filter(Boolean).join("\r\n");
+
+  if (isIOS()) {
+    // On iOS Safari, navigating to a data: URI with calendar content opens
+    // the native "Add to Calendar" preview directly (the download attribute
+    // trick below does not work there at all).
+    const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
+    window.location.href = dataUrl;
+    return;
+  }
 
   const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
