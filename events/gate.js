@@ -8,16 +8,17 @@ const GATE_PASSWORDS = { "gay": "guest", "admin": "admin" };
 const GATE_SESSION_KEY = "findadate:unlocked";
 const GATE_ROLE_KEY = "findadate:role";
 
-function buildOverlay() {
+function buildOverlay(isSwitch) {
   const overlay = document.createElement("div");
   overlay.id = "gate-overlay";
   overlay.innerHTML = `
     <div class="gate-card">
       <div class="gate-icon">🔒</div>
-      <h2>Private area</h2>
-      <p>Enter the password to continue.</p>
+      <h2>${isSwitch ? "Switch role" : "Private area"}</h2>
+      <p>${isSwitch ? "Enter a password to switch role." : "Enter the password to continue."}</p>
       <input type="password" id="gate-password" placeholder="Password" autocomplete="off">
       <button class="btn block" id="gate-submit" type="button">Enter</button>
+      ${isSwitch ? `<button class="btn block secondary" id="gate-cancel" type="button" style="margin-top:8px;">Cancel</button>` : ""}
       <p class="gate-error" id="gate-error"></p>
     </div>
   `;
@@ -65,6 +66,7 @@ function buildOverlay() {
       sessionStorage.setItem(GATE_ROLE_KEY, role);
       overlay.remove();
       style.remove();
+      if (isSwitch) window.location.reload();
     } else {
       errorEl.textContent = "Incorrect password, try again.";
       input.value = "";
@@ -74,6 +76,12 @@ function buildOverlay() {
 
   submitBtn.addEventListener("click", tryUnlock);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+  if (isSwitch) {
+    overlay.querySelector("#gate-cancel").addEventListener("click", () => {
+      overlay.remove();
+      style.remove();
+    });
+  }
   setTimeout(() => input.focus(), 50);
 }
 
@@ -92,3 +100,19 @@ if (sessionStorage.getItem(GATE_SESSION_KEY) !== "1") {
 window.isAdmin = function () {
   return sessionStorage.getItem(GATE_ROLE_KEY) === "admin";
 };
+
+// Lets the user re-enter a password mid-session to switch role (e.g. from
+// guest to admin) without needing a new tab/incognito window. On success
+// the page reloads so every admin-gated button re-renders correctly.
+window.openRoleSwitcher = function () {
+  buildOverlay(true);
+};
+
+window.currentRole = function () {
+  return sessionStorage.getItem(GATE_ROLE_KEY) || "guest";
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("role-switch-btn");
+  if (btn) btn.addEventListener("click", () => window.openRoleSwitcher());
+});
