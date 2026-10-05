@@ -214,9 +214,9 @@ function renderUpcoming() {
           </div>
         </div>
         <div class="upcoming-actions cal-actions-slot">
-          <button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>
+          ${window.isAdmin() ? `<button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>` : ""}
           <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
-          <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
+          ${window.isAdmin() ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
         </div>
       </div>
       <div class="attendees-list" id="attendees-${id}"></div>
@@ -249,18 +249,20 @@ function renderUpcoming() {
       viewText.textContent = `${parts.full}${tm ? " · " + tm : ""}${loc ? " · " + loc : ""}`;
     }
 
-    editBtn.addEventListener("click", () => {
-      const isEditing = editFields.style.display !== "none";
-      if (isEditing) {
-        editFields.style.display = "none";
-        viewText.style.display = "";
-        editBtn.textContent = t("btn_edit");
-      } else {
-        editFields.style.display = "flex";
-        viewText.style.display = "none";
-        editBtn.textContent = t("btn_done");
-      }
-    });
+    if (editBtn) {
+      editBtn.addEventListener("click", () => {
+        const isEditing = editFields.style.display !== "none";
+        if (isEditing) {
+          editFields.style.display = "none";
+          viewText.style.display = "";
+          editBtn.textContent = t("btn_edit");
+        } else {
+          editFields.style.display = "flex";
+          viewText.style.display = "none";
+          editBtn.textContent = t("btn_done");
+        }
+      });
+    }
 
     card.querySelector(".date-input").addEventListener("change", async (e) => {
       const dateVal = e.target.value;
@@ -288,7 +290,8 @@ function renderUpcoming() {
       } catch (err) { console.error(err); }
     });
 
-    card.querySelector(".delete-event-btn").addEventListener("click", (e) => {
+    const upcomingDeleteBtn = card.querySelector(".delete-event-btn");
+    if (upcomingDeleteBtn) upcomingDeleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openConfirmDialog(t("confirm_delete_event"), async () => {
         try {
@@ -380,9 +383,10 @@ function renderEventList() {
         </div>
         <span class="chip">${t("chip_open")}</span>
       </a>
-      <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>
+      ${window.isAdmin() ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
     `;
-    row.querySelector(".delete-event-btn").addEventListener("click", (e) => {
+    const votingDeleteBtn = row.querySelector(".delete-event-btn");
+    if (votingDeleteBtn) votingDeleteBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       openConfirmDialog(t("confirm_delete_event"), async () => {
