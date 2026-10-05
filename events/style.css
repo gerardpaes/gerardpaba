@@ -68,7 +68,14 @@ header {
   color: var(--accent);
   font-weight: 500;
   font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
+
+.back-link-icon { display: none; }
 
 /* ===== HERO ===== */
 .hero {
@@ -181,6 +188,8 @@ label.field-label {
   letter-spacing: 0.04em;
   margin-bottom: 8px;
 }
+
+label.field-label.spacer-label { visibility: hidden; }
 
 input[type="text"] {
   width: 100%;
@@ -520,7 +529,7 @@ footer.hint {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .hero { padding: 120px 20px 40px; min-height: auto; }
+  .hero { padding: 110px 20px 40px; min-height: auto; }
   .hero h1 { font-size: 36px; }
   section { padding: 10px 18px 50px; }
   .nav { padding: 0 18px; }
@@ -533,6 +542,20 @@ footer.hint {
 
 @media (max-width: 640px) {
   .nav a.nav-link { display: none; }
+}
+
+@media (max-width: 480px) {
+  header { height: 64px; }
+  .hero { padding-top: 90px; }
+  .nav { padding: 0 14px; }
+  .nav .brand { font-size: 18px; gap: 6px; }
+  .nav .brand .brand-text { display: none; }
+  .nav-links { gap: 8px; }
+  .nav a.back-link { font-size: 13px; white-space: nowrap; }
+  .back-link-icon { display: inline; font-size: 18px; }
+  .back-link-text { display: none; }
+  .lang-switcher { gap: 4px; }
+  .lang-btn { padding: 5px 8px; font-size: 11px; }
 }
 
 /* ===== LANGUAGE SWITCHER ===== */
@@ -562,18 +585,7 @@ footer.hint {
   border-color: var(--accent);
 }
 
-/* ===== TRI-STATE CALENDAR DAYS ===== */
-.cal-day.state-available {
-  background: var(--good);
-  border-color: #28a745;
-  color: #fff;
-}
-
-.cal-day.state-tentative {
-  background: var(--warn);
-  border-color: #e68a00;
-  color: #fff;
-}
+/* ===== TRI-STATE CALENDAR DAYS (see redesigned rules further below) ===== */
 
 .cal-legend-tristate {
   display: flex;
@@ -619,6 +631,14 @@ footer.hint {
 
 .status-badge.voting { background: #fff4e5; color: #b5720a; }
 .status-badge.approved { background: #e7f8ec; color: #1f8a3b; }
+
+.vote-count-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
 
 /* ===== APPROVED BANNER (event page) ===== */
 .approved-banner {
@@ -1015,28 +1035,44 @@ footer.hint {
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
+/* Redesigned tri-state day marks: big, unmistakable icon badge instead of
+   a tiny corner tick, flat solid colors instead of stripes/gradients so
+   the state reads instantly even at a glance. These rules intentionally
+   come after (and are at least as specific as) the weekend-grey rule
+   below, so available/tentative always wins over the weekend tint. */
 .cal-day .state-icon {
   position: absolute;
-  top: 2px; left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
   line-height: 1;
-  opacity: 0.9;
+  opacity: 0.92;
+  pointer-events: none;
 }
 
-/* Clearer visual distinction, no reliance on an unlearnable click cycle */
-.cal-day.state-available {
-  background: linear-gradient(135deg, #34c759, #28a745);
+.cal-day.state-available,
+.cal-day.cal-day-weekend.state-available {
+  background: #28a745;
   border-color: #1f9138;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(52,199,89,0.35);
+  box-shadow: 0 2px 8px rgba(40,167,69,0.4);
 }
 
-.cal-day.state-tentative {
-  background: repeating-linear-gradient(45deg, #ff9f0a, #ff9f0a 8px, #ffb53d 8px, #ffb53d 16px);
+.cal-day.state-tentative,
+.cal-day.cal-day-weekend.state-tentative {
+  background: #ff9f0a;
   border-color: #e68a00;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(255,159,10,0.35);
+  box-shadow: 0 2px 8px rgba(255,159,10,0.4);
+}
+
+.cal-day.state-available .cal-day-num,
+.cal-day.state-tentative .cal-day-num {
+  opacity: 0.35;
+  font-size: 11px;
 }
 
 /* ===== DELETE EVENT BUTTON ===== */
@@ -1202,9 +1238,11 @@ footer.hint {
 }
 
 @media (max-width: 600px) {
-  .name-emoji-row { flex-wrap: wrap; }
-  .name-emoji-row input[type="text"] { margin-bottom: 10px; }
-  .plusone-inline { width: 100%; justify-content: center; margin-bottom: 18px; }
+  .name-emoji-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .name-emoji-row > div { width: 100%; }
+  .name-emoji-row .spacer-label { display: none; }
+  .name-emoji-row input[type="text"] { margin-bottom: 0; }
+  .plusone-inline { width: 100%; justify-content: center; margin-bottom: 0; }
 }
 
 /* ===== CONFIRM DIALOG (site-styled, replaces window.confirm) ===== */
@@ -1355,11 +1393,18 @@ footer.hint {
   margin-top: 2px;
 }
 
-/* ===== WEEKEND HIGHLIGHTING ===== */
+/* ===== WEEKEND HIGHLIGHTING =====
+   Base weekend tint only; any day state (available/tentative/candidate/
+   a heat-N vote level) is layered on top via its own combined selector,
+   so the grey never covers an actual answer or heat color. */
 .cal-weekday.cal-weekday-weekend { color: var(--text); font-weight: 800; }
 
-.cal-day.cal-day-weekend:not(.candidate):not(.state-available):not(.state-tentative) {
-  background: #ececef;
-}
+.cal-day.cal-day-weekend { background: #ececef; }
 
-.cal-day.cal-day-weekend.heat-0 { background: #ececef; }
+.cal-day.cal-day-weekend.candidate { background: #f0f6ff; }
+
+.cal-day.cal-day-weekend.heat-1 { background: #e8f6ea; }
+.cal-day.cal-day-weekend.heat-2 { background: #c3edc9; }
+.cal-day.cal-day-weekend.heat-3 { background: #8fe09d; }
+.cal-day.cal-day-weekend.heat-4 { background: #4fcf68; }
+.cal-day.cal-day-weekend.heat-5 { background: #2fb850; }
