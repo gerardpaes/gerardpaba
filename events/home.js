@@ -21,6 +21,16 @@ const confirmedFields = document.getElementById("confirmed-fields");
 const confirmedDateInput = document.getElementById("confirmed-date-input");
 const confirmedTimeInput = document.getElementById("confirmed-time-input");
 const confirmedLocationInput = document.getElementById("confirmed-location-input");
+const multiDayToggle = document.getElementById("multi-day-toggle");
+const confirmedEndDateWrap = document.getElementById("confirmed-end-date-wrap");
+const confirmedEndDateInput = document.getElementById("confirmed-end-date-input");
+const confirmedTimeWrap = document.getElementById("confirmed-time-wrap");
+
+multiDayToggle.addEventListener("change", () => {
+  const on = multiDayToggle.checked;
+  confirmedEndDateWrap.style.display = on ? "" : "none";
+  confirmedTimeWrap.style.display = on ? "none" : "";
+});
 
 const EMOJI_CHOICES = ["🎉", "🎂", "🍕", "🍻", "🏖️", "⚽", "🎮", "🎬", "🎵", "🏔️", "🚗", "📚"];
 let selectedEmoji = "";
@@ -102,6 +112,10 @@ function resetCreateModal() {
   confirmedDateInput.value = "";
   confirmedTimeInput.value = "";
   confirmedLocationInput.value = "";
+  multiDayToggle.checked = false;
+  confirmedEndDateInput.value = "";
+  confirmedEndDateWrap.style.display = "none";
+  confirmedTimeWrap.style.display = "";
   updateCreateBtnLabel();
 }
 
@@ -121,13 +135,15 @@ createBtn.addEventListener("click", async () => {
   const id = slugify(rawName) + "-" + Date.now().toString(36).slice(-4);
 
   const hasConfirmedDate = confirmedDateToggle.checked && confirmedDateInput.value;
+  const isMultiDay = hasConfirmedDate && multiDayToggle.checked && confirmedEndDateInput.value;
 
   try {
     await setDoc(doc(collection(db, "events"), id), {
       name,
       createdAt: serverTimestamp(),
       approvedDate: hasConfirmedDate ? confirmedDateInput.value : null,
-      approvedTime: hasConfirmedDate ? (confirmedTimeInput.value || null) : null,
+      approvedEndDate: isMultiDay ? confirmedEndDateInput.value : null,
+      approvedTime: hasConfirmedDate && !isMultiDay ? (confirmedTimeInput.value || null) : null,
       location: hasConfirmedDate ? (confirmedLocationInput.value || "") : ""
     });
     showToast(t("toast_event_created"));
@@ -190,38 +206,46 @@ function renderUpcoming() {
   upcomingGridEl.innerHTML = "";
   upcoming.forEach(({ id, data }) => {
     const { dayNum, month, full } = formatDateParts(data.approvedDate);
+    const isRange = data.approvedEndDate && data.approvedEndDate !== data.approvedDate;
     const title = data.name;
     const time = data.approvedTime || "";
     const location = data.location || "";
+    const endParts = isRange ? formatDateParts(data.approvedEndDate) : null;
+    const pillHtml = isRange
+      ? `<span class="d-num d-num-range">${dayNum}-${endParts.dayNum}</span><span class="d-month">${month}</span>`
+      : `<span class="d-num">${dayNum}</span><span class="d-month">${month}</span>`;
+    const dateTextHtml = isRange
+      ? `${full} → ${endParts.full}${location ? " · " + location : ""}`
+      : `${full}${time ? " · " + time : ""}${location ? " · " + location : ""}`;
 
     const card = document.createElement("div");
     card.className = "upcoming-card";
     card.innerHTML = `
+      ${window.isAdmin() ? `
+      <div class="kebab-wrap">
+        <button class="kebab-btn" type="button" aria-label="${t("btn_edit")}">&#8942;</button>
+        <div class="kebab-menu">
+          <button class="kebab-edit-btn" data-id="${id}" type="button">${t("btn_edit")}</button>
+          <button class="kebab-delete-btn danger" data-id="${id}" type="button">${t("btn_delete_event")}</button>
+        </div>
+      </div>` : ""}
       <div class="uc-row uc-head">
         <div class="upcoming-date-pill">
-          <span class="d-num">${dayNum}</span>
-          <span class="d-month">${month}</span>
+          ${pillHtml}
         </div>
-        <div class="upcoming-name">${title}</div>
-      </div>
-      <div class="uc-row uc-meta">
-        <div class="upcoming-date-text view-mode-text">${full}${time ? " · " + time : ""}${location ? " · " + location : ""}</div>
-        <div class="edit-fields-inline" style="display:none;">
-          <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
-          <input type="time" class="time-input" data-id="${id}" value="${time}">
-          <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
+        <div class="uc-head-text">
+          <div class="upcoming-name">${title}</div>
+          <div class="upcoming-date-text view-mode-text">${dateTextHtml}</div>
+          <div class="edit-fields-inline" style="display:none;">
+            <input type="date" class="date-input" data-id="${id}" value="${data.approvedDate}">
+            ${isRange ? `<input type="date" class="end-date-input" data-id="${id}" value="${data.approvedEndDate}">` : `<input type="time" class="time-input" data-id="${id}" value="${time}">`}
+            <input type="text" class="location-input" data-id="${id}" value="${location}" data-i18n-placeholder="placeholder_location">
+          </div>
         </div>
       </div>
-      <div class="uc-row uc-actions-primary cal-actions-slot">
-        ${window.isAdmin() ? `<button class="edit-toggle-btn" data-id="${id}" type="button">${t("btn_edit")}</button>` : ""}
-      </div>
-      <div class="uc-row uc-actions-attendees">
+      <div class="uc-row uc-foot cal-actions-slot">
         <button class="attendees-toggle" data-id="${id}" type="button">${t("view_attendees")}</button>
       </div>
-      ${window.isAdmin() ? `
-      <div class="uc-row uc-actions-delete">
-        <button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑 ${t("btn_delete_event")}</button>
-      </div>` : ""}
       <div class="attendees-list" id="attendees-${id}"></div>
     `;
     upcomingGridEl.appendChild(card);
@@ -230,8 +254,9 @@ function renderUpcoming() {
       title,
       isoDate: data.approvedDate,
       details: `Find a Date: ${title}`,
-      time: card.querySelector(".time-input").value || null,
-      location: card.querySelector(".location-input").value || ""
+      time: isRange ? null : (card.querySelector(".time-input")?.value || null),
+      location: card.querySelector(".location-input").value || "",
+      endIsoDate: isRange ? (card.querySelector(".end-date-input")?.value || data.approvedEndDate) : null
     });
     const calBtn = createCalendarAddButton(getParams, {
       addToCalendar: t("add_to_calendar"),
@@ -242,18 +267,40 @@ function renderUpcoming() {
 
     const viewText = card.querySelector(".view-mode-text");
     const editFields = card.querySelector(".edit-fields-inline");
-    const editBtn = card.querySelector(".edit-toggle-btn");
+    const editBtn = card.querySelector(".kebab-edit-btn");
+    const kebabBtn = card.querySelector(".kebab-btn");
+    const kebabMenu = card.querySelector(".kebab-menu");
 
     function refreshViewText() {
       const d = card.querySelector(".date-input").value || data.approvedDate;
-      const tm = card.querySelector(".time-input").value || "";
+      const endInput = card.querySelector(".end-date-input");
+      const timeInput = card.querySelector(".time-input");
       const loc = card.querySelector(".location-input").value || "";
       const parts = formatDateParts(d);
-      viewText.textContent = `${parts.full}${tm ? " · " + tm : ""}${loc ? " · " + loc : ""}`;
+      if (endInput) {
+        const endVal = endInput.value || data.approvedEndDate;
+        const endParts = formatDateParts(endVal);
+        viewText.textContent = `${parts.full} → ${endParts.full}${loc ? " · " + loc : ""}`;
+      } else {
+        const tm = timeInput ? (timeInput.value || "") : "";
+        viewText.textContent = `${parts.full}${tm ? " · " + tm : ""}${loc ? " · " + loc : ""}`;
+      }
+    }
+
+    if (kebabBtn) {
+      kebabBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        document.querySelectorAll(".kebab-menu.open").forEach(m => { if (m !== kebabMenu) m.classList.remove("open"); });
+        kebabMenu.classList.toggle("open");
+      });
+      document.addEventListener("click", (e) => {
+        if (!card.contains(e.target)) kebabMenu.classList.remove("open");
+      });
     }
 
     if (editBtn) {
       editBtn.addEventListener("click", () => {
+        kebabMenu.classList.remove("open");
         const isEditing = editFields.style.display !== "none";
         if (isEditing) {
           editFields.style.display = "none";
@@ -277,13 +324,29 @@ function renderUpcoming() {
       } catch (err) { console.error(err); }
     });
 
-    card.querySelector(".time-input").addEventListener("change", async (e) => {
-      const timeVal = e.target.value || null;
-      try {
-        await updateDoc(doc(collection(db, "events"), id), { approvedTime: timeVal });
-        refreshViewText();
-      } catch (err) { console.error(err); }
-    });
+    const endDateInputEl = card.querySelector(".end-date-input");
+    if (endDateInputEl) {
+      endDateInputEl.addEventListener("change", async (e) => {
+        const endVal = e.target.value;
+        if (!endVal) return;
+        try {
+          await updateDoc(doc(collection(db, "events"), id), { approvedEndDate: endVal });
+          data.approvedEndDate = endVal;
+          refreshViewText();
+        } catch (err) { console.error(err); }
+      });
+    }
+
+    const timeInputEl = card.querySelector(".time-input");
+    if (timeInputEl) {
+      timeInputEl.addEventListener("change", async (e) => {
+        const timeVal = e.target.value || null;
+        try {
+          await updateDoc(doc(collection(db, "events"), id), { approvedTime: timeVal });
+          refreshViewText();
+        } catch (err) { console.error(err); }
+      });
+    }
 
     card.querySelector(".location-input").addEventListener("change", async (e) => {
       const locVal = e.target.value || "";
@@ -293,7 +356,7 @@ function renderUpcoming() {
       } catch (err) { console.error(err); }
     });
 
-    const upcomingDeleteBtn = card.querySelector(".delete-event-btn");
+    const upcomingDeleteBtn = card.querySelector(".kebab-delete-btn");
     if (upcomingDeleteBtn) upcomingDeleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openConfirmDialog(t("confirm_delete_event"), async () => {
@@ -345,6 +408,17 @@ function firstGlyph(name) {
   return first.toUpperCase();
 }
 
+// Splits a leading emoji (chosen in the create-event emoji picker, stored
+// glued to the start of `name`) from the rest of the title. Returns the
+// emoji (or null if the name doesn't start with one) and the clean title.
+const EMOJI_PREFIX_RE = /^(\p{Extended_Pictographic}(?:\u200d\p{Extended_Pictographic})*)\s*/u;
+function splitEmoji(name) {
+  if (!name) return { emoji: null, title: "" };
+  const m = name.match(EMOJI_PREFIX_RE);
+  if (m) return { emoji: m[1], title: name.slice(m[0].length) };
+  return { emoji: null, title: name };
+}
+
 function voteCountLabel(n) {
   const [singular, plural] = t("vote_count_label").split("|");
   const word = n === 1 ? singular : plural;
@@ -371,21 +445,18 @@ function renderEventList() {
 
   eventListEl.innerHTML = "";
   voting.forEach(({ id, data }) => {
+    const { emoji, title } = splitEmoji(data.name);
     const row = document.createElement("div");
     row.className = "event-row";
     row.innerHTML = `
+      <div class="ev-icon">${emoji || "?"}</div>
       <a href="/events/event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
-        <div class="ev-icon">${firstGlyph(data.name)}</div>
         <div class="ev-info">
-          <div class="ev-name">${data.name}</div>
-          <div class="ev-meta">${eventTapLabel()}</div>
-          <div class="ev-status">
-            <span class="status-badge voting">${t("ev_status_voting")}</span>
-            <span class="vote-count-badge" data-vote-count-id="${id}">…</span>
-          </div>
+          <div class="ev-name">${title}</div>
+          <div class="ev-meta" data-vote-count-id="${id}">…</div>
         </div>
-        <span class="chip">${t("chip_open")}</span>
       </a>
+      <button class="btn vote-btn" type="button" onclick="window.location.href='/events/event.html?id=${encodeURIComponent(id)}'">${t("btn_vote")}</button>
       ${window.isAdmin() ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
     `;
     const votingDeleteBtn = row.querySelector(".delete-event-btn");
@@ -405,8 +476,8 @@ function renderEventList() {
     eventListEl.appendChild(row);
 
     fetchAttendees(id).then(list => {
-      const badge = row.querySelector(`[data-vote-count-id="${id}"]`);
-      if (badge) badge.textContent = voteCountLabel(list.length);
+      const meta = row.querySelector(`[data-vote-count-id="${id}"]`);
+      if (meta) meta.textContent = list.length > 0 ? voteCountLabel(list.length) : t("no_votes_yet");
     });
   });
   requestAnimationFrame(revealOnScroll);
