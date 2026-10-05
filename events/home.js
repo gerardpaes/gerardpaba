@@ -330,6 +330,21 @@ function renderUpcoming() {
   requestAnimationFrame(revealOnScroll);
 }
 
+function firstGlyph(name) {
+  if (!name) return "?";
+  // Use Array.from so multi-code-unit emoji (surrogate pairs) are not
+  // split in half (which previously showed a broken "?" glyph).
+  const first = Array.from(name.trim())[0] || "?";
+  // Only uppercase plain letters; emoji pass through unchanged.
+  return first.toUpperCase();
+}
+
+function voteCountLabel(n) {
+  const [singular, plural] = t("vote_count_label").split("|");
+  const word = n === 1 ? singular : plural;
+  return `${n} ${word}`;
+}
+
 function eventTapLabel() {
   const lang = getLocale();
   const labels = {
@@ -354,12 +369,13 @@ function renderEventList() {
     row.className = "event-row";
     row.innerHTML = `
       <a href="/events/event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
-        <div class="ev-icon">${(data.name || "?").charAt(0).toUpperCase()}</div>
+        <div class="ev-icon">${firstGlyph(data.name)}</div>
         <div class="ev-info">
           <div class="ev-name">${data.name}</div>
           <div class="ev-meta">${eventTapLabel()}</div>
           <div class="ev-status">
             <span class="status-badge voting">${t("ev_status_voting")}</span>
+            <span class="vote-count-badge" data-vote-count-id="${id}">…</span>
           </div>
         </div>
         <span class="chip">${t("chip_open")}</span>
@@ -380,6 +396,11 @@ function renderEventList() {
       });
     });
     eventListEl.appendChild(row);
+
+    fetchAttendees(id).then(list => {
+      const badge = row.querySelector(`[data-vote-count-id="${id}"]`);
+      if (badge) badge.textContent = voteCountLabel(list.length);
+    });
   });
   requestAnimationFrame(revealOnScroll);
 }
