@@ -115,7 +115,7 @@ export class MonthCalendar {
       if (this.mode === "pick-free") {
         classes.push("candidate");
         if (this.available.has(iso)) { classes.push("state-available"); extra = `<span class="state-icon">✓</span>`; }
-        else if (this.tentative.has(iso)) { classes.push("state-tentative"); extra = `<span class="state-icon">?</span>`; }
+        else if (this.tentative.has(iso)) { classes.push("state-tentative"); extra = `<span class="state-icon">~</span>`; }
 
         const count = this.counts[iso] || 0;
         if (this.showCountBadges && count > 0) {
@@ -136,7 +136,7 @@ export class MonthCalendar {
 
       if (iso === todayIso) classes.push("today-marker");
 
-      html += `<div class="${classes.join(" ")}" data-iso="${iso}">${extra}${d}${badge}</div>`;
+      html += `<div class="${classes.join(" ")}" data-iso="${iso}">${extra}<span class="cal-day-num">${d}</span>${badge}</div>`;
     }
 
     html += `</div>`;
