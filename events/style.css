@@ -406,25 +406,42 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
   vertical-align: middle;
 }
 
-/* ===== RESULTS RANKING ===== */
-.rank-list { display: flex; flex-direction: column; gap: 14px; }
+/* ===== RESULTS RANKING =====
+   Simple stacked card: top row (rank # / date / total), a progress bar,
+   then the list of names below. Everything is full-width and wraps
+   naturally, so it reads cleanly on narrow screens without any
+   side-by-side squeeze. */
+.rank-list { display: flex; flex-direction: column; gap: 12px; }
 
 .rank-card {
   display: flex;
-  align-items: center;
-  gap: 18px;
+  flex-direction: column;
+  gap: 8px;
   background: #fafafa;
   border-radius: 16px;
-  padding: 18px 22px;
+  padding: 16px 18px;
+  border: 1.5px solid transparent;
+}
+
+.rank-card.is-approved {
+  background: #eafbf0;
+  border-color: #28a745;
+}
+
+.rank-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .rank-badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px; height: 42px;
+  width: 32px; height: 32px;
   border-radius: 50%;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   background: #e8e8ed;
   color: var(--text);
@@ -435,9 +452,15 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .rank-badge.silver { background: linear-gradient(135deg,#e2e2e7,#c3c3cb); color: #333; }
 .rank-badge.bronze { background: linear-gradient(135deg,#e3a76f,#cc8a4c); color: #3a2400; }
 
-.rank-info { flex: 1; min-width: 0; }
-.rank-info .rank-date { font-size: 17px; font-weight: 600; }
-.rank-info .rank-who { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.rank-date { font-size: 16px; font-weight: 600; flex: 1; min-width: 0; }
+
+.rank-total {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-left: auto;
+}
 
 .bar-wrap {
   position: relative;
@@ -445,7 +468,6 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
   border-radius: 8px;
   overflow: hidden;
   height: 8px;
-  margin-top: 10px;
 }
 
 .bar-fill {
@@ -456,15 +478,19 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
   transition: width 0.4s ease;
 }
 
-.rank-total {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-  text-align: right;
-  flex-shrink: 0;
+.rank-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.rank-total .unit { font-size: 12px; color: var(--muted); font-weight: 500; display: block; }
+.rank-card .approve-date-btn {
+  align-self: stretch;
+  width: 100%;
+  margin-top: 4px;
+}
 
 /* ===== PARTICIPANTS ===== */
 .participants-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
@@ -536,8 +562,6 @@ footer.hint {
   .nav-links { gap: 14px; }
   .nav a.nav-link { font-size: 14px; }
   .card { padding: 22px; }
-  .rank-card { flex-wrap: wrap; }
-  .rank-total { text-align: left; }
 }
 
 @media (max-width: 640px) {
@@ -709,9 +733,6 @@ footer.hint {
 @media (max-width: 600px) {
   .nav-links { flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
   .lang-switcher { order: 10; }
-  .rank-card { flex-direction: column; align-items: stretch; text-align: left; }
-  .rank-total { text-align: left; }
-  .approve-date-btn { align-self: flex-start; }
   .approved-banner { flex-direction: column; align-items: stretch; }
   .cal-export-row { justify-content: flex-start; }
   .cal-grid { gap: 4px; }
@@ -1383,20 +1404,23 @@ footer.hint {
 }
 
 /* ===== RESULTS: TENTATIVE COUNT DISPLAY ===== */
-.rank-who.rank-tentative { color: var(--warn); margin-top: 2px; }
+.rank-who.rank-tentative { color: var(--warn); }
 
 .rank-tent-badge {
-  display: block;
+  display: inline;
   font-size: 11px;
   color: var(--warn);
   font-weight: 600;
-  margin-top: 2px;
+  margin-left: 4px;
 }
 
 /* ===== WEEKEND HIGHLIGHTING =====
-   Base weekend tint only; any day state (available/tentative/candidate/
-   a heat-N vote level) is layered on top via its own combined selector,
-   so the grey never covers an actual answer or heat color. */
+   Weekends get a small corner dot so Sat/Sun are easy to spot at a glance,
+   without ever changing the actual background color: once a day carries a
+   real answer (available/tentative) or a heat-N vote level, it must look
+   IDENTICAL to a weekday with the same state/level. The dot itself is
+   hidden once a day is marked available/tentative, so a selected day never
+   looks "different" just because it falls on a weekend. */
 .cal-weekday.cal-weekday-weekend { color: var(--text); font-weight: 800; }
 
 .cal-day.cal-day-weekend { background: #ececef; }
@@ -1408,3 +1432,18 @@ footer.hint {
 .cal-day.cal-day-weekend.heat-3 { background: #8fe09d; }
 .cal-day.cal-day-weekend.heat-4 { background: #4fcf68; }
 .cal-day.cal-day-weekend.heat-5 { background: #2fb850; }
+
+.cal-day.cal-day-weekend::before {
+  content: "";
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #9a9aa5;
+  z-index: 1;
+}
+
+.cal-day.cal-day-weekend.state-available::before,
+.cal-day.cal-day-weekend.state-tentative::before {
+  display: none;
+}
