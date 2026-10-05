@@ -75,7 +75,15 @@
         <label class="field-label" data-i18n="label_date">Date</label>
         <input type="date" id="confirmed-date-input">
       </div>
-      <div>
+      <div class="multi-day-toggle-row">
+        <input type="checkbox" id="multi-day-toggle">
+        <label for="multi-day-toggle" style="margin:0; font-weight:500; cursor:pointer;" data-i18n="label_multi_day_toggle">Several days (e.g. a trip)</label>
+      </div>
+      <div id="confirmed-end-date-wrap" style="display:none;">
+        <label class="field-label" data-i18n="label_end_date">End date</label>
+        <input type="date" id="confirmed-end-date-input">
+      </div>
+      <div id="confirmed-time-wrap">
         <label class="field-label" data-i18n="label_time_optional">Time</label>
         <input type="time" id="confirmed-time-input">
       </div>
