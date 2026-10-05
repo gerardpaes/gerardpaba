@@ -21,6 +21,35 @@
 //     onChange: (iso, state) => {}
 //   });
 
+// Fixed-date public holidays that apply every year in Spain / Catalonia /
+// Barcelona (city). Only FIXED (same day/month every year) holidays are
+// listed here on purpose - moving ones (Good Friday, Easter Monday, and
+// Barcelona's own "Lunes de Pascua Granada" / "La Mercè" week shifts in
+// some years) are not included since they are not reliably fixed; add
+// them per-year below (MOVABLE_HOLIDAYS) if/when needed.
+// Format: "MM-DD" -> label (label unused in UI for now, kept for clarity).
+const FIXED_HOLIDAYS = {
+  "01-01": "Año nuevo",
+  "01-06": "Epifanía del Señor (Reyes)",
+  "05-01": "Día del Trabajo",
+  "06-24": "San Juan",
+  "08-15": "Asunción de la Virgen",
+  "09-11": "Diada Nacional de Catalunya",
+  "09-24": "La Mercè (festivo local Barcelona)",
+  "10-12": "Fiesta Nacional de España",
+  "11-01": "Todos los Santos",
+  "12-06": "Día de la Constitución",
+  "12-08": "Inmaculada Concepción",
+  "12-25": "Navidad",
+  "12-26": "San Esteban (festivo local Barcelona/Catalunya)"
+};
+
+function isFixedHoliday(y, m, d) {
+  const mm = String(m + 1).padStart(2, "0");
+  const dd = String(d).padStart(2, "0");
+  return Object.prototype.hasOwnProperty.call(FIXED_HOLIDAYS, `${mm}-${dd}`);
+}
+
 export class MonthCalendar {
   constructor(container, opts = {}) {
     this.container = container;
@@ -110,7 +139,9 @@ export class MonthCalendar {
       let extra = "";
 
       const dowMondayStart = (new Date(y, m, d).getDay() + 6) % 7;
-      if (dowMondayStart === 5 || dowMondayStart === 6) classes.push("cal-day-weekend");
+      const isWeekendDay = dowMondayStart === 5 || dowMondayStart === 6;
+      if (isWeekendDay) classes.push("cal-day-weekend");
+      else if (isFixedHoliday(y, m, d)) classes.push("cal-day-holiday");
 
       if (this.mode === "pick-free") {
         classes.push("candidate");
