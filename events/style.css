@@ -11,7 +11,16 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* App-like feel on mobile: only vertical scroll allowed, no sideways
+     drag/pan and no pinch-zoom drift (viewport meta already disables
+     pinch-zoom; this is the belt-and-braces CSS side of it so a stray
+     wide element can never cause horizontal scroll/bounce either). */
+  overflow-x: hidden;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+}
 
 body {
   margin: 0;
@@ -19,6 +28,33 @@ body {
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100vw;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+  /* No rubber-band bounce past the top/bottom edges (Chrome/Android +
+     recent Safari) and no bluish tap-flash on buttons/links - makes
+     every tap feel like a native app control instead of a webpage. */
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+  /* Respect the iPhone notch / home-indicator safe areas instead of
+     letting content run under them. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+button, a, input, select, textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Comfortable minimum tap target size on touch devices (Apple/Google
+   guidelines both recommend ~44px) so buttons never feel fiddly on a
+   phone screen. */
+@media (max-width: 600px) {
+  button, .btn, a.nav-link, .cal-nav-btn, .lang-btn, .role-switch-btn {
+    min-height: 40px;
+  }
 }
 
 a { color: inherit; text-decoration: none; }
@@ -312,38 +348,10 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  --cal-gap: 6px;
-  gap: var(--cal-gap);
-  position: relative;
-}
-
-/* Weekend background: a tinted panel that sits OUTSIDE/behind the Sat+Dom
-   day cells (and their header), spanning the full column height, rather
-   than any mark drawn inside the cell itself. The cells keep their normal
-   candidate/heat/state backgrounds on top (z-index 1); this pseudo layer
-   only shows in the gaps around/between them. */
-.cal-grid::before,
-.cal-grid::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: calc((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap) * 1.4);
-  background: #ececef;
-  border-radius: 14px;
-  z-index: 0;
-  pointer-events: none;
-}
-.cal-grid::before {
-  left: calc(5 * ((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap)) - var(--cal-gap) * 0.7);
-}
-.cal-grid::after {
-  left: calc(6 * ((100% - 6 * var(--cal-gap)) / 7 + var(--cal-gap)) - var(--cal-gap) * 0.7);
+  gap: 6px;
 }
 
 .cal-weekday {
-  position: relative;
-  z-index: 1;
   text-align: center;
   font-size: 11px;
   font-weight: 700;
@@ -354,7 +362,6 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 
 .cal-day {
   position: relative;
-  z-index: 1;
   aspect-ratio: 1;
   display: flex;
   flex-direction: column;
@@ -783,6 +790,24 @@ footer.hint {
   .cal-export-row { justify-content: flex-start; }
   .cal-grid { --cal-gap: 4px; gap: var(--cal-gap); }
   .cal-day { font-size: 12px; }
+  /* The small ✓/~ corner badge doesn't reliably fit at this cell size on
+     narrow phones; drop it entirely and rely only on the flat
+     green/orange background to show available/tentative - still fully
+     clear, and the day number stays 100% legible. */
+  .cal-day .state-icon { display: none; }
+
+  /* Any text/date/time input must render at >=16px on mobile or iOS
+     Safari auto-zooms the whole page on focus, which breaks the
+     "fixed like an app" feel we just locked down above. Force it here
+     for every input across the site rather than hunting each one. */
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 
 /* ===== UPCOMING EVENTS DASHBOARD (confirmed events, top of home) ===== */
@@ -800,37 +825,51 @@ footer.hint {
 .upcoming-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 14px 18px;
+  padding: 12px 16px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.4s, transform 0.4s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .upcoming-card:hover { box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); }
 
 .upcoming-card.visible { opacity: 1; transform: translateY(0); }
 
-.upcoming-top {
+/* Compact, stacked layout: 1) name row, 2) date+location row,
+   3) edit/calendar row, 4) attendees row, 5) delete row (admin only).
+   Each row is deliberately thin so the whole card stays short on mobile
+   instead of wrapping into many tall lines. */
+.uc-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
-.upcoming-main {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1;
-  min-width: 220px;
-}
+.uc-head { gap: 10px; }
 
 .upcoming-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
+  flex: 1;
+  min-width: 0;
 }
+
+.uc-meta { padding-left: 50px; margin-top: -4px; }
+
+.uc-actions-primary,
+.uc-actions-attendees,
+.uc-actions-delete {
+  padding-left: 50px;
+}
+
+.uc-actions-primary:empty,
+.uc-actions-attendees:empty,
+.uc-actions-delete:empty { display: none; }
 
 .upcoming-datebox {
   display: flex;
@@ -874,17 +913,23 @@ footer.hint {
   font-family: inherit;
 }
 
-.upcoming-actions {
-  display: flex;
+.uc-actions-primary {
   gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 0;
-  align-items: center;
 }
 
-.upcoming-actions .btn.cal-export {
+.uc-actions-primary .btn.cal-export,
+.uc-actions-primary .edit-toggle-btn {
   font-size: 12px;
   padding: 6px 12px;
+}
+
+.edit-toggle-btn {
+  border: 1px solid var(--border);
+  background: #fafafa;
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .attendees-toggle {
@@ -896,6 +941,19 @@ footer.hint {
   cursor: pointer;
   padding: 0;
   margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.uc-actions-delete .delete-event-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -972,12 +1030,13 @@ footer.hint {
 }
 
 @media (max-width: 600px) {
-  .upcoming-top { flex-direction: column; align-items: stretch; }
-  .upcoming-main { min-width: 0; width: 100%; }
   .time-input-row { width: 100%; justify-content: space-between; }
-  .upcoming-actions { width: 100%; }
-  .upcoming-actions .btn.cal-export { flex: 1; justify-content: center; text-align: center; }
-  .attendees-toggle { width: 100%; justify-content: center; }
+  .upcoming-card { padding: 10px 14px; gap: 4px; }
+  .upcoming-date-pill { min-width: 36px; padding: 3px 8px; }
+  .upcoming-date-pill .d-num { font-size: 14px; }
+  .uc-meta, .uc-actions-primary, .uc-actions-attendees, .uc-actions-delete { padding-left: 44px; }
+  .upcoming-name { font-size: 14px; }
+  .upcoming-date-text { font-size: 12px; }
 }
 
 /* ===== SINGLE "ADD TO CALENDAR" DROPDOWN BUTTON ===== */
@@ -1125,7 +1184,8 @@ footer.hint {
 }
 
 .cal-day.state-available,
-.cal-day.cal-day-weekend.state-available {
+.cal-day.cal-day-weekend.state-available,
+.cal-day.cal-day-holiday.state-available {
   background: #28a745;
   border-color: #1f9138;
   color: #fff;
@@ -1133,7 +1193,8 @@ footer.hint {
 }
 
 .cal-day.state-tentative,
-.cal-day.cal-day-weekend.state-tentative {
+.cal-day.cal-day-weekend.state-tentative,
+.cal-day.cal-day-holiday.state-tentative {
   background: #ff9f0a;
   border-color: #e68a00;
   color: #fff;
@@ -1460,22 +1521,28 @@ footer.hint {
   margin-left: 4px;
 }
 
-/* ===== WEEKEND HIGHLIGHTING =====
-   Weekend cells must NEVER differ in fill color from a weekday cell in
-   the same state (empty / candidate / available / tentative / heat-N):
-   that's why there is no `.cal-day.cal-day-weekend.candidate` override
-   here (it used to exist and, by sheer file-order luck, overrode the
-   green/orange available/tentative fill on weekends - removed).
-   The weekend marker itself now lives OUTSIDE the day cells: see the
-   .cal-grid::before/::after tinted column panels declared next to
-   .cal-grid above. Those sit behind the cells (z-index 0) so Sat/Dom
-   read as a highlighted column without ever touching a cell's own
-   background/fill. Only the heat levels still need a per-cell override
-   here, since the plain weekend grey is now handled by the grid panel. */
-.cal-weekday.cal-weekday-weekend { color: var(--text); font-weight: 800; }
+/* ===== WEEKEND / BANK HOLIDAY HIGHLIGHTING =====
+   Non-working days (Sat, Sun, and fixed Spain/Catalonia/Barcelona bank
+   holidays - see FIXED_HOLIDAYS in calendar.js) share the exact same
+   visual treatment: a solid accent-colored border + accent-colored text,
+   with NO background fill of their own, so they never fight with the
+   candidate/heat/available/tentative background colors underneath - those
+   keep winning via the higher-specificity combo rules below and above.
+   This replaces two earlier, rejected designs: a dark pill behind the day
+   number (inside the cell) and a tinted panel behind the whole column
+   (outside the cell but still a background fill) - the user asked for a
+   border + colored text instead, with solid (not dashed) lines. */
+.cal-weekday.cal-weekday-weekend { color: var(--accent); font-weight: 800; }
 
-.cal-day.cal-day-weekend.heat-1 { background: #e8f6ea; }
-.cal-day.cal-day-weekend.heat-2 { background: #c3edc9; }
-.cal-day.cal-day-weekend.heat-3 { background: #8fe09d; }
-.cal-day.cal-day-weekend.heat-4 { background: #4fcf68; }
-.cal-day.cal-day-weekend.heat-5 { background: #2fb850; }
+.cal-day.cal-day-weekend,
+.cal-day.cal-day-holiday {
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.cal-day.cal-day-weekend.heat-1, .cal-day.cal-day-holiday.heat-1 { background: #e8f6ea; }
+.cal-day.cal-day-weekend.heat-2, .cal-day.cal-day-holiday.heat-2 { background: #c3edc9; }
+.cal-day.cal-day-weekend.heat-3, .cal-day.cal-day-holiday.heat-3 { background: #8fe09d; }
+.cal-day.cal-day-weekend.heat-4, .cal-day.cal-day-holiday.heat-4 { background: #4fcf68; }
+.cal-day.cal-day-weekend.heat-5, .cal-day.cal-day-holiday.heat-5 { background: #2fb850; }
