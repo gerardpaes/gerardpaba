@@ -59,6 +59,7 @@ export class MonthCalendar {
     this.counts = opts.counts || {};
     this.maxCount = opts.maxCount || 1;
     this.approvedDate = opts.approvedDate || null;
+    this.approvedEndDate = opts.approvedEndDate || null;
     this.onChange = opts.onChange || (() => {});
     this.showCountBadges = opts.showCountBadges !== false;
     this.pickMode = "available"; // which state clicking a day applies, in "pick-free" mode
@@ -159,7 +160,7 @@ export class MonthCalendar {
           classes.push(`heat-${level}`);
           badge = `<span class="count-badge">${count}</span>`;
         }
-        if (this.approvedDate === iso) {
+        if (this.isApprovedIso(iso)) {
           classes.push("approved-day");
           extra = `<span class="approved-star">★</span>`;
         }
@@ -227,8 +228,20 @@ export class MonthCalendar {
     this.render();
   }
 
-  setApprovedDate(iso) {
+  // Returns true for `iso` if it's the single approved day, or falls
+  // inside the approved [approvedDate, approvedEndDate] range (inclusive)
+  // when a multi-day range was approved.
+  isApprovedIso(iso) {
+    if (!this.approvedDate) return false;
+    if (!this.approvedEndDate || this.approvedEndDate === this.approvedDate) {
+      return this.approvedDate === iso;
+    }
+    return iso >= this.approvedDate && iso <= this.approvedEndDate;
+  }
+
+  setApprovedDate(iso, endIso = null) {
     this.approvedDate = iso;
+    this.approvedEndDate = endIso;
     this.render();
   }
 
