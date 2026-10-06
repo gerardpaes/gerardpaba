@@ -59,10 +59,17 @@ export function googleCalendarUrl(title, isoDate, details = "", time = null, loc
 }
 
 function isIOS() {
-  // iPhone/iPad Safari ignores the <a download> attribute on blob: URLs,
-  // so the normal "create blob + click hidden link" trick silently does
-  // nothing there. iPadOS 13+ also reports as "MacIntel" but is touch-only,
-  // so we check maxTouchPoints too.
+  // iPhone/iPad ignore the <a download> attribute on blob: URLs, so the
+  // normal "create blob + click hidden link" trick silently does nothing
+  // there. iPadOS 13+ also reports as "MacIntel" but is touch-only, so we
+  // check maxTouchPoints too.
+  //
+  // Note: this intentionally matches ANY browser on iOS (Chrome, Firefox,
+  // Edge...), not just Safari by name. Apple forces every iOS browser to
+  // run on the WebKit engine under the hood (its own rendering/JS engines
+  // are banned on iOS), so "Chrome on iPhone" has the exact same data:-URI
+  // and calendar-handoff behavior as Safari. Detecting the OS, not the
+  // browser name, is correct here.
   const ua = navigator.userAgent || "";
   return /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -101,22 +108,20 @@ export function downloadIcs(title, isoDate, details = "", time = null, location 
     // the user gesture), so a real <a href="data:..."> anchor + synchronous
     // .click() inside the same user-gesture call stack is used instead.
     //
-    // Important gotcha: the anchor must NOT be `display:none` (or have no
-    // layout at all) - older WebKit silently refuses to honor .click() /
-    // treats the element as "not interactable" in that case, which is
-    // exactly why this kept failing even with the anchor-click approach.
-    // Position it off-screen instead so it has real layout but is invisible.
-    //
-    // Also do NOT set `download` together with a `data:` URI: Safari's
-    // in-app calendar-preview behavior (opening the native "Add Event"
-    // sheet) is only triggered when the data: URI is navigated to as a
-    // normal link: the `download` attribute makes Safari try to save it
-    // as a file instead, which is a dead end on iOS (no visible result).
+    // Important gotchas (learned the hard way, two prior attempts failed):
+    // 1. The anchor must NOT be `display:none` - WebKit treats it as
+    //    "not interactable" and silently ignores .click(). Give it real
+    //    layout, just moved off-screen.
+    // 2. Do NOT set `download` together with a `data:` URI: that makes
+    //    Safari try to save it as a file instead of previewing it.
+    // 3. Do NOT set `target="_blank"`: Safari's native "Add Event" sheet
+    //    for a data:text/calendar resource is only triggered on a
+    //    top-level, SAME-TAB navigation. Opening it in a new tab/popup
+    //    context just shows a blank tab and never hands off to Calendar.
+    //    The anchor must navigate the current window.
     const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.target = "_blank";
-    a.rel = "noopener";
     a.style.position = "fixed";
     a.style.top = "-1000px";
     a.style.left = "-1000px";
