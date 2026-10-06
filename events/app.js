@@ -10,9 +10,14 @@ initLanguageSwitcher();
 const params = new URLSearchParams(window.location.search);
 const eventId = params.get("id");
 
-// Fixed shortlist of frequent friends, offered as native <datalist>
-// suggestions on the name field. Pure convenience — any other name can
-// still be typed freely, it's not a restricted/validated list.
+// Fixed shortlist of frequent friends, offered as suggestions on the name
+// field. Pure convenience — any other name can still be typed freely, it's
+// not a restricted/validated list.
+//
+// NOTE: this is a custom JS dropdown, NOT a native <datalist> — Safari on
+// iOS does not support <datalist> suggestion popups at all (silently does
+// nothing), so this list never showed up on mobile. A hand-built dropdown
+// works identically on desktop and every mobile browser.
 const FRIEND_NAMES = [
   "Gerard Paba", "Gerard Padrós", "Pol", "Laura Sánchez",
   "Laura Alcoberro", "Angola", "Guillem", "Artur"
@@ -22,15 +27,58 @@ const titleEl = document.getElementById("event-title");
 const subtitleEl = document.getElementById("event-subtitle");
 const nameInput = document.getElementById("your-name");
 const plusOneCheckbox = document.getElementById("plus-one");
+const plusOneBtn = document.getElementById("plus-one-btn");
+
+function refreshPlusOneBtn() {
+  if (!plusOneBtn) return;
+  const on = plusOneCheckbox.checked;
+  plusOneBtn.classList.toggle("active", on);
+  plusOneBtn.setAttribute("aria-pressed", String(on));
+}
+
+if (plusOneBtn) {
+  plusOneBtn.addEventListener("click", () => {
+    plusOneCheckbox.checked = !plusOneCheckbox.checked;
+    refreshPlusOneBtn();
+  });
+}
 const submitBtn = document.getElementById("submit-btn");
 const removeBtn = document.getElementById("remove-btn");
 const resultsAreaEl = document.getElementById("results-area");
 const participantsChipsEl = document.getElementById("participants-chips");
 const toastEl = document.getElementById("toast");
 const approvedBannerArea = document.getElementById("approved-banner-area");
-const friendSuggestionsEl = document.getElementById("friend-suggestions");
-if (friendSuggestionsEl) {
-  friendSuggestionsEl.innerHTML = FRIEND_NAMES.map(n => `<option value="${n}"></option>`).join("");
+// Custom suggestion dropdown (works on iOS Safari, unlike <datalist>).
+const nameSuggestEl = document.getElementById("name-suggest-dropdown");
+if (nameSuggestEl) {
+  function renderNameSuggestions(query) {
+    const q = query.trim().toLowerCase();
+    const matches = q
+      ? FRIEND_NAMES.filter(n => n.toLowerCase().startsWith(q) || n.toLowerCase().includes(" " + q))
+      : [];
+    if (matches.length === 0) {
+      nameSuggestEl.classList.remove("open");
+      nameSuggestEl.innerHTML = "";
+      return;
+    }
+    nameSuggestEl.innerHTML = matches.map(n => `<button type="button" class="name-suggest-item">${n}</button>`).join("");
+    nameSuggestEl.classList.add("open");
+  }
+
+  nameInput.addEventListener("input", () => renderNameSuggestions(nameInput.value));
+  nameInput.addEventListener("focus", () => renderNameSuggestions(nameInput.value));
+  nameSuggestEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".name-suggest-item");
+    if (!btn) return;
+    nameInput.value = btn.textContent;
+    nameSuggestEl.classList.remove("open");
+    nameSuggestEl.innerHTML = "";
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target !== nameInput && !nameSuggestEl.contains(e.target)) {
+      nameSuggestEl.classList.remove("open");
+    }
+  });
 }
 
 const pickCalendarEl = document.getElementById("pick-calendar");
@@ -192,6 +240,7 @@ function restoreMyResponseIfAny() {
     const r = responses[slugifyName(savedName)];
     pickCal.setState(r.available || [], r.tentative || []);
     plusOneCheckbox.checked = !!r.plusOne;
+    refreshPlusOneBtn();
   }
 }
 
@@ -566,6 +615,7 @@ removeBtn.addEventListener("click", async () => {
     localStorage.removeItem(`findadate:${eventId}:name`);
     if (pickCal) pickCal.setState([], []);
     plusOneCheckbox.checked = false;
+    refreshPlusOneBtn();
     showToast(t("toast_removed"));
   } catch (e) {
     console.error(e);
