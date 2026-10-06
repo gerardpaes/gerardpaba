@@ -109,6 +109,11 @@ export const DICT = {
     label_confirmed_date_toggle: "Ja tinc una data confirmada",
     label_date: "Data",
     label_multi_day_toggle: "Diversos dies (p. ex. un viatge)",
+    label_day_mode: "Quin tipus d'esdeveniment és?",
+    day_mode_single: "Un dia",
+    day_mode_single_sub: "una data concreta",
+    day_mode_multi: "Diversos dies",
+    day_mode_multi_sub: "p. ex. un viatge",
     label_end_date: "Data de fi",
     label_choose_emoji: "Tria una icona (opcional)",
     pickmode_available: "Disponible",
@@ -230,6 +235,11 @@ export const DICT = {
     label_confirmed_date_toggle: "Ya tengo una fecha confirmada",
     label_date: "Fecha",
     label_multi_day_toggle: "Varios días (p. ej. un viaje)",
+    label_day_mode: "¿Qué tipo de evento es?",
+    day_mode_single: "Un día",
+    day_mode_single_sub: "una fecha concreta",
+    day_mode_multi: "Varios días",
+    day_mode_multi_sub: "p. ej. un viaje",
     label_end_date: "Fecha de fin",
     label_choose_emoji: "Elige un icono (opcional)",
     pickmode_available: "Disponible",
@@ -351,6 +361,11 @@ export const DICT = {
     label_confirmed_date_toggle: "I already have a confirmed date",
     label_date: "Date",
     label_multi_day_toggle: "Several days (e.g. a trip)",
+    label_day_mode: "What kind of event is it?",
+    day_mode_single: "One day",
+    day_mode_single_sub: "a single date",
+    day_mode_multi: "Several days",
+    day_mode_multi_sub: "e.g. a trip",
     label_end_date: "End date",
     label_choose_emoji: "Choose an icon (optional)",
     pickmode_available: "Available",
@@ -400,17 +415,34 @@ export function applyTranslations(root = document) {
   });
 }
 
+// Renders both a plain inline pill row (shown on desktop via CSS) AND a
+// single "ES ▾" dropdown trigger + popup menu (shown on mobile via CSS) in
+// the SAME markup, so there is one source of truth for the active state
+// instead of keeping two components in sync. Which one is visually shown
+// at a given screen width is pure CSS (see .lang-switcher rules).
 export function initLanguageSwitcher(containerId = "lang-switcher") {
   const container = document.getElementById(containerId);
   if (!container) return;
   const current = getLocale();
-  container.innerHTML = SUPPORTED.map(code => `
-    <button type="button" class="lang-btn ${code === current ? "active" : ""}" data-lang="${code}">${code.toUpperCase()}</button>
-  `).join("");
+  container.innerHTML = `
+    <button type="button" class="lang-dd-trigger">${current.toUpperCase()} <span class="lang-dd-caret">▾</span></button>
+    <div class="lang-dd-menu">
+      ${SUPPORTED.map(code => `<button type="button" class="lang-btn ${code === current ? "active" : ""}" data-lang="${code}">${code.toUpperCase()}</button>`).join("")}
+    </div>
+  `;
   container.querySelectorAll(".lang-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       setLocale(btn.dataset.lang);
       window.location.reload();
     });
+  });
+  const trigger = container.querySelector(".lang-dd-trigger");
+  const menu = container.querySelector(".lang-dd-menu");
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) menu.classList.remove("open");
   });
 }
