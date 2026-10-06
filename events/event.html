@@ -37,17 +37,18 @@
 
   <div class="card">
     <div class="name-emoji-row">
-      <div style="flex:1;">
+      <div style="flex:1; position:relative;">
         <label class="field-label" for="your-name" data-i18n="label_your_name">Your name</label>
-        <input type="text" id="your-name" list="friend-suggestions" autocomplete="off" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
-        <datalist id="friend-suggestions"></datalist>
+        <input type="text" id="your-name" autocomplete="off" data-i18n-placeholder="placeholder_your_name" placeholder="e.g. Gerard" style="margin-bottom:0;">
+        <div id="name-suggest-dropdown" class="name-suggest-dropdown"></div>
       </div>
       <div>
         <label class="field-label spacer-label">&nbsp;</label>
-        <label class="plusone-inline">
-          <input type="checkbox" id="plus-one">
+        <button type="button" class="plusone-toggle" id="plus-one-btn" aria-pressed="false">
+          <span class="plusone-toggle-icon">+1</span>
           <span data-i18n="plusone_label">I'll bring a +1</span>
-        </label>
+        </button>
+        <input type="checkbox" id="plus-one" hidden>
       </div>
     </div>
 
