@@ -491,6 +491,7 @@ function renderEventList() {
   }
 
   eventListEl.innerHTML = "";
+  const admin = window.isAdmin();
   voting.forEach(({ id, data }) => {
     const { emoji, title } = splitEmoji(data.name);
     const row = document.createElement("div");
@@ -499,13 +500,51 @@ function renderEventList() {
       <div class="ev-icon">${emoji || "?"}</div>
       <a href="/events/event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
         <div class="ev-info">
-          <div class="ev-name">${title}</div>
+          <div class="ev-name">
+            <span class="ev-name-text">${title}</span>
+            ${admin ? `<input type="text" class="ev-name-edit-input" value="${title}" style="display:none;">` : ""}
+          </div>
           <div class="ev-meta" data-vote-count-id="${id}">…</div>
         </div>
       </a>
       <button class="btn vote-btn" type="button" onclick="window.location.href='/events/event.html?id=${encodeURIComponent(id)}'">${t("btn_vote")}</button>
-      ${window.isAdmin() ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
+      ${admin ? `<button class="edit-event-name-btn" data-id="${id}" type="button" title="${t("btn_edit")}">✎</button>` : ""}
+      ${admin ? `<button class="delete-event-btn" data-id="${id}" type="button" title="${t("btn_delete_event")}">🗑</button>` : ""}
     `;
+
+    const editNameBtn = row.querySelector(".edit-event-name-btn");
+    if (editNameBtn) editNameBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const nameText = row.querySelector(".ev-name-text");
+      const nameInput = row.querySelector(".ev-name-edit-input");
+      const isEditing = nameInput.style.display !== "none";
+      if (isEditing) {
+        const newTitle = nameInput.value.trim();
+        if (newTitle && newTitle !== title) {
+          const fullName = emoji ? `${emoji} ${newTitle}` : newTitle;
+          updateDoc(doc(collection(db, "events"), id), { name: fullName }).catch(err => {
+            console.error(err);
+            showToast(t("toast_create_error"));
+          });
+        }
+        nameInput.style.display = "none";
+        nameText.style.display = "";
+        editNameBtn.textContent = "✎";
+      } else {
+        nameText.style.display = "none";
+        nameInput.style.display = "";
+        nameInput.focus();
+        nameInput.select();
+        editNameBtn.textContent = "✓";
+      }
+    });
+    const nameEditInput = row.querySelector(".ev-name-edit-input");
+    if (nameEditInput) nameEditInput.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); });
+    if (nameEditInput) nameEditInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") editNameBtn.click();
+    });
+
     const votingDeleteBtn = row.querySelector(".delete-event-btn");
     if (votingDeleteBtn) votingDeleteBtn.addEventListener("click", (e) => {
       e.preventDefault();
