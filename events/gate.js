@@ -112,7 +112,31 @@ window.currentRole = function () {
   return sessionStorage.getItem(GATE_ROLE_KEY) || "guest";
 };
 
+// Plain hardcoded label text (not run through the i18n module, which is a
+// separate ES module loaded later) - just enough for guest/admin to read
+// clearly as a labeled chip instead of a bare icon on mobile.
+const ROLE_LABELS = {
+  ca: { guest: "Convidat", admin: "Admin" },
+  es: { guest: "Invitado", admin: "Admin" },
+  en: { guest: "Guest", admin: "Admin" }
+};
+
+function currentLangForLabel() {
+  try {
+    return localStorage.getItem("findadate:lang") || "ca";
+  } catch (e) { return "ca"; }
+}
+
+function refreshRoleLabel() {
+  const labelEl = document.querySelector("[data-role-label]");
+  if (!labelEl) return;
+  const lang = currentLangForLabel();
+  const labels = ROLE_LABELS[lang] || ROLE_LABELS.ca;
+  labelEl.textContent = window.isAdmin() ? labels.admin : labels.guest;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("role-switch-btn");
   if (btn) btn.addEventListener("click", () => window.openRoleSwitcher());
+  refreshRoleLabel();
 });
