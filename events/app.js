@@ -128,10 +128,34 @@ function computeStretches() {
     }
   });
 
+  // Collapse to only the MAXIMAL stretch at each distinct headcount level
+  // (drop any stretch whose day-range is fully contained inside another
+  // stretch that has the exact same set of people). Without this, e.g.
+  // P1=1-2-3, P2=1-2-3-4-5, P3=2-3-4 would list 2, 2-3, AND 3 (all with the
+  // same 3-person group) as separate rows — we only want to keep "2-3"
+  // (the longest run for that exact group), not its sub-stretches.
+  const byGroup = new Map(); // "sortedKeys" -> array of candidate stretches
+  stretches.forEach(s => {
+    const groupKey = s.names.slice().sort().join("|");
+    if (!byGroup.has(groupKey)) byGroup.set(groupKey, []);
+    byGroup.get(groupKey).push(s);
+  });
+  const maximal = [];
+  byGroup.forEach(list => {
+    list.forEach(s => {
+      const isContained = list.some(other =>
+        other !== s &&
+        other.startIso <= s.startIso && other.endIso >= s.endIso &&
+        !(other.startIso === s.startIso && other.endIso === s.endIso)
+      );
+      if (!isContained) maximal.push(s);
+    });
+  });
+
   // Keep only stretches with 2+ people (true coincidences) OR single days
   // with 1 person (so the "just one person voted" case still shows up),
   // then sort by headcount desc, then length desc.
-  const filtered = stretches.filter(s => s.names.length >= 2 || s.days === 1);
+  const filtered = maximal.filter(s => s.names.length >= 2 || s.days === 1);
   filtered.sort((a, b) => (b.names.length - a.names.length) || (b.days - a.days));
   return filtered;
 }
@@ -365,13 +389,20 @@ function renderResults() {
     };
   });
 
-  const stretchList = computeStretches()
-    .filter(s => s.days > 1) // length-1 stretches are already covered by tallyList (with tentative support)
-    .map(s => ({
-      startIso: s.startIso, endIso: s.endIso, days: s.days,
-      total: s.names.length, tentTotal: 0,
-      availNames: s.names, tentNames: []
-    }));
+  // Multi-day stretches (true overlap ranges) only make sense for events
+  // explicitly created as "Several days" (dayMode === "multi") — a plain
+  // single-day event keeps showing only individual days, so marking
+  // availability on several unrelated days never gets misread as "wants
+  // a trip spanning all of them".
+  const stretchList = eventData.dayMode === "multi"
+    ? computeStretches()
+        .filter(s => s.days > 1) // length-1 stretches are already covered by tallyList (with tentative support)
+        .map(s => ({
+          startIso: s.startIso, endIso: s.endIso, days: s.days,
+          total: s.names.length, tentTotal: 0,
+          availNames: s.names, tentNames: []
+        }))
+    : [];
 
   const combined = [...tallyList, ...stretchList];
   const ranked = combined.slice().sort((a, b) => (b.total - a.total) || (b.days - a.days));
@@ -386,24 +417,20 @@ function renderResults() {
       ? `${formatDateLong(item.startIso)} → ${formatDateLong(item.endIso)}`
       : formatDateLong(item.startIso);
     html += `
-      <div class="rank-card${isApproved ? " is-approved" : ""}">
-        <div class="rank-top-row">
-          <div class="rank-badge ${badgeClass}">${idx + 1}</div>
-          <div class="rank-date">${dateLabel}${item.days > 1 ? `<span class="rank-days-badge">${item.days}d</span>` : ""}</div>
-          ${isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : ""}
-          <div class="rank-total">
-            ${item.total}${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}
-          </div>
+      <div class="rank-row${isApproved ? " is-approved" : ""}">
+        <div class="rank-row-main">
+          <span class="rank-date">${dateLabel}${item.days > 1 ? `<span class="rank-days-badge">${item.days}d</span>` : ""}</span>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <span class="rank-total">${item.total}${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}</span>
+          ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-start="${item.startIso}" data-end="${item.endIso}" type="button">
+            ${isApproved ? "✓" : t("approve_btn")}
+          </button>` : (isApproved ? `<span class="status-badge approved">${t("approved_tag")}</span>` : "")}
         </div>
-        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
         <div class="rank-names">
-          ${item.availNames.length ? `<span class="rank-who">✅ ${item.availNames.join(", ")}</span>` : ""}
-          ${item.tentNames.length ? `<span class="rank-who rank-tentative">❓ ${item.tentNames.join(", ")}</span>` : ""}
-          ${!item.availNames.length && !item.tentNames.length ? `<span class="rank-who">—</span>` : ""}
+          ${item.availNames.length ? item.availNames.join(", ") : ""}
+          ${item.tentNames.length ? `<span class="rank-tentative">❓ ${item.tentNames.join(", ")}</span>` : ""}
+          ${!item.availNames.length && !item.tentNames.length ? "—" : ""}
         </div>
-        ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-start="${item.startIso}" data-end="${item.endIso}" type="button">
-          ${isApproved ? "✓ " + t("approved_tag") : t("approve_btn")}
-        </button>` : ""}
       </div>
     `;
   });
