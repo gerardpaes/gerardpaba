@@ -497,7 +497,10 @@ function renderEventList() {
     const row = document.createElement("div");
     row.className = "event-row";
     row.innerHTML = `
-      <div class="ev-icon">${emoji || "?"}</div>
+      <div class="ev-icon">
+        <span class="ev-icon-text">${emoji || "?"}</span>
+        ${admin ? `<input type="text" class="ev-icon-edit-input" value="${emoji || ""}" maxlength="4" style="display:none;">` : ""}
+      </div>
       <a href="/events/event.html?id=${encodeURIComponent(id)}" class="ev-link-area">
         <div class="ev-info">
           <div class="ev-name">
@@ -518,11 +521,14 @@ function renderEventList() {
       e.stopPropagation();
       const nameText = row.querySelector(".ev-name-text");
       const nameInput = row.querySelector(".ev-name-edit-input");
+      const iconText = row.querySelector(".ev-icon-text");
+      const iconInput = row.querySelector(".ev-icon-edit-input");
       const isEditing = nameInput.style.display !== "none";
       if (isEditing) {
         const newTitle = nameInput.value.trim();
-        if (newTitle && newTitle !== title) {
-          const fullName = emoji ? `${emoji} ${newTitle}` : newTitle;
+        const newEmoji = iconInput.value.trim();
+        if ((newTitle && newTitle !== title) || newEmoji !== (emoji || "")) {
+          const fullName = newEmoji ? `${newEmoji} ${newTitle || title}` : (newTitle || title);
           updateDoc(doc(collection(db, "events"), id), { name: fullName }).catch(err => {
             console.error(err);
             showToast(t("toast_create_error"));
@@ -530,10 +536,14 @@ function renderEventList() {
         }
         nameInput.style.display = "none";
         nameText.style.display = "";
+        iconInput.style.display = "none";
+        iconText.style.display = "";
         editNameBtn.textContent = "✎";
       } else {
         nameText.style.display = "none";
         nameInput.style.display = "";
+        iconText.style.display = "none";
+        iconInput.style.display = "";
         nameInput.focus();
         nameInput.select();
         editNameBtn.textContent = "✓";
@@ -542,6 +552,11 @@ function renderEventList() {
     const nameEditInput = row.querySelector(".ev-name-edit-input");
     if (nameEditInput) nameEditInput.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); });
     if (nameEditInput) nameEditInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") editNameBtn.click();
+    });
+    const iconEditInput = row.querySelector(".ev-icon-edit-input");
+    if (iconEditInput) iconEditInput.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); });
+    if (iconEditInput) iconEditInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") editNameBtn.click();
     });
 
