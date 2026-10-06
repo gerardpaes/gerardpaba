@@ -18,7 +18,7 @@
     <div class="nav-links">
       <a href="/" class="back-link"><span class="back-link-icon">←</span><span class="back-link-text" data-i18n="back_to_site">Back to site</span></a>
       <div class="lang-switcher" id="lang-switcher"></div>
-      <button class="role-switch-btn" id="role-switch-btn" type="button" title="Switch role">👤</button>
+      <button class="role-switch-btn" id="role-switch-btn" type="button" title="Switch role"><span class="rsb-icon">👤</span><span class="rsb-label" data-role-label></span></button>
     </div>
   </div>
 </header>
@@ -55,6 +55,18 @@
     <button class="modal-close-btn" id="close-create-modal" type="button">&times;</button>
     <h2 data-i18n="create_title">Create a new event</h2>
     <p class="section-sub" data-i18n="create_sub">Give it a name…</p>
+
+    <label class="field-label" data-i18n="label_day_mode">What kind of event is it?</label>
+    <div class="seg-group" id="day-mode-group">
+      <button type="button" class="seg-opt active" id="day-mode-single" data-mode="single">
+        <span>📅 <span data-i18n="day_mode_single">One day</span></span>
+        <span class="seg-sub" data-i18n="day_mode_single_sub">a single date</span>
+      </button>
+      <button type="button" class="seg-opt" id="day-mode-multi" data-mode="multi">
+        <span>🧳 <span data-i18n="day_mode_multi">Several days</span></span>
+        <span class="seg-sub" data-i18n="day_mode_multi_sub">e.g. a trip</span>
+      </button>
+    </div>
 
     <label class="field-label" for="event-name" data-i18n="label_event_name">Event name</label>
     <input type="text" id="event-name" data-i18n-placeholder="placeholder_event_name" placeholder="e.g. Christmas Dinner">
