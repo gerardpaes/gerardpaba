@@ -52,7 +52,7 @@ function setDayMode(mode) {
 dayModeSingleBtn.addEventListener("click", () => setDayMode("single"));
 dayModeMultiBtn.addEventListener("click", () => setDayMode("multi"));
 
-const EMOJI_CHOICES = ["🎉", "🎂", "🍕", "🍻", "🏖️", "⚽", "🎮", "🎬", "🎵", "🏔️", "🚗", "📚"];
+const EMOJI_CHOICES = ["🎉", "🎂", "🍕", "🍻", "🏖️", "🎬", "🎵", "🏔️", "🚗", "🎤", "✈️", "🧳", "🍽️", "🎄", "🌈", "🍴", "🍄", "🍂", "☀️", "🌸", "🧅"];
 let selectedEmoji = "";
 
 function renderEmojiPicker() {
@@ -90,10 +90,23 @@ function refreshEmojiActiveStates() {
 renderEmojiPicker();
 
 // Hidden text input: receives whatever emoji the system keyboard inserts
-// when the "+" square is tapped (works on both mobile and desktop).
+// when the "+" square is tapped. On mobile this works invisibly because
+// focusing it pops the system keyboard (which has an emoji key) right
+// away. On a LAPTOP there is no touch keyboard, so leaving the input
+// permanently invisible gave the user zero feedback that clicking "+" did
+// anything at all - it silently focused an off-screen 1x1px box. Now the
+// input becomes visibly shown right under the grid while focused, with a
+// placeholder hinting how to actually type an emoji on desktop (OS emoji
+// picker shortcut, or paste), and hides again on blur if left empty.
 emojiFreeInput.addEventListener("input", () => {
   selectedEmoji = emojiFreeInput.value.trim();
   refreshEmojiActiveStates();
+});
+emojiFreeInput.addEventListener("focus", () => {
+  emojiFreeInput.classList.add("visible");
+});
+emojiFreeInput.addEventListener("blur", () => {
+  if (!emojiFreeInput.value.trim()) emojiFreeInput.classList.remove("visible");
 });
 
 function updateCreateBtnLabel() {
