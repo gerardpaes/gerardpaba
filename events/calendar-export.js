@@ -150,13 +150,20 @@ function slugify(str) {
   return String(str).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "event";
 }
 
-// Builds a single "Add to calendar" button that, on click, opens a
-// centered modal with two big options: Google Calendar / Apple-iPhone
-// Calendar (.ics). `getParams()` is called lazily each time an option is
-// clicked, so the caller can always supply the latest title/time/location.
+// Builds a single "Add to calendar" button that, on click, opens Google
+// Calendar directly with the event prefilled - no menu/modal anymore.
 //
-// Returns the wrapper DOM element — insert it wherever the two old
-// buttons used to live.
+// Apple/iPhone Calendar (.ics via a data: URI) was removed: despite
+// several fix attempts, it kept failing to trigger the native "Add Event"
+// sheet reliably across iOS versions/browsers. Google Calendar works
+// everywhere (including on iPhone, where it opens in Safari and the user
+// can still add it to their calendar from there), so it's simpler and
+// more reliable to only offer that one option.
+//
+// `getParams()` is called lazily on click, so the caller can always
+// supply the latest title/time/location.
+//
+// Returns the wrapper DOM element — insert it wherever the old button lived.
 export function createCalendarAddButton(getParams, labels) {
   const wrap = document.createElement("div");
   wrap.className = "cal-add-wrap";
@@ -165,47 +172,9 @@ export function createCalendarAddButton(getParams, labels) {
   const btn = wrap.querySelector(".cal-add-btn");
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    openCalChoiceModal(getParams, labels);
+    const { title, isoDate, details, time, location, endIsoDate } = getParams();
+    window.open(googleCalendarUrl(title, isoDate, details, time, location, endIsoDate), "_blank", "noopener");
   });
 
   return wrap;
-}
-
-function openCalChoiceModal(getParams, labels) {
-  const overlay = document.createElement("div");
-  overlay.className = "cal-choice-overlay open";
-  overlay.innerHTML = `
-    <div class="cal-choice-dialog">
-      <button class="modal-close-btn" type="button" data-action="close">&times;</button>
-      <h3 class="cal-choice-title">${labels.addToCalendar}</h3>
-      <div class="cal-choice-options">
-        <button class="cal-choice-opt" type="button" data-kind="google">
-          <span class="cco-icon">📅</span>
-          <span class="cco-label">${labels.google}</span>
-        </button>
-        <button class="cal-choice-opt" type="button" data-kind="apple">
-          <span class="cco-icon">🍏</span>
-          <span class="cco-label">${labels.apple}</span>
-        </button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-
-  function close() { overlay.remove(); }
-
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
-  overlay.querySelector('[data-action="close"]').addEventListener("click", close);
-
-  overlay.querySelectorAll(".cal-choice-opt").forEach(item => {
-    item.addEventListener("click", () => {
-      close();
-      const { title, isoDate, details, time, location, endIsoDate } = getParams();
-      if (item.dataset.kind === "google") {
-        window.open(googleCalendarUrl(title, isoDate, details, time, location, endIsoDate), "_blank", "noopener");
-      } else {
-        downloadIcs(title, isoDate, details, time, location, endIsoDate);
-      }
-    });
-  });
 }
