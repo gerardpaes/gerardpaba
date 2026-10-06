@@ -21,33 +21,33 @@ const confirmedFields = document.getElementById("confirmed-fields");
 const confirmedDateInput = document.getElementById("confirmed-date-input");
 const confirmedTimeInput = document.getElementById("confirmed-time-input");
 const confirmedLocationInput = document.getElementById("confirmed-location-input");
-const multiDayToggle = document.getElementById("multi-day-toggle");
 const confirmedEndDateWrap = document.getElementById("confirmed-end-date-wrap");
 const confirmedEndDateInput = document.getElementById("confirmed-end-date-input");
 const confirmedTimeWrap = document.getElementById("confirmed-time-wrap");
 
-multiDayToggle.addEventListener("change", () => {
-  const on = multiDayToggle.checked;
-  confirmedEndDateWrap.style.display = on ? "" : "none";
-  confirmedTimeWrap.style.display = on ? "none" : "";
-});
-
 // Day-mode segmented control: "single" (default, one specific date — the
 // classic flow, results ranking shows individual days only) vs "multi"
 // (a trip-style event — results ranking also surfaces the best overlapping
-// date RANGE across people's availability, not just single days). Purely
-// a UI/ranking-logic flag stored on the event doc as `dayMode`; it does
-// NOT affect the "I already have a confirmed date" multi-day range above
-// (that one is independent — an admin can pre-set a fixed trip range even
-// before voting starts).
+// date RANGE across people's availability, not just single days). This
+// single choice at the top of the modal now ALSO decides whether the
+// "confirmed date" section (if the admin already has a fixed date) asks
+// for a start+end range or a single date+time — no separate/redundant
+// "several days" checkbox further down anymore.
 const dayModeSingleBtn = document.getElementById("day-mode-single");
 const dayModeMultiBtn = document.getElementById("day-mode-multi");
 let dayMode = "single";
+
+function applyDayModeToConfirmedFields() {
+  const multi = dayMode === "multi";
+  confirmedEndDateWrap.style.display = multi ? "" : "none";
+  confirmedTimeWrap.style.display = multi ? "none" : "";
+}
 
 function setDayMode(mode) {
   dayMode = mode;
   dayModeSingleBtn.classList.toggle("active", mode === "single");
   dayModeMultiBtn.classList.toggle("active", mode === "multi");
+  applyDayModeToConfirmedFields();
 }
 dayModeSingleBtn.addEventListener("click", () => setDayMode("single"));
 dayModeMultiBtn.addEventListener("click", () => setDayMode("multi"));
@@ -58,7 +58,7 @@ let selectedEmoji = "";
 function renderEmojiPicker() {
   emojiPickerGrid.innerHTML = EMOJI_CHOICES.map(e =>
     `<button type="button" class="emoji-opt-btn" data-emoji="${e}">${e}</button>`
-  ).join("");
+  ).join("") + `<button type="button" class="emoji-more-btn" id="emoji-more-btn" title="${t("emoji_more_title")}">➕</button>`;
   emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const emoji = btn.dataset.emoji;
@@ -68,17 +68,32 @@ function renderEmojiPicker() {
         selectedEmoji = emoji;
       }
       emojiFreeInput.value = selectedEmoji;
-      emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
+      refreshEmojiActiveStates();
     });
   });
+  // "+" square: same grid, different color, opens the system emoji
+  // keyboard directly (via the hidden text input) so users can pick ANY
+  // emoji, not just the preset palette — no separate free-text box
+  // floating below the grid anymore.
+  document.getElementById("emoji-more-btn").addEventListener("click", () => {
+    emojiFreeInput.focus();
+  });
+}
+
+function refreshEmojiActiveStates() {
+  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
+  const moreBtn = document.getElementById("emoji-more-btn");
+  const isCustom = selectedEmoji && !EMOJI_CHOICES.includes(selectedEmoji);
+  moreBtn.classList.toggle("active", !!isCustom);
+  moreBtn.textContent = isCustom ? selectedEmoji : "➕";
 }
 renderEmojiPicker();
 
-// Free-text emoji input: lets mobile users open their system emoji keyboard
-// and pick ANY emoji, not just the preset palette above.
+// Hidden text input: receives whatever emoji the system keyboard inserts
+// when the "+" square is tapped (works on both mobile and desktop).
 emojiFreeInput.addEventListener("input", () => {
   selectedEmoji = emojiFreeInput.value.trim();
-  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.toggle("active", b.dataset.emoji === selectedEmoji));
+  refreshEmojiActiveStates();
 });
 
 function updateCreateBtnLabel() {
@@ -126,16 +141,13 @@ function resetCreateModal() {
   eventNameInput.value = "";
   selectedEmoji = "";
   emojiFreeInput.value = "";
-  emojiPickerGrid.querySelectorAll(".emoji-opt-btn").forEach(b => b.classList.remove("active"));
+  refreshEmojiActiveStates();
   confirmedDateToggle.checked = false;
   confirmedFields.classList.remove("open");
   confirmedDateInput.value = "";
   confirmedTimeInput.value = "";
   confirmedLocationInput.value = "";
-  multiDayToggle.checked = false;
   confirmedEndDateInput.value = "";
-  confirmedEndDateWrap.style.display = "none";
-  confirmedTimeWrap.style.display = "";
   setDayMode("single");
   updateCreateBtnLabel();
 }
@@ -156,7 +168,7 @@ createBtn.addEventListener("click", async () => {
   const id = slugify(rawName) + "-" + Date.now().toString(36).slice(-4);
 
   const hasConfirmedDate = confirmedDateToggle.checked && confirmedDateInput.value;
-  const isMultiDay = hasConfirmedDate && multiDayToggle.checked && confirmedEndDateInput.value;
+  const isMultiDay = hasConfirmedDate && dayMode === "multi" && confirmedEndDateInput.value;
 
   try {
     await setDoc(doc(collection(db, "events"), id), {
