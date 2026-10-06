@@ -299,7 +299,10 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .event-row .ev-info { min-width: 0; }
 .event-row .ev-info .ev-name {
   font-size: 15.5px; font-weight: 600;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
 }
 .event-row .ev-info .ev-meta { color: var(--muted); font-size: 13px; margin-top: 3px; }
 
@@ -311,6 +314,25 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .event-row .vote-btn:hover { background: var(--accent-dark); }
 
 .event-row .delete-event-btn { flex-shrink: 0; }
+.event-row .edit-event-name-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.event-row .edit-event-name-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ev-name-edit-input {
+  width: 100%;
+  font-size: 15.5px; font-weight: 600; font-family: inherit;
+  padding: 4px 8px;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text);
+}
 
 .chip {
   display: inline-flex;
@@ -494,6 +516,8 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 
 .rank-row.is-approved { background: rgba(40, 167, 69, 0.06); border-radius: 10px; padding: 12px 10px; }
 
+.rank-date-line { margin-bottom: 6px; }
+
 .rank-row-main {
   display: flex;
   align-items: center;
@@ -503,8 +527,6 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .rank-date {
   font-size: 14px;
   font-weight: 600;
-  flex: 0 0 auto;
-  min-width: 64px;
   white-space: nowrap;
 }
 
@@ -564,15 +586,56 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .participant-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: #ffffff;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 16px;
+  border-radius: 16px;
+  padding: 4px 6px 4px 16px;
   font-size: 14px;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  flex-wrap: wrap;
 }
+
+.participant-chip-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.participant-chip-remove {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 999px;
+  opacity: 0.6;
+  transition: opacity .15s, background .15s;
+}
+.participant-chip-remove:hover { opacity: 1; background: #fdeeee; }
+
+.participant-chip-dates {
+  display: none;
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 6px 2px 2px 2px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+.participant-chip.open .participant-chip-dates { display: block; }
+
+.pcd-group { display: block; }
+.pcd-group.pcd-tentative { color: var(--warn); margin-top: 2px; }
 
 .participant-chip .avatar {
   width: 26px; height: 26px;
