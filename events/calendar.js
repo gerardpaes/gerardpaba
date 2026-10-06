@@ -64,10 +64,14 @@ export class MonthCalendar {
     this.showCountBadges = opts.showCountBadges !== false;
     this.pickMode = "available"; // which state clicking a day applies, in "pick-free" mode
     this.pickModeLabels = opts.pickModeLabels || { available: "Available", tentative: "Tentative" };
+    // "mini" is used when several small read-only calendars are shown
+    // side by side (one per month that has votes) - no month-nav arrows,
+    // smaller cells, fixed to the month it was created for.
+    this.mini = !!opts.mini;
 
     const today = new Date();
-    this.viewYear = today.getFullYear();
-    this.viewMonth = today.getMonth();
+    this.viewYear = opts.initialYear != null ? opts.initialYear : today.getFullYear();
+    this.viewMonth = opts.initialMonth != null ? opts.initialMonth : today.getMonth();
   }
 
   isoOf(y, m, d) {
@@ -107,9 +111,9 @@ export class MonthCalendar {
 
     let html = `
       <div class="calendar-header">
-        <button class="cal-nav-btn" data-nav="-1" type="button">&lsaquo;</button>
+        ${this.mini ? "" : `<button class="cal-nav-btn" data-nav="-1" type="button">&lsaquo;</button>`}
         <div class="cal-title">${monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)}</div>
-        <button class="cal-nav-btn" data-nav="1" type="button">&rsaquo;</button>
+        ${this.mini ? "" : `<button class="cal-nav-btn" data-nav="1" type="button">&rsaquo;</button>`}
       </div>
     `;
 
@@ -173,6 +177,7 @@ export class MonthCalendar {
 
     html += `</div>`;
     this.container.innerHTML = html;
+    if (this.mini) this.container.classList.add("calendar-mini");
 
     this.container.querySelectorAll(".pick-mode-btn").forEach(btn => {
       const lbl = btn.querySelector(".pmb-label");
