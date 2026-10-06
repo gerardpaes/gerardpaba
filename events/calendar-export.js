@@ -98,18 +98,31 @@ export function downloadIcs(title, isoDate, details = "", time = null, location 
   if (isIOS()) {
     // On iOS Safari, assigning window.location.href = "data:..." from a
     // script is silently blocked (it is not treated as a direct result of
-    // the user gesture), so nothing visibly happens. The reliable method is
-    // to create a real <a href="data:..."> anchor and dispatch a click on it
-    // synchronously, inside the same click handler call stack: Safari then
-    // opens its native "Add to Calendar" preview for the .ics content.
+    // the user gesture), so a real <a href="data:..."> anchor + synchronous
+    // .click() inside the same user-gesture call stack is used instead.
+    //
+    // Important gotcha: the anchor must NOT be `display:none` (or have no
+    // layout at all) - older WebKit silently refuses to honor .click() /
+    // treats the element as "not interactable" in that case, which is
+    // exactly why this kept failing even with the anchor-click approach.
+    // Position it off-screen instead so it has real layout but is invisible.
+    //
+    // Also do NOT set `download` together with a `data:` URI: Safari's
+    // in-app calendar-preview behavior (opening the native "Add Event"
+    // sheet) is only triggered when the data: URI is navigated to as a
+    // normal link: the `download` attribute makes Safari try to save it
+    // as a file instead, which is a dead end on iOS (no visible result).
     const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`;
     const a = document.createElement("a");
     a.href = dataUrl;
-    a.setAttribute("download", `${slugify(title)}.ics`);
-    a.style.display = "none";
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.style.position = "fixed";
+    a.style.top = "-1000px";
+    a.style.left = "-1000px";
     document.body.appendChild(a);
     a.click();
-    setTimeout(() => document.body.removeChild(a), 0);
+    setTimeout(() => document.body.removeChild(a), 1000);
     return;
   }
 
