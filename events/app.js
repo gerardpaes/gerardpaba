@@ -185,12 +185,13 @@ function formatDateLong(iso) {
   return d.toLocaleDateString(localeCode, { weekday: "long", day: "numeric", month: "long" });
 }
 
-// Compact "4 des" / "4 dic" / "4 dec" style date, used anywhere space is
-// tight (ranking rows, per-person vote lists) - no weekday, short month.
+// Compact numeric "7/12" style date, used anywhere space is tight (date
+// ranges, per-person vote lists). Locale-agnostic on purpose: Intl's short
+// month name for Catalan ("7 de des.") reads badly, especially doubled in
+// a range like "7 de des. \u2192 8 de des.".
 function formatDateShort(iso) {
   const d = new Date(iso + "T00:00:00");
-  const localeCode = { ca: "ca-ES", es: "es-ES", en: "en-US" }[getLocale()] || "en-US";
-  return d.toLocaleDateString(localeCode, { day: "numeric", month: "short" }).replace(".", "");
+  return `${d.getDate()}/${d.getMonth() + 1}`;
 }
 
 function slugifyName(name) {
@@ -554,11 +555,11 @@ function renderResults() {
     const pct = Math.round((item.total / maxTotal) * 100);
     const isApproved = eventData.approvedDate === item.startIso &&
       (eventData.approvedEndDate || eventData.approvedDate) === item.endIso;
-    // Short date label everywhere (e.g. "4 des" or "4 des → 6 des") - the
-    // long weekday+month version made multi-day ranges wrap/overflow badly.
+    // Multi-day events get a compact numeric range ("7/12 → 8/12"); a
+    // single day keeps the full weekday+month label since it's not doubled.
     const dateLabel = item.days > 1
       ? `${formatDateShort(item.startIso)} → ${formatDateShort(item.endIso)}`
-      : formatDateShort(item.startIso);
+      : formatDateLong(item.startIso);
     html += `
       <div class="rank-row${isApproved ? " is-approved" : ""}">
         <div class="rank-date-line">
