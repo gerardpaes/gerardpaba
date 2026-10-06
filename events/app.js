@@ -87,7 +87,64 @@ const resultsCalendarEl = document.getElementById("results-calendar");
 let eventData = null;
 let responses = {};
 let pickCal = null;
-let resultsCal = null;
+let resultsCals = [];
+// Only auto-jump the "pick your availability" calendar to the month of the
+// first existing vote ONCE on initial load - after that the user may have
+// navigated manually and we must not yank the view out from under them.
+let pickCalJumpedToDefault = false;
+
+function todayMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// If there is at least one existing vote anywhere, jump the picking
+// calendar to the month of the EARLIEST one, so a new voter opening the
+// page doesn't land on today's (often empty) month and wonder where
+// everyone else's picks are.
+function maybeJumpPickCalToFirstResultMonth() {
+  if (pickCalJumpedToDefault || !pickCal) return;
+  const allIsos = [];
+  Object.values(responses).forEach(r => {
+    (r.available || []).forEach(iso => allIsos.push(iso));
+    (r.tentative || []).forEach(iso => allIsos.push(iso));
+  });
+  if (allIsos.length === 0) return;
+  allIsos.sort();
+  pickCal.jumpToMonthOf(allIsos[0]);
+  pickCalJumpedToDefault = true;
+}
+
+// Results calendar: normally a single full-size month view. But if votes
+// are spread across SEVERAL distinct months, showing just one forces the
+// admin to click through months one at a time to see the full picture -
+// instead render one small read-only calendar per month that has any
+// votes, all visible at once.
+function rebuildResultsCalendars(dates, counts, maxTotal) {
+  resultsCalendarEl.innerHTML = "";
+  resultsCals = [];
+  const monthKeys = Array.from(new Set(dates.map(iso => iso.slice(0, 7)))).sort();
+  const useMini = monthKeys.length > 1;
+  resultsCalendarEl.classList.toggle("results-calendars-grid", useMini);
+  const keysToRender = monthKeys.length > 0 ? monthKeys : [todayMonthKey()];
+  keysToRender.forEach(key => {
+    const [y, m] = key.split("-").map(Number);
+    const div = document.createElement("div");
+    div.className = "calendar" + (useMini ? " calendar-mini-item" : "");
+    resultsCalendarEl.appendChild(div);
+    const cal = new MonthCalendar(div, {
+      mode: "display",
+      mini: useMini,
+      initialYear: y,
+      initialMonth: m - 1,
+      counts, maxCount: maxTotal,
+      approvedDate: eventData ? (eventData.approvedDate || null) : null,
+      approvedEndDate: eventData ? (eventData.approvedEndDate || null) : null
+    });
+    cal.render();
+    resultsCals.push(cal);
+  });
+}
 
 function showToast(msg) {
   toastEl.textContent = msg;
@@ -327,7 +384,7 @@ function renderApprovedBanner() {
         const eventRef = doc(collection(db, "events"), eventId);
         await updateDoc(eventRef, { approvedDate: dv });
         eventData.approvedDate = dv;
-        resultsCal.setApprovedDate(dv, eventData.approvedEndDate);
+        resultsCals.forEach(cal => cal.setApprovedDate(dv, eventData.approvedEndDate));
         renderApprovedBanner();
         renderResults();
         showToast(t("toast_approved", formatDateLong(dv)));
@@ -342,7 +399,7 @@ function renderApprovedBanner() {
           const eventRef = doc(collection(db, "events"), eventId);
           await updateDoc(eventRef, { approvedEndDate: ev });
           eventData.approvedEndDate = ev;
-          resultsCal.setApprovedDate(eventData.approvedDate, ev);
+          resultsCals.forEach(cal => cal.setApprovedDate(eventData.approvedDate, ev));
           renderApprovedBanner();
           renderResults();
           showToast(t("toast_approved", `${formatDateLong(eventData.approvedDate)} \u2192 ${formatDateLong(ev)}`));
@@ -391,7 +448,7 @@ function renderApprovedBanner() {
         eventData.approvedDate = null;
         eventData.approvedEndDate = null;
         renderApprovedBanner();
-        resultsCal.setApprovedDate(null);
+        resultsCals.forEach(cal => cal.setApprovedDate(null));
         renderResults();
         showToast(t("toast_unapproved"));
       } catch (e) {
@@ -411,7 +468,7 @@ function renderResults() {
 
   // Keep the "who's picking" calendar showing live counts too, even before results exist.
   if (pickCal) pickCal.setCounts(counts, maxTotal);
-  if (resultsCal) resultsCal.setCounts(counts, maxTotal);
+  rebuildResultsCalendars(dates, counts, maxTotal);
 
   if (totalParticipants === 0 || dates.length === 0) {
     resultsAreaEl.innerHTML = `<div class="empty-state">${t("no_responses")}</div>`;
@@ -498,7 +555,7 @@ function renderResults() {
         });
         eventData.approvedDate = startIso;
         eventData.approvedEndDate = endIso !== startIso ? endIso : null;
-        resultsCal.setApprovedDate(startIso, eventData.approvedEndDate);
+        resultsCals.forEach(cal => cal.setApprovedDate(startIso, eventData.approvedEndDate));
         renderApprovedBanner();
         renderResults();
         showToast(t("toast_approved", endIso !== startIso ? `${formatDateLong(startIso)} → ${formatDateLong(endIso)}` : formatDateLong(startIso)));
@@ -555,13 +612,6 @@ async function loadEvent() {
     });
     pickCal.render();
 
-    resultsCal = new MonthCalendar(resultsCalendarEl, {
-      mode: "display",
-      approvedDate: eventData.approvedDate || null,
-      approvedEndDate: eventData.approvedEndDate || null
-    });
-    resultsCal.render();
-
     renderApprovedBanner();
 
     onSnapshot(collection(eventRef, "responses"), (snap2) => {
@@ -570,6 +620,7 @@ async function loadEvent() {
       renderResults();
       renderParticipants();
       restoreMyResponseIfAny();
+      maybeJumpPickCalToFirstResultMonth();
       requestAnimationFrame(revealOnScroll);
     });
 
