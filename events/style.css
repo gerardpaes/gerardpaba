@@ -1111,7 +1111,10 @@ footer.hint {
   padding: 32px;
   max-width: 420px;
   width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   box-shadow: 0 24px 70px rgba(0,0,0,0.2);
+  -webkit-overflow-scrolling: touch;
 }
 
 .create-modal h2 { text-align: left; font-size: 22px; margin-bottom: 6px; }
@@ -1416,11 +1419,11 @@ footer.hint {
 .confirmed-fields input[type="time"],
 .confirmed-fields input[type="text"] {
   width: 100%;
-  padding: 12px 14px;
+  padding: 13px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: #fafafa;
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
 }
 
@@ -1453,20 +1456,42 @@ footer.hint {
   transform: scale(1.08);
 }
 
-.emoji-free-input {
-  width: 70px; height: 38px;
+/* "+" square inside the emoji grid: same size/shape as the preset emoji
+   buttons but a distinct accent color, so it reads as "one more option
+   in the grid" rather than a separate control. Tapping it focuses the
+   hidden text input below, which opens the system emoji keyboard on
+   mobile (or lets you type any emoji on desktop). */
+.emoji-more-btn {
+  width: 38px; height: 38px;
   border-radius: 10px;
-  border: 1.5px solid var(--border);
-  background: #fafafa;
-  font-size: 18px;
-  text-align: center;
-  margin-top: 8px;
-  display: inline-block;
+  border: 1.5px solid var(--accent);
+  background: #eaf3ff;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+  font-family: inherit;
 }
 
-.emoji-free-input:focus {
-  border-color: var(--accent);
-  outline: none;
+.emoji-more-btn.active {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.08);
+  font-size: 18px;
+}
+
+/* Hidden text input that receives the actual emoji character once the
+   system emoji keyboard inserts one; invisible but still focusable/typable
+   (not display:none, which some mobile keyboards refuse to open for). */
+.emoji-hidden-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: 0;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .name-emoji-row {
@@ -1488,8 +1513,41 @@ footer.hint {
 
 .name-emoji-row input[type="text"] { flex: 1; }
 
-/* ===== +1 CHECKBOX NEXT TO NAME FIELD ===== */
-.plusone-inline {
+/* Custom name-suggestion dropdown (replaces native <datalist>, which
+   Safari on iOS silently ignores — this works identically everywhere). */
+.name-suggest-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 60;
+}
+
+.name-suggest-dropdown.open { display: block; }
+
+.name-suggest-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.name-suggest-item:hover { background: #f5f5f7; }
+.name-suggest-item + .name-suggest-item { border-top: 1px solid var(--border); }
+
+/* ===== +1 TOGGLE BUTTON NEXT TO NAME FIELD ===== */
+.plusone-toggle {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1502,15 +1560,40 @@ footer.hint {
   white-space: nowrap;
   font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
   flex-shrink: 0;
   height: 47px;
   box-sizing: border-box;
+  transition: background .15s, border-color .15s, color .15s;
 }
 
-.plusone-inline input[type="checkbox"] {
-  width: 20px; height: 20px;
-  accent-color: var(--accent);
-  cursor: pointer;
+.plusone-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 20px;
+  border-radius: 7px;
+  background: #e4e4e8;
+  color: #8a8a93;
+  font-size: 11px;
+  font-weight: 700;
+  transition: background .15s, color .15s;
+  flex-shrink: 0;
+}
+
+.plusone-toggle:hover { border-color: var(--accent); }
+
+.plusone-toggle.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.plusone-toggle.active .plusone-toggle-icon {
+  background: #fff;
+  color: var(--accent);
 }
 
 @media (max-width: 600px) {
@@ -1518,7 +1601,7 @@ footer.hint {
   .name-emoji-row > div { width: 100%; }
   .name-emoji-row .spacer-label { display: none; }
   .name-emoji-row input[type="text"] { margin-bottom: 0; }
-  .plusone-inline { width: 100%; justify-content: center; margin-bottom: 0; }
+  .plusone-toggle { width: 100%; justify-content: center; margin-bottom: 0; }
 }
 
 /* ===== CONFIRM DIALOG (site-styled, replaces window.confirm) ===== */
