@@ -116,6 +116,7 @@ export const DICT = {
     day_mode_multi_sub: "p. ex. un viatge",
     label_end_date: "Data de fi",
     label_choose_emoji: "Tria una icona (opcional)",
+    emoji_more_title: "Més emojis…",
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentatiu",
 
@@ -242,6 +243,7 @@ export const DICT = {
     day_mode_multi_sub: "p. ej. un viaje",
     label_end_date: "Fecha de fin",
     label_choose_emoji: "Elige un icono (opcional)",
+    emoji_more_title: "Más emojis…",
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentativo",
 
@@ -368,6 +370,7 @@ export const DICT = {
     day_mode_multi_sub: "e.g. a trip",
     label_end_date: "End date",
     label_choose_emoji: "Choose an icon (optional)",
+    emoji_more_title: "More emoji…",
     pickmode_available: "Available",
     pickmode_tentative: "Tentative",
 
