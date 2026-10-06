@@ -74,7 +74,7 @@
     <div class="emoji-picker-row">
       <label class="field-label" data-i18n="label_choose_emoji">Choose an icon (optional)</label>
       <div class="emoji-picker-grid" id="emoji-picker-grid"></div>
-      <input type="text" id="emoji-free-input" class="emoji-free-input" maxlength="4" placeholder="😀" inputmode="text" autocomplete="off">
+      <input type="text" id="emoji-free-input" class="emoji-hidden-input" maxlength="4" inputmode="text" autocomplete="off" tabindex="-1">
     </div>
 
     <div class="confirmed-toggle-row">
@@ -86,10 +86,6 @@
       <div>
         <label class="field-label" data-i18n="label_date">Date</label>
         <input type="date" id="confirmed-date-input">
-      </div>
-      <div class="multi-day-toggle-row">
-        <input type="checkbox" id="multi-day-toggle">
-        <label for="multi-day-toggle" style="margin:0; font-weight:500; cursor:pointer;" data-i18n="label_multi_day_toggle">Several days (e.g. a trip)</label>
       </div>
       <div id="confirmed-end-date-wrap" style="display:none;">
         <label class="field-label" data-i18n="label_end_date">End date</label>
