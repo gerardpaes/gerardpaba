@@ -117,6 +117,7 @@ export const DICT = {
     label_end_date: "Data de fi",
     label_choose_emoji: "Tria una icona (opcional)",
     emoji_more_title: "Més emojis…",
+    emoji_free_placeholder: "😀 enganxa",
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentatiu",
 
@@ -244,6 +245,7 @@ export const DICT = {
     label_end_date: "Fecha de fin",
     label_choose_emoji: "Elige un icono (opcional)",
     emoji_more_title: "Más emojis…",
+    emoji_free_placeholder: "😀 pega",
     pickmode_available: "Disponible",
     pickmode_tentative: "Tentativo",
 
@@ -371,6 +373,7 @@ export const DICT = {
     label_end_date: "End date",
     label_choose_emoji: "Choose an icon (optional)",
     emoji_more_title: "More emoji…",
+    emoji_free_placeholder: "😀 paste",
     pickmode_available: "Available",
     pickmode_tentative: "Tentative",
 
