@@ -32,6 +32,26 @@ multiDayToggle.addEventListener("change", () => {
   confirmedTimeWrap.style.display = on ? "none" : "";
 });
 
+// Day-mode segmented control: "single" (default, one specific date — the
+// classic flow, results ranking shows individual days only) vs "multi"
+// (a trip-style event — results ranking also surfaces the best overlapping
+// date RANGE across people's availability, not just single days). Purely
+// a UI/ranking-logic flag stored on the event doc as `dayMode`; it does
+// NOT affect the "I already have a confirmed date" multi-day range above
+// (that one is independent — an admin can pre-set a fixed trip range even
+// before voting starts).
+const dayModeSingleBtn = document.getElementById("day-mode-single");
+const dayModeMultiBtn = document.getElementById("day-mode-multi");
+let dayMode = "single";
+
+function setDayMode(mode) {
+  dayMode = mode;
+  dayModeSingleBtn.classList.toggle("active", mode === "single");
+  dayModeMultiBtn.classList.toggle("active", mode === "multi");
+}
+dayModeSingleBtn.addEventListener("click", () => setDayMode("single"));
+dayModeMultiBtn.addEventListener("click", () => setDayMode("multi"));
+
 const EMOJI_CHOICES = ["🎉", "🎂", "🍕", "🍻", "🏖️", "⚽", "🎮", "🎬", "🎵", "🏔️", "🚗", "📚"];
 let selectedEmoji = "";
 
@@ -116,6 +136,7 @@ function resetCreateModal() {
   confirmedEndDateInput.value = "";
   confirmedEndDateWrap.style.display = "none";
   confirmedTimeWrap.style.display = "";
+  setDayMode("single");
   updateCreateBtnLabel();
 }
 
@@ -141,6 +162,7 @@ createBtn.addEventListener("click", async () => {
     await setDoc(doc(collection(db, "events"), id), {
       name,
       createdAt: serverTimestamp(),
+      dayMode,
       approvedDate: hasConfirmedDate ? confirmedDateInput.value : null,
       approvedEndDate: isMultiDay ? confirmedEndDateInput.value : null,
       approvedTime: hasConfirmedDate && !isMultiDay ? (confirmedTimeInput.value || null) : null,
