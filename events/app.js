@@ -152,10 +152,45 @@ function showToast(msg) {
   setTimeout(() => toastEl.classList.remove("show"), 2200);
 }
 
+// Generic site-styled confirm dialog (replaces window.confirm), reused for
+// admin destructive actions on this page (removing a participant's response).
+function openConfirmDialog(message, onConfirm) {
+  const overlay = document.createElement("div");
+  overlay.className = "confirm-dialog-overlay open";
+  overlay.innerHTML = `
+    <div class="confirm-dialog">
+      <p class="confirm-dialog-text"></p>
+      <div class="btn-row">
+        <button class="btn secondary" data-action="cancel" type="button">${t("btn_cancel")}</button>
+        <button class="btn danger" data-action="confirm" type="button">${t("btn_delete_event")}</button>
+      </div>
+    </div>
+  `;
+  overlay.querySelector(".confirm-dialog-text").textContent = message;
+  document.body.appendChild(overlay);
+
+  function close() { overlay.remove(); }
+
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-action="cancel"]').addEventListener("click", close);
+  overlay.querySelector('[data-action="confirm"]').addEventListener("click", () => {
+    close();
+    onConfirm();
+  });
+}
+
 function formatDateLong(iso) {
   const d = new Date(iso + "T00:00:00");
   const localeCode = { ca: "ca-ES", es: "es-ES", en: "en-US" }[getLocale()] || "en-US";
   return d.toLocaleDateString(localeCode, { weekday: "long", day: "numeric", month: "long" });
+}
+
+// Compact "4 des" / "4 dic" / "4 dec" style date, used anywhere space is
+// tight (ranking rows, per-person vote lists) - no weekday, short month.
+function formatDateShort(iso) {
+  const d = new Date(iso + "T00:00:00");
+  const localeCode = { ca: "ca-ES", es: "es-ES", en: "en-US" }[getLocale()] || "en-US";
+  return d.toLocaleDateString(localeCode, { day: "numeric", month: "short" }).replace(".", "");
 }
 
 function slugifyName(name) {
@@ -519,13 +554,17 @@ function renderResults() {
     const pct = Math.round((item.total / maxTotal) * 100);
     const isApproved = eventData.approvedDate === item.startIso &&
       (eventData.approvedEndDate || eventData.approvedDate) === item.endIso;
+    // Short date label everywhere (e.g. "4 des" or "4 des → 6 des") - the
+    // long weekday+month version made multi-day ranges wrap/overflow badly.
     const dateLabel = item.days > 1
-      ? `${formatDateLong(item.startIso)} → ${formatDateLong(item.endIso)}`
-      : formatDateLong(item.startIso);
+      ? `${formatDateShort(item.startIso)} → ${formatDateShort(item.endIso)}`
+      : formatDateShort(item.startIso);
     html += `
       <div class="rank-row${isApproved ? " is-approved" : ""}">
-        <div class="rank-row-main">
+        <div class="rank-date-line">
           <span class="rank-date">${dateLabel}${item.days > 1 ? `<span class="rank-days-badge">${item.days}d</span>` : ""}</span>
+        </div>
+        <div class="rank-row-main">
           <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div>
           <span class="rank-total">${item.total}${item.tentTotal ? `<span class="rank-tent-badge">+${item.tentTotal}?</span>` : ""}</span>
           ${window.isAdmin() ? `<button class="btn secondary approve-date-btn" data-start="${item.startIso}" data-end="${item.endIso}" type="button">
@@ -567,16 +606,55 @@ function renderResults() {
 }
 
 function renderParticipants() {
-  const entries = Object.values(responses);
+  const entries = Object.entries(responses); // [slugKey, data]
   if (entries.length === 0) {
     participantsChipsEl.innerHTML = `<span class="meta">${t("no_people")}</span>`;
     return;
   }
+  const admin = window.isAdmin();
   participantsChipsEl.innerHTML = "";
-  entries.forEach(r => {
-    const chip = document.createElement("span");
+  entries.forEach(([key, r]) => {
+    const chip = document.createElement("div");
     chip.className = "participant-chip";
-    chip.innerHTML = `<span class="avatar">${initials(r.displayName)}</span>${r.displayName}${r.plusOne ? " +1" : ""}`;
+    chip.innerHTML = `
+      <button type="button" class="participant-chip-main">
+        <span class="avatar">${initials(r.displayName)}</span>${r.displayName}${r.plusOne ? " +1" : ""}
+      </button>
+      <div class="participant-chip-dates"></div>
+      ${admin ? `<button type="button" class="participant-chip-remove" title="${t("btn_remove_response")}">🗑</button>` : ""}
+    `;
+
+    const datesWrap = chip.querySelector(".participant-chip-dates");
+    const avail = (r.available || []).slice().sort();
+    const tent = (r.tentative || []).slice().sort();
+    const datesHtml = [
+      avail.length ? `<span class="pcd-group">${avail.map(formatDateShort).join(", ")}</span>` : "",
+      tent.length ? `<span class="pcd-group pcd-tentative">❓ ${tent.map(formatDateShort).join(", ")}</span>` : "",
+      (!avail.length && !tent.length) ? `<span class="pcd-group">—</span>` : ""
+    ].join("");
+    datesWrap.innerHTML = datesHtml;
+
+    chip.querySelector(".participant-chip-main").addEventListener("click", () => {
+      chip.classList.toggle("open");
+    });
+
+    const removeBtn = chip.querySelector(".participant-chip-remove");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openConfirmDialog(t("confirm_remove_response", r.displayName), async () => {
+          try {
+            const eventRef = doc(collection(db, "events"), eventId);
+            await deleteDoc(doc(collection(eventRef, "responses"), key));
+            showToast(t("toast_response_removed", r.displayName));
+          } catch (err) {
+            console.error(err);
+            showToast(t("toast_remove_error"));
+          }
+        });
+      });
+    }
+
     participantsChipsEl.appendChild(chip);
   });
 }
