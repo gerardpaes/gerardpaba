@@ -438,6 +438,28 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 .cal-day.heat-4 { background: #4fcf68; border-color: #3bbd54; color: #fff; }
 .cal-day.heat-5 { background: #2fb850; border-color: #279e45; color: #fff; }
 
+/* ===== RESULTS: several small calendars when votes span multiple months ===== */
+.results-calendars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.calendar-mini-item {
+  padding: 16px;
+  border-radius: 16px;
+}
+
+.calendar-mini .calendar-header { margin-bottom: 10px; }
+.calendar-mini .cal-title { font-size: 15px; }
+.calendar-mini .cal-grid { gap: 3px; }
+.calendar-mini .cal-weekday { font-size: 9px; padding-bottom: 4px; }
+.calendar-mini .cal-day { font-size: 10px; border-radius: 7px; }
+.calendar-mini .cal-day .count-badge {
+  min-width: 14px; height: 14px; font-size: 8px; top: -4px; right: -4px;
+}
+.calendar-mini .approved-star { font-size: 10px; }
+
 .cal-legend {
   display: flex;
   align-items: center;
@@ -1492,6 +1514,25 @@ footer.hint {
   border: none;
   opacity: 0;
   pointer-events: none;
+}
+
+/* While focused (mainly matters on desktop, where there's no touch
+   keyboard to pop automatically): become a real visible little field so
+   the user gets feedback that the "+" click did something, with room to
+   actually type/paste an emoji using the OS emoji picker shortcut. */
+.emoji-hidden-input.visible {
+  position: static;
+  width: 90px; height: 38px;
+  padding: 0 10px;
+  margin-left: 8px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  opacity: 1;
+  pointer-events: auto;
+  font-size: 16px;
+  background: #fff;
+  color: var(--text);
+  vertical-align: middle;
 }
 
 .name-emoji-row {
