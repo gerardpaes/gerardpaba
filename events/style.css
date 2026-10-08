@@ -1750,6 +1750,35 @@ footer.hint {
 }
 .info-dialog-group { padding: 4px 0; line-height: 1.5; }
 .info-dialog-group.info-dialog-tentative { color: var(--warn); }
+.info-dialog-group.name-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.name-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 4px 14px 4px 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.name-pill .avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0071e3, #4da3ff);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+
 
 /* ===== UPCOMING CARD: VIEW/EDIT TOGGLE ===== */
 .edit-fields-inline {
