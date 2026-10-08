@@ -436,6 +436,9 @@ input[type="text"]:focus { outline: none; border-color: var(--accent); backgroun
 
 .cal-day.candidate:hover { border-color: var(--accent); transform: scale(1.05); }
 
+.cal-day-clickable { cursor: pointer; }
+.cal-day-clickable:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+
 .cal-day.selected {
   background: var(--accent);
   border-color: var(--accent);
@@ -1248,16 +1251,6 @@ footer.hint {
   gap: 6px;
 }
 
-.cal-add-btn::after {
-  content: "";
-  width: 0; height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid currentColor;
-  opacity: 0.6;
-  margin-left: 2px;
-}
-
 .cal-add-menu {
   display: none;
   position: absolute;
@@ -1747,6 +1740,16 @@ footer.hint {
   margin: 0 0 20px;
   line-height: 1.4;
 }
+
+.info-dialog-title { margin-bottom: 10px; font-weight: 700; }
+.info-dialog-body {
+  text-align: left;
+  margin: 0 0 20px;
+  font-size: 14.5px;
+  color: var(--text);
+}
+.info-dialog-group { padding: 4px 0; line-height: 1.5; }
+.info-dialog-group.info-dialog-tentative { color: var(--warn); }
 
 /* ===== UPCOMING CARD: VIEW/EDIT TOGGLE ===== */
 .edit-fields-inline {
