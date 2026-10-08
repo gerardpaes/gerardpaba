@@ -143,8 +143,8 @@ function rebuildResultsCalendars(dates, counts, maxTotal) {
       onDayClick: (iso) => {
         const { availNames, tentNames } = namesForDate(iso);
         const bodyHtml = [
-          availNames.length ? `<div class="info-dialog-group">${availNames.join(", ")}</div>` : "",
-          tentNames.length ? `<div class="info-dialog-group info-dialog-tentative">❓ ${tentNames.join(", ")}</div>` : "",
+          availNames.length ? `<div class="info-dialog-group name-pills">${namePillsHtml(availNames)}</div>` : "",
+          tentNames.length ? `<div class="info-dialog-group name-pills info-dialog-tentative">❓ ${namePillsHtml(tentNames)}</div>` : "",
           (!availNames.length && !tentNames.length) ? `<div class="info-dialog-group">—</div>` : ""
         ].join("");
         openInfoDialog(formatDateLong(iso), bodyHtml);
@@ -213,18 +213,28 @@ function openInfoDialog(title, bodyHtml) {
 }
 
 // Who marked `iso` as available/tentative, used by the results-calendar
-// day-click handler below.
+// day-click handler below. Each entry keeps displayName/plusOne separate
+// (rather than a pre-joined label) so the caller can render pills with an
+// avatar, same look as the "Qui ha respost" participant chips.
 function namesForDate(iso) {
   const availNames = [];
   const tentNames = [];
   Object.values(responses).forEach(r => {
     const avail = r.available || [];
     const tent = r.tentative || [];
-    const label = r.displayName + (r.plusOne ? " (+1)" : "");
-    if (avail.includes(iso)) availNames.push(label);
-    else if (tent.includes(iso)) tentNames.push(label);
+    const entry = { displayName: r.displayName, plusOne: !!r.plusOne };
+    if (avail.includes(iso)) availNames.push(entry);
+    else if (tent.includes(iso)) tentNames.push(entry);
   });
   return { availNames, tentNames };
+}
+
+// Renders a list of {displayName, plusOne} as avatar+name pills, same
+// markup/look as the "Qui ha respost" participant chips.
+function namePillsHtml(entries) {
+  return entries.map(e =>
+    `<span class="name-pill"><span class="avatar">${initials(e.displayName)}</span>${e.displayName}${e.plusOne ? " +1" : ""}</span>`
+  ).join("");
 }
 
 function formatDateLong(iso) {
