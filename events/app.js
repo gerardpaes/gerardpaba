@@ -139,7 +139,16 @@ function rebuildResultsCalendars(dates, counts, maxTotal) {
       initialMonth: m - 1,
       counts, maxCount: maxTotal,
       approvedDate: eventData ? (eventData.approvedDate || null) : null,
-      approvedEndDate: eventData ? (eventData.approvedEndDate || null) : null
+      approvedEndDate: eventData ? (eventData.approvedEndDate || null) : null,
+      onDayClick: (iso) => {
+        const { availNames, tentNames } = namesForDate(iso);
+        const bodyHtml = [
+          availNames.length ? `<div class="info-dialog-group">${availNames.join(", ")}</div>` : "",
+          tentNames.length ? `<div class="info-dialog-group info-dialog-tentative">❓ ${tentNames.join(", ")}</div>` : "",
+          (!availNames.length && !tentNames.length) ? `<div class="info-dialog-group">—</div>` : ""
+        ].join("");
+        openInfoDialog(formatDateLong(iso), bodyHtml);
+      }
     });
     cal.render();
     resultsCals.push(cal);
@@ -177,6 +186,45 @@ function openConfirmDialog(message, onConfirm) {
     close();
     onConfirm();
   });
+}
+
+// Simple site-styled info dialog (just a title + body + close button),
+// used to show who's available/tentative on a date tapped in a results
+// calendar.
+function openInfoDialog(title, bodyHtml) {
+  const overlay = document.createElement("div");
+  overlay.className = "confirm-dialog-overlay open";
+  overlay.innerHTML = `
+    <div class="confirm-dialog info-dialog">
+      <p class="confirm-dialog-text info-dialog-title"></p>
+      <div class="info-dialog-body"></div>
+      <div class="btn-row">
+        <button class="btn secondary" data-action="close" type="button">${t("btn_close")}</button>
+      </div>
+    </div>
+  `;
+  overlay.querySelector(".info-dialog-title").textContent = title;
+  overlay.querySelector(".info-dialog-body").innerHTML = bodyHtml;
+  document.body.appendChild(overlay);
+
+  function close() { overlay.remove(); }
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('[data-action="close"]').addEventListener("click", close);
+}
+
+// Who marked `iso` as available/tentative, used by the results-calendar
+// day-click handler below.
+function namesForDate(iso) {
+  const availNames = [];
+  const tentNames = [];
+  Object.values(responses).forEach(r => {
+    const avail = r.available || [];
+    const tent = r.tentative || [];
+    const label = r.displayName + (r.plusOne ? " (+1)" : "");
+    if (avail.includes(iso)) availNames.push(label);
+    else if (tent.includes(iso)) tentNames.push(label);
+  });
+  return { availNames, tentNames };
 }
 
 function formatDateLong(iso) {
