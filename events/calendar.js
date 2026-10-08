@@ -61,6 +61,7 @@ export class MonthCalendar {
     this.approvedDate = opts.approvedDate || null;
     this.approvedEndDate = opts.approvedEndDate || null;
     this.onChange = opts.onChange || (() => {});
+    this.onDayClick = opts.onDayClick || null;
     this.showCountBadges = opts.showCountBadges !== false;
     this.pickMode = "available"; // which state clicking a day applies, in "pick-free" mode
     this.pickModeLabels = opts.pickModeLabels || { available: "Available", tentative: "Tentative" };
@@ -163,6 +164,7 @@ export class MonthCalendar {
           const level = this.heatLevel(count);
           classes.push(`heat-${level}`);
           badge = `<span class="count-badge">${count}</span>`;
+          if (this.onDayClick) classes.push("cal-day-clickable");
         }
         if (this.isApprovedIso(iso)) {
           classes.push("approved-day");
@@ -214,6 +216,10 @@ export class MonthCalendar {
           }
           this.render();
         });
+      });
+    } else if (this.mode === "display" && this.onDayClick) {
+      this.container.querySelectorAll(".cal-day-clickable").forEach(dayEl => {
+        dayEl.addEventListener("click", () => this.onDayClick(dayEl.dataset.iso));
       });
     }
   }
