@@ -127,6 +127,7 @@ export const DICT = {
     btn_edit: "Editar",
     btn_done: "Fet",
     btn_cancel: "Cancel·lar",
+    btn_close: "Tancar",
     no_time_set: "Sense hora",
     no_location_set: "Sense ubicació",
 
@@ -258,6 +259,7 @@ export const DICT = {
     btn_edit: "Editar",
     btn_done: "Hecho",
     btn_cancel: "Cancelar",
+    btn_close: "Cerrar",
     no_time_set: "Sin hora",
     no_location_set: "Sin ubicación",
 
@@ -389,6 +391,7 @@ export const DICT = {
     btn_edit: "Edit",
     btn_done: "Done",
     btn_cancel: "Cancel",
+    btn_close: "Close",
     no_time_set: "No time set",
     no_location_set: "No location set",
 
