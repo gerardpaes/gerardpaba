@@ -42,6 +42,13 @@ if (plusOneBtn) {
     refreshPlusOneBtn();
   });
 }
+// When the name field loses focus (typed a name and tapped/tabbed away),
+// if that name already has a saved response, load it into the calendar so
+// editing an existing vote works even on a brand-new device/browser.
+nameInput.addEventListener("blur", () => {
+  if (loadResponseIntoForm(nameInput.value)) showToast(t("toast_loaded_existing", nameInput.value.trim()));
+});
+
 const submitBtn = document.getElementById("submit-btn");
 const removeBtn = document.getElementById("remove-btn");
 const resultsAreaEl = document.getElementById("results-area");
@@ -73,6 +80,7 @@ if (nameSuggestEl) {
     nameInput.value = btn.textContent;
     nameSuggestEl.classList.remove("open");
     nameSuggestEl.innerHTML = "";
+    if (loadResponseIntoForm(nameInput.value)) showToast(t("toast_loaded_existing", nameInput.value));
   });
   document.addEventListener("click", (e) => {
     if (e.target !== nameInput && !nameSuggestEl.contains(e.target)) {
@@ -388,11 +396,25 @@ function restoreMyResponseIfAny() {
   const savedName = localStorage.getItem(`findadate:${eventId}:name`);
   if (savedName && responses[slugifyName(savedName)]) {
     nameInput.value = savedName;
-    const r = responses[slugifyName(savedName)];
-    pickCal.setState(r.available || [], r.tentative || []);
-    plusOneCheckbox.checked = !!r.plusOne;
-    refreshPlusOneBtn();
+    loadResponseIntoForm(savedName);
   }
+}
+
+// Loads an EXISTING response (if any) for the given name into the pick
+// calendar + plus-one toggle, so editing an existing vote works from any
+// device/browser - not just the one that originally saved it (localStorage
+// only remembers the name typed on THIS browser, so without this a friend
+// voting again from a different phone would see a blank calendar and risk
+// overwriting their own earlier picks with nothing).
+function loadResponseIntoForm(name) {
+  const trimmed = (name || "").trim();
+  if (!trimmed || !pickCal) return false;
+  const r = responses[slugifyName(trimmed)];
+  if (!r) return false;
+  pickCal.setState(r.available || [], r.tentative || []);
+  plusOneCheckbox.checked = !!r.plusOne;
+  refreshPlusOneBtn();
+  return true;
 }
 
 function renderApprovedBanner() {
