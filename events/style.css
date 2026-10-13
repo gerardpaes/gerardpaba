@@ -40,9 +40,11 @@ button, a, input, select, textarea {
 @media (max-width: 600px) {
   html {
     overflow-x: hidden;
-    touch-action: pan-y;
-    -ms-touch-action: pan-y;
   }
+  /* touch-action lives ONLY on body, not on html too: setting it on both
+     ancestor and descendant has a known Chrome-for-Android bug where
+     vertical scroll gets silently blocked entirely (desktop/iOS were
+     unaffected, which is why this wasn't caught earlier). */
   body {
     overflow-x: hidden;
     max-width: 100vw;
